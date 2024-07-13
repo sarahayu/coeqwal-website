@@ -1,4 +1,4 @@
-export const LOD_1_LEVELS = 10;
+export const LOD_1_LEVELS = 5;
 
 export const LOD_2_LEVELS = 5;
 export const LOD_2_RAD_PX = 3;

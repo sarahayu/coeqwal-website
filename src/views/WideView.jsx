@@ -33,6 +33,10 @@ export default function WideView() {
             console.log(d);
             setActiveWaterdrops([d.key]);
             setState({ state: "ExamineView" });
+            d3.select("#mosaic-svg")
+              .select(".svg-trans")
+              .selectAll(".smallDrop")
+              .attr("display", "none");
 
             zoomTo([d.x, d.y, camera.getZFromFarHeight(d.height * 1.2)], () => {
               // TODO transition
@@ -40,6 +44,11 @@ export default function WideView() {
               dropsMesh.updateVisibility(0.5);
 
               dropsMesh.remove(scene);
+
+              d3.select("#mosaic-svg")
+                .select(".svg-trans")
+                .selectAll(".smallDrop")
+                .attr("display", "initial");
             });
           },
           () => {},

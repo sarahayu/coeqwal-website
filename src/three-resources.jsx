@@ -19,6 +19,7 @@ const camera = new Camera({
   zoomFn: (transform) => {
     d3.select("#mosaic-svg").select(".svg-trans").attr("transform", transform);
 
+    // TODO spread out drops on zoom?
     dropsMesh.updateOutlineVisibility(
       d3.scaleLinear().domain([1, 5]).range([0.1, 1]).clamp(true)(transform.k)
     );

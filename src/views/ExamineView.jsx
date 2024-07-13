@@ -28,14 +28,28 @@ export default function ExamineView() {
     waterdrops,
   } = useContext(AppContext);
 
+  useEffect(function init() {
+    // do this now so it won't lag later
+    // TODO fix
+    updateSmallDropSVG(
+      d3.select("#mosaic-svg").select(".svg-trans"),
+      getWaterdrops(
+        waterdrops.groups[0].nodes.map((n) => n.id),
+        waterdrops.nodes
+      )
+    );
+
+    // TODO fix it still appears on first render
+    d3.select("#mosaic-svg")
+      .select(".svg-trans")
+      .selectAll(".smallDrop")
+      .attr("display", "none");
+  }, []);
+
   useEffect(
     function update() {
       if (isState(state, "ExamineView")) {
-        console.log(
-          waterdrops.groups
-            .find((g) => g.key === activeWaterdrops[0])
-            .nodes.map((n) => n.id)
-        );
+        // TODO transition
         updateSmallDropSVG(
           d3.select("#mosaic-svg").select(".svg-trans"),
           getWaterdrops(
@@ -96,7 +110,6 @@ function updateSmallDropSVG(
   onHover,
   onUnhover
 ) {
-  console.log("updating svg");
   container
     .selectAll(".smallDrop")
     .data(waterdrops)
@@ -105,26 +118,26 @@ function updateSmallDropSVG(
         .append("g")
         .attr("class", "smallDrop")
         .each(function ({ levs }, i) {
-          d3.select(this.parentNode)
-            .append("g")
-            .attr("id", `drop-${i}`)
-            .append("g")
-            .attr("class", "text-scale")
-            .append("text")
-            .style("font-size", 16)
-            .attr("text-anchor", "middle");
+          // TODO replace with tooltip, remove unnec svg
+          // d3.select(this.parentNode)
+          //   .append("g")
+          //   .attr("id", `drop-${i}`)
+          //   .append("g")
+          //   .attr("class", "text-scale")
+          //   .append("text")
+          //   .style("font-size", LOD_2_RAD_PX * 0.2)
+          //   .attr("text-anchor", "middle");
 
           const s = d3.select(this);
           s.append("rect").attr("class", "bbox").style("visibility", "hidden");
 
-          // s.on("mouseover", function () {
-          //   container.selectAll(".smallDrop").style("opacity", 0.5);
-          //   s.style("opacity", 1);
-          //   container.select(`#drop-${i}`).style("opacity", 1);
-          // }).on("mouseout", function () {
-          //   container.selectAll(".smallDrop").style("opacity", 1);
-          //   container.select(`#drop-${i}`).style("opacity", 0);
-          // });
+          s.on("mouseover", function () {
+            d3.select(this)
+              .select(".bump")
+              .style("transform", `translateY(${-LOD_2_RAD_PX * 0.1}px)`);
+          }).on("mouseout", function () {
+            d3.select(this).select(".bump").style("transform", "translateY(0)");
+          });
 
           const stops = d3
             .select(this)
@@ -147,31 +160,30 @@ function updateSmallDropSVG(
               .attr("stop-color", interpolateWatercolorBlue(i / LOD_1_LEVELS));
           });
 
-          d3.select(this)
-            .append("path")
+          const g = d3.select(this).append("g").attr("class", "bump");
+
+          g.append("path")
             .attr("d", DROPLET_SHAPE)
             .attr("class", "outline")
             .attr("fill", "none")
             .attr("stroke", "lightgray")
             .attr("stroke-width", 0.05);
 
-          d3.select(this)
-            .append("path")
+          g.append("path")
             .attr("class", "fill")
             .attr("d", DROPLET_SHAPE)
             .attr("fill", `url(#drop-fill-${i})`);
         });
     })
-    .attr("display", "initial")
     .attr(
       "transform",
-      ({ globalX, globalY, tilt }) =>
-        `translate(${globalX}, ${globalY}) rotate(${0})`
+      ({ globalX, globalY, tilt, x, y }) =>
+        `translate(${globalX + x * 0.5}, ${globalY + y * 0.5}) rotate(${0})`
     )
-    .each(function ({ levs, maxLev, scen }, i) {
+    .each(function ({ levs, maxLev, key, globalX, globalY, x, y }, i) {
       const s = d3.select(this);
 
-      d3.select(`#drop-${i}`).style("opacity", 0).select("text").text(scen);
+      d3.select(`#drop-${i}`).style("opacity", 0).select("text").text(key);
 
       s.select(".outline").attr(
         "transform",
@@ -201,15 +213,5 @@ function updateSmallDropSVG(
         .attr("y", d.node().getBBox().y)
         .attr("width", d.node().getBBox().width)
         .attr("height", d.node().getBBox().height);
-
-      container
-        .select(`#drop-${i}`)
-        .attr(
-          "transform",
-          `translate(${
-            d.node().getBoundingClientRect().x +
-            d.node().getBoundingClientRect().width / 2
-          }, ${d.node().getBoundingClientRect().y})`
-        );
     });
 }
