@@ -63,10 +63,6 @@ export function useStateRef(val) {
   return [state, setState, stateRef];
 }
 
-export function isNonTransitionState(stateInfo, stateName) {
-  return stateInfo && stateInfo.state === stateName && !stateInfo.transitioning;
-}
-
-export function isTransitionState(stateInfo, stateName) {
-  return stateInfo && stateInfo.state === stateName && stateInfo.transitioning;
+export function isState(stateInfo, stateName) {
+  return stateInfo && stateInfo.state === stateName;
 }

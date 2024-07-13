@@ -14,6 +14,14 @@ export function createInterps(obj_name, scen_name, data, maxDelivs) {
     .clamp(true);
 }
 
+export function createInterpsFromDelivs(delivs, maxDelivs) {
+  return d3
+    .scaleLinear()
+    .domain(ticksExact(0, 1, delivs.length))
+    .range(delivs.map((v) => Math.min(1, v / maxDelivs)))
+    .clamp(true);
+}
+
 // TODO fix colors
 export function calcDomLev(levs) {
   levs = [1, ...levs, 0];

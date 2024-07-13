@@ -23,7 +23,11 @@ import {
   SCENARIO_IDS,
 } from "data/objectives-data";
 
-import { calcDomLev, createInterps } from "utils/data-utils";
+import {
+  calcDomLev,
+  createInterps,
+  createInterpsFromDelivs,
+} from "utils/data-utils";
 import { placeDropsUsingPhysics, toRadians } from "utils/math-utils";
 import { mapBy, useStateRef } from "utils/misc-utils";
 
@@ -47,11 +51,14 @@ const appWidth = window.innerWidth,
 
 renderer.setSize(appWidth, appHeight);
 
-// dropsMesh.createMesh(waterdrops);
-pointsMesh.createMesh(waterdrops);
+console.time("drops mesh creating");
+dropsMesh.createMesh(waterdrops);
+console.timeEnd("drops mesh creating");
+
+// pointsMesh.createMesh(waterdrops);
 
 export default function App() {
-  const [stateStack, setStateStack, stateStackRef] = useStateRef([]);
+  const [state, setState, stateRef] = useStateRef([]);
   const [activeWaterdrops, setActiveWaterdrops] = useState([]);
   const [goBack, setGoBack] = useState(null);
 
@@ -71,42 +78,30 @@ export default function App() {
       renderer.render(scene, camera.camera);
     });
 
-    pushState({ state: "WideView" });
+    camera.callZoomFromWorldViewport({
+      worldX: 0,
+      worldY: 0,
+      farHeight: camera.getZFromFarHeight(waterdrops.height),
+    });
+
+    setState({ state: "WideView" });
   }, []);
 
-  const pushState = useCallback(({ state, transitioning }) => {
-    setStateStack((stateStack) => {
-      stateStack = [{ state, transitioning }, ...stateStack];
-      console.log("after push: ", JSON.stringify(stateStack));
-      return stateStack;
-    });
-  }, []);
-
-  const popState = useCallback((n = 1) => {
-    setStateStack((stateStack) => {
-      for (let i = 0; i < n; i++) stateStack.shift();
-      console.log("after pop: ", JSON.stringify(stateStack));
-      return [...stateStack];
-    });
+  const resetCamera = useCallback((callback) => {
+    zoomTo([0, 0, camera.getZFromFarHeight(waterdrops.height)], callback);
   }, []);
 
   const zoomTo = useCallback((xyz, callback) => {
-    const i = camera.getZoomInterpolator(xyz);
+    const i = camera.interpolateZoomCamera(xyz);
 
     const t = d3.timer((elapsed) => {
       const et = Math.min(elapsed / (i.duration / 2), 1);
 
-      const [worldX, worldY, farHeight] = i(et);
-
-      camera.callZoomFromWorldViewport({
-        worldX,
-        worldY,
-        farHeight,
-      });
+      camera.callZoom(i(et));
 
       if (et === 1) {
         t.stop();
-        callback();
+        callback && callback();
       }
     });
   }, []);
@@ -116,9 +111,8 @@ export default function App() {
       value={{
         appWidth,
         appHeight,
-        stateStack,
-        pushState,
-        popState,
+        state,
+        setState,
         activeWaterdrops,
         setActiveWaterdrops,
         waterdrops,
@@ -129,6 +123,7 @@ export default function App() {
         dropsMesh,
         setGoBack,
         zoomTo,
+        resetCamera,
       }}
     >
       <div className="bubbles-wrapper">
@@ -165,17 +160,16 @@ function initWaterdrops(grouping) {
   );
   const smallDropRad = Math.max(2, LOD_2_RAD_PX * LOD_2_SMALL_DROP_PAD_FACTOR);
 
-  const largeNodesPos = mapBy(
-    placeDropsUsingPhysics(
-      0,
-      0,
-      groupKeys.map((p, idx) => ({
-        r: largeDropRad,
-        id: idx,
-      }))
-    ),
-    ({ id }) => id
+  const largeNodesPhys = placeDropsUsingPhysics(
+    0,
+    0,
+    groupKeys.map((p, idx) => ({
+      r: largeDropRad,
+      id: idx,
+    }))
   );
+
+  const largeNodesPos = mapBy(largeNodesPhys, ({ id }) => id);
 
   const smallNodesPhys = placeDropsUsingPhysics(
     0,
@@ -192,12 +186,14 @@ function initWaterdrops(grouping) {
   const groupNodes = [];
   const nodeIDtoIdx = {};
 
+  const groupToNodes = {};
+
   let idx = 0;
 
-  for (const node of FLATTENED_DATA) {
-    const { id, objective, scenario, deliveries } = node;
+  for (const nodeData of FLATTENED_DATA) {
+    const { id, objective, scenario, deliveries } = nodeData;
 
-    const i = createInterps(objective, scenario, OBJECTIVES_DATA, MAX_DELIVS);
+    const i = createInterpsFromDelivs(deliveries, MAX_DELIVS);
     const wds = ticksExact(0, 1, LOD_2_LEVELS + 1).map((d) => i(d));
 
     const levs = wds.map(
@@ -210,7 +206,7 @@ function initWaterdrops(grouping) {
     const groupRank = DATA_GROUPINGS[grouping][groupID].rank;
     const memberRank = DATA_GROUPINGS[grouping][groupID][id];
 
-    nodes.push({
+    const node = {
       id,
       levs,
       maxLev: LOD_2_RAD_PX,
@@ -223,7 +219,13 @@ function initWaterdrops(grouping) {
       key: memberID,
       globalX: largeNodesPos[groupRank].x + smallNodesPos[memberRank].x,
       globalY: largeNodesPos[groupRank].y + smallNodesPos[memberRank].y,
-    });
+    };
+
+    nodes.push(node);
+
+    if (!groupToNodes[groupID]) groupToNodes[groupID] = [];
+
+    groupToNodes[groupID].push(node);
 
     nodeIDtoIdx[id] = idx++;
   }
@@ -235,6 +237,7 @@ function initWaterdrops(grouping) {
       tilt: Math.random() * 50 - 25,
       key: groupKey,
       height: smallNodesPhys.height,
+      nodes: groupToNodes[groupKey],
     });
   }
 
@@ -242,5 +245,6 @@ function initWaterdrops(grouping) {
     nodes: nodes,
     nodeIDtoIdx,
     groups: groupNodes,
+    height: largeNodesPhys.height,
   };
 }

@@ -156,71 +156,89 @@ export function mouseToThree(mouseX, mouseY, width, height) {
 
 class MeshGeometry {
   threeGeom = new THREE.BufferGeometry();
-  idx = 0;
-  vertices = [];
-  faces = [];
-  colors = [];
+  triangleIdx = 0;
+  positionAttribute;
+  colorAttribute;
+
+  constructor(numPoints, color = true) {
+    this.threeGeom.setAttribute(
+      "position",
+      new THREE.BufferAttribute(new Float32Array(numPoints * 3), 3)
+    );
+
+    if (color)
+      this.threeGeom.setAttribute(
+        "color",
+        new THREE.BufferAttribute(new Float32Array(numPoints * 3), 3)
+      );
+
+    this.positionAttribute = this.threeGeom.getAttribute("position");
+    this.colorAttribute = this.threeGeom.getAttribute("color");
+  }
 
   addMeshCoords(meshCoords, transform, color, z = 0) {
-    const indices = [];
     for (let j = 0; j < meshCoords.length; j++) {
       const [v1, v2, v3] = meshCoords[j];
 
-      this.vertices.push(
+      this.positionAttribute.setXYZ(
+        this.triangleIdx * 3 + 0,
         transform.x + v1[0],
         transform.y - v1[1],
-        z,
+        z
+      );
+
+      this.positionAttribute.setXYZ(
+        this.triangleIdx * 3 + 1,
         transform.x + v2[0],
         transform.y - v2[1],
-        z,
+        z
+      );
+
+      this.positionAttribute.setXYZ(
+        this.triangleIdx * 3 + 2,
         transform.x + v3[0],
         transform.y - v3[1],
         z
       );
 
-      this.faces.push(this.idx * 3 + 0, this.idx * 3 + 1, this.idx * 3 + 2);
-
       if (color) {
-        this.colors.push(
+        this.colorAttribute.setXYZ(
+          this.triangleIdx * 3 + 0,
           color.r,
           color.g,
-          color.b,
+          color.b
+        );
+        this.colorAttribute.setXYZ(
+          this.triangleIdx * 3 + 1,
           color.r,
           color.g,
-          color.b,
+          color.b
+        );
+        this.colorAttribute.setXYZ(
+          this.triangleIdx * 3 + 2,
           color.r,
           color.g,
           color.b
         );
       }
 
-      indices.push(this.idx++);
+      this.triangleIdx++;
     }
-
-    return indices;
   }
 
   finish() {
-    this.threeGeom.setIndex(this.faces);
-    this.threeGeom.setAttribute(
-      "position",
-      new THREE.BufferAttribute(new Float32Array(this.vertices), 3)
-    );
-    this.threeGeom.setAttribute(
-      "color",
-      new THREE.BufferAttribute(new Float32Array(this.colors), 3)
-    );
+    this.threeGeom.setDrawRange(0, this.triangleIdx * 3);
   }
 }
 
 export class WaterdropMesh {
+  static MAX_POINTS_DROPS = 60 * 13e4; // approx num verts per droplet * approx num droplets on screen
+  static MAX_POINTS_OUTLINE = 40 * 13e4; // approx num verts per droplet * approx num droplets on screen
+
   dropsMesh;
   outlineMesh;
 
   added = false;
-
-  // caching vertex ownership so we can update existing vertices instead of creating new one each time
-  idToVertInfo = {};
 
   createMesh(waterdrops) {
     if (!this.dropsMesh) {
@@ -247,19 +265,13 @@ export class WaterdropMesh {
   }
 
   initializeMeshes(waterdrops) {
-    const dropsGeometry = new MeshGeometry();
+    const dropsGeometry = new MeshGeometry(WaterdropMesh.MAX_POINTS_DROPS);
     const outlinePoints = [];
 
     const outlineMeshCoords = waterdropDeltaOutline(0, 1, LOD_2_RAD_PX * 0.975);
 
-    let outlineVertexIdx = 0,
-      shapeVertexIdx = 0;
-
     for (let i = 0; i < waterdrops.nodes.length; i++) {
       const { id, globalX: x, globalY: y, levs, maxLev } = waterdrops.nodes[i];
-
-      let outlineVerticesAdded = outlineMeshCoords.length,
-        shapeVerticesAdded = 0;
 
       for (let k = levs.length - 1; k >= 0; k--) {
         const l1 = k !== levs.length - 1 ? levs[k + 1] : 0;
@@ -280,8 +292,6 @@ export class WaterdropMesh {
           color,
           (i % 5) / 50 + 0.02
         );
-
-        shapeVerticesAdded += meshCoords.length * 3;
       }
 
       outlinePoints.push(
@@ -289,15 +299,6 @@ export class WaterdropMesh {
           ([dx, dy]) => new THREE.Vector3(x + dx, -y - dy, (i % 5) / 50 + 0.01)
         )
       );
-
-      this.idToVertInfo[id] = {
-        shapeVertRange: [shapeVertexIdx, shapeVerticesAdded],
-        outlineVertRange: [outlineVertexIdx, outlineVerticesAdded],
-        centroid: [x, y],
-      };
-
-      shapeVertexIdx += shapeVerticesAdded;
-      outlineVertexIdx += outlineVerticesAdded;
     }
 
     dropsGeometry.finish();
@@ -306,6 +307,8 @@ export class WaterdropMesh {
       dropsGeometry.threeGeom,
       new THREE.MeshBasicMaterial({
         vertexColors: true,
+        transparent: true,
+        opacity: 1,
       })
     );
 
@@ -325,39 +328,16 @@ export class WaterdropMesh {
     this.outlineMesh.material.needsUpdate = true;
   }
 
+  updateVisibility(opac) {
+    if (!this.outlineMesh || !this.dropsMesh) return;
+    this.outlineMesh.material.opacity = opac;
+    this.outlineMesh.material.needsUpdate = true;
+    this.dropsMesh.material.opacity = opac;
+    this.dropsMesh.material.needsUpdate = true;
+  }
+
   updateMeshes(waterdrops) {
-    for (let i = 0; i < waterdrops.nodes.length; i++) {
-      const { id, globalX: newX, globalY: newY } = waterdrops.nodes[i];
-
-      const [sviStart, sviLen] = this.idToVertInfo[id].shapeVertRange;
-      const [oviStart, oviLen] = this.idToVertInfo[id].outlineVertRange;
-      const [oldX, oldY] = this.idToVertInfo[id].centroid;
-
-      const dx = newX - oldX,
-        dy = newY - oldY;
-
-      const shapeGeom = this.dropsMesh.geometry;
-      const outlineGeom = this.outlineMesh.geometry;
-
-      for (let i = 0; i < sviLen; i++) {
-        const x = shapeGeom.vertices[sviStart + i].x,
-          y = shapeGeom.vertices[sviStart + i].y;
-        shapeGeom.vertices[sviStart + i].setX(x + dx);
-        shapeGeom.vertices[sviStart + i].setY(y - dy);
-      }
-
-      this.idToVertInfo[id].centroid = [newX, newY];
-
-      for (let i = 0; i < oviLen; i++) {
-        const x = outlineGeom.attributes.position.array[(oviStart + i) * 3 + 0],
-          y = outlineGeom.attributes.position.array[(oviStart + i) * 3 + 1];
-        outlineGeom.attributes.position.array[(oviStart + i) * 3 + 0] = x + dx;
-        outlineGeom.attributes.position.array[(oviStart + i) * 3 + 1] = y - dy;
-      }
-
-      shapeGeom.verticesNeedUpdate = true;
-      outlineGeom.attributes.position.needsUpdate = true;
-    }
+    // TODO fix
   }
 }
 
@@ -484,9 +464,6 @@ export class Camera {
   view;
   curTransform;
 
-  // for zooming calculations, keep track of original starting camera position
-  startCamera;
-
   raycaster = new THREE.Raycaster();
 
   constructor({ fov, near, far, zoomFn }) {
@@ -526,15 +503,38 @@ export class Camera {
     return (Math.tan(toRadians(90 - this.fov / 2)) * farHeight) / 2;
   }
 
-  getZoomInterpolator([x, y, z]) {
-    return d3.interpolateZoom(
+  getFarHeightFromZ(z) {
+    return Math.tan(toRadians(this.fov) / 2) * z * 2;
+  }
+
+  interpolateZoomCamera([endx, endy, endz]) {
+    const i = d3.interpolateZoom(
       [
         this.camera.position.x,
         this.camera.position.y,
         this.height / this.curTransform.k,
       ],
-      [x, -y, Math.tan(toRadians(this.fov) / 2) * z * 2]
+      [endx, -endy, this.getFarHeightFromZ(endz)]
     );
+
+    const interper = (t) => {
+      const [worldX, worldY, farHeight] = i(t);
+
+      const k = this.height / farHeight;
+
+      const x = -(worldX * k) + this.width / 2;
+      const y = worldY * k + this.height / 2;
+
+      return {
+        x,
+        y,
+        k,
+      };
+    };
+
+    interper.duration = i.duration;
+
+    return interper;
   }
 
   mount(domElement) {
@@ -545,17 +545,16 @@ export class Camera {
     this.width = width;
     this.height = height;
 
-    // TODO prevent user from escaping bounds but allow transitions to
-    // this.zoom = this.zoom.scaleExtent([
-    //   this.getScaleFromZ(this.far),
-    //   this.getScaleFromZ(this.near),
-    // ]);
+    this.zoom = this.zoom.scaleExtent([
+      this.getScaleFromZ(this.far),
+      this.getScaleFromZ(this.near),
+    ]);
 
     this.camera = new THREE.PerspectiveCamera(
       this.fov,
       width / height,
       this.near,
-      this.far + 1000
+      this.far + 1
     );
 
     this.camera.position.set(0, 0, this.far);
@@ -567,11 +566,6 @@ export class Camera {
         .translate(this.width / 2, this.height / 2)
         .scale(this.getScaleFromZ(this.far))
     );
-
-    this.camera.updateProjectionMatrix();
-    this.camera.updateWorldMatrix();
-
-    this.startCamera = this.camera.clone();
   }
 
   _d3ZoomHandler(transform) {

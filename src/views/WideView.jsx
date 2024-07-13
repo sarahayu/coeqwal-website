@@ -1,63 +1,60 @@
 import * as d3 from "d3";
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect } from "react";
 
 import { AppContext } from "AppContext";
 
 import { GROUP_HOVER_AREA_FACTOR } from "settings";
 import { dropsMesh, pointsMesh, scene } from "three-resources";
-import { isNonTransitionState } from "utils/misc-utils";
+import { isState } from "utils/misc-utils";
 import { DROPLET_SHAPE } from "utils/render-utils";
-import { toRadians } from "utils/math-utils";
 
 export default function WideView() {
-  const { waterdrops, stateStack, pushState, popState, camera, zoomTo } =
+  const { waterdrops, state, setState, camera, zoomTo, setActiveWaterdrops } =
     useContext(AppContext);
-
-  const enterRef = useRef(false);
-  const exitRef = useRef(false);
 
   useEffect(
     function update() {
-      if (
-        isNonTransitionState(stateStack[0], "WideView") &&
-        !enterRef.current
-      ) {
-        enterRef.current = true;
-        exitRef.current = false;
+      if (isState(state, "WideView")) {
+        console.time("drawing");
+        dropsMesh.draw(scene);
+        console.timeEnd("drawing");
 
-        pointsMesh.draw(scene);
+        dropsMesh.updateVisibility(1);
+        dropsMesh.updateOutlineVisibility(
+          d3.scaleLinear().domain([1, 5]).range([0.1, 1]).clamp(true)(
+            camera.curTransform.k
+          )
+        );
 
         updateLargeDropSVG(
           d3.select("#mosaic-svg").select(".svg-trans"),
           waterdrops,
           (d) => {
-            popState();
-            pushState({ state: "ExamineView" });
-            pushState({ state: "WideView", transitioning: true });
+            console.log(d);
+            setActiveWaterdrops([d.key]);
+            setState({ state: "ExamineView" });
 
             zoomTo([d.x, d.y, camera.getZFromFarHeight(d.height * 1.2)], () => {
-              popState();
+              // TODO transition
+              dropsMesh.updateOutlineVisibility(1);
+              dropsMesh.updateVisibility(0.5);
+
+              dropsMesh.remove(scene);
             });
           },
           () => {},
           () => {}
         );
-      }
 
-      if (
-        !isNonTransitionState(stateStack[0], "WideView") &&
-        !exitRef.current
-      ) {
-        enterRef.current = false;
-        exitRef.current = true;
-
-        d3.select("#mosaic-svg")
-          .select(".svg-trans")
-          .selectAll(".largeDrop")
-          .attr("display", "none");
+        return () => {
+          d3.select("#mosaic-svg")
+            .select(".svg-trans")
+            .selectAll(".largeDrop")
+            .attr("display", "none");
+        };
       }
     },
-    [stateStack]
+    [state]
   );
 
   return <></>;

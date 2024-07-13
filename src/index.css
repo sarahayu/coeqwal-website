@@ -715,4 +715,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   position: absolute;
   bottom: 1rem;
   left: 1rem;
+  background: none;
+  outline: 0;
+  border: 0;
+  font-size: 4rem;
+  cursor: pointer;
+  transition: 0.2s transform;
+}
+
+.go-back-btn:hover {
+  transform: translateX(-0.5em);
 }
