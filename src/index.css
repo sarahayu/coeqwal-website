@@ -607,7 +607,9 @@ text {
   z-index: 1;
 }
 
-.largeDrop {
+.smallDrop,
+.largeDrop,
+.compSmallDrop {
   cursor: pointer;
 }
 
@@ -727,6 +729,31 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   transform: translateX(-0.5em);
 }
 
-.smallDrop {
+.circlet.active circle {
+  stroke: "orange";
+}
+
+.circlet.active {
+  animation: rotating 30s linear infinite;
+}
+
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.wide-view-action-btn {
+  position: absolute;
+  bottom: 1em;
+  right: 1em;
+  font-size: 2rem;
+  background: lightgray;
+  border: none;
   cursor: pointer;
+  padding: 0.5em 1em;
+  border-radius: 100vh;
 }

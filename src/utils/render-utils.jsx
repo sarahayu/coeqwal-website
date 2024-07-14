@@ -268,7 +268,11 @@ export class WaterdropMesh {
     const dropsGeometry = new MeshGeometry(WaterdropMesh.MAX_POINTS_DROPS);
     const outlinePoints = [];
 
-    const outlineMeshCoords = waterdropDeltaOutline(0, 1, LOD_2_RAD_PX * 0.975);
+    const outlineMeshCoords = waterdropDeltaOutline(
+      0,
+      1,
+      LOD_2_RAD_PX * 2 * 0.975
+    );
 
     for (let i = 0; i < waterdrops.nodes.length; i++) {
       const { id, globalX: x, globalY: y, levs, maxLev } = waterdrops.nodes[i];
@@ -280,7 +284,7 @@ export class WaterdropMesh {
         const meshCoords = waterdropDelta(
           l1 / maxLev,
           l2 / maxLev,
-          LOD_2_RAD_PX
+          LOD_2_RAD_PX * 2
         );
         const color = new THREE.Color(
           interpolateWatercolorBlue(k / LOD_2_LEVELS)
@@ -466,14 +470,20 @@ export class Camera {
 
   raycaster = new THREE.Raycaster();
 
-  constructor({ fov, near, far, zoomFn }) {
+  _svgElement;
+
+  constructor({ fov, near, far }) {
     this.fov = fov;
     this.near = near;
     this.far = far;
+  }
 
+  setZoomFn(zoomFn) {
     this.zoom = d3.zoom().on("zoom", (e) => {
-      this._d3ZoomHandler(e.transform);
       this.curTransform = e.transform;
+
+      this._THREEZoomHandler(e.transform);
+      d3.select(this._svgElement).attr("transform", e.transform);
 
       zoomFn && zoomFn(e.transform);
     });
@@ -537,8 +547,9 @@ export class Camera {
     return interper;
   }
 
-  mount(domElement) {
-    this.view = d3.select(domElement);
+  mount(webglElement, svgElement) {
+    this.view = d3.select(webglElement);
+    this._svgElement = svgElement;
   }
 
   setSize(width, height) {
@@ -568,7 +579,7 @@ export class Camera {
     );
   }
 
-  _d3ZoomHandler(transform) {
+  _THREEZoomHandler(transform) {
     const scale = transform.k;
     const x = -(transform.x - this.width / 2) / scale;
     const y = (transform.y - this.height / 2) / scale;

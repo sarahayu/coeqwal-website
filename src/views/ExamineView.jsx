@@ -1,21 +1,14 @@
 import * as d3 from "d3";
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 import { AppContext } from "AppContext";
 
 import { isState } from "utils/misc-utils";
-import { LOD_2_LEVELS } from "settings";
 import { LOD_1_LEVELS } from "settings";
 import { interpolateWatercolorBlue, ticksExact } from "bucket-lib/utils";
-import { DROPLET_SHAPE, waterdrop } from "utils/render-utils";
+import { DROPLET_SHAPE } from "utils/render-utils";
 import { LOD_2_RAD_PX } from "settings";
-import {
-  FLATTENED_DATA,
-  MAX_DELIVS,
-  OBJECTIVES_DATA,
-} from "data/objectives-data";
-import { createInterps, createInterpsFromDelivs } from "utils/data-utils";
-import { LOD_2_MIN_LEV_VAL } from "settings";
+import { FLATTENED_DATA } from "data/objectives-data";
 
 export default function ExamineView() {
   const {
@@ -31,33 +24,32 @@ export default function ExamineView() {
   useEffect(function init() {
     // do this now so it won't lag later
     // TODO fix
-    updateSmallDropSVG(
-      d3.select("#mosaic-svg").select(".svg-trans"),
-      getWaterdrops(
-        waterdrops.groups[0].nodes.map((n) => n.id),
-        waterdrops.nodes
-      )
-    );
-
-    // TODO fix it still appears on first render
-    d3.select("#mosaic-svg")
-      .select(".svg-trans")
-      .selectAll(".smallDrop")
-      .attr("display", "none");
+    // updateSmallDropSVG(
+    //   d3.select("#mosaic-svg").select(".svg-trans"),
+    //   getWaterdrops(
+    //     waterdrops.groups[0].nodes.map((n) => n.id),
+    //     waterdrops.nodes
+    //   ),
+    //   0
+    // );
   }, []);
 
   useEffect(
     function update() {
       if (isState(state, "ExamineView")) {
-        // TODO transition
+        const transitionDelay = state.transitionDuration;
+        const container = d3.select("#mosaic-svg").select(".svg-trans");
+
         updateSmallDropSVG(
-          d3.select("#mosaic-svg").select(".svg-trans"),
+          container,
           getWaterdrops(
             waterdrops.groups
               .find((g) => g.key === activeWaterdrops[0])
               .nodes.map((n) => n.id),
             waterdrops.nodes
-          )
+          ),
+          transitionDelay / 2,
+          {}
         );
 
         setGoBack(() => () => {
@@ -85,18 +77,18 @@ function getWaterdrops(nodeArr, waterdrops) {
   const wds = [];
 
   for (const nodeID of nodeArr) {
-    const { id, objective, scenario, deliveries } = FLATTENED_DATA[nodeID];
+    const { id, deliveries } = FLATTENED_DATA[nodeID];
 
-    const i = createInterpsFromDelivs(deliveries, MAX_DELIVS);
-    const ls = ticksExact(0, 1, LOD_1_LEVELS + 1).map((d) => i(d));
+    // const i = createInterpsFromDelivs(deliveries, MAX_DELIVS);
+    // const ls = ticksExact(0, 1, LOD_1_LEVELS + 1).map((d) => i(d));
 
-    const levs = ls.map(
-      (w, i) => Math.max(w, i == 0 ? LOD_2_MIN_LEV_VAL : 0) * LOD_2_RAD_PX
-    );
+    // const levs = ls.map(
+    //   (w, i) => Math.max(w, i == 0 ? LOD_2_MIN_LEV_VAL : 0) * LOD_2_RAD_PX
+    // );
 
     wds.push({
       ...waterdrops[id],
-      levs,
+      // levs,
     });
   }
 
@@ -106,9 +98,8 @@ function getWaterdrops(nodeArr, waterdrops) {
 function updateSmallDropSVG(
   container,
   waterdrops,
-  onClick,
-  onHover,
-  onUnhover
+  transitionDelay,
+  { onClick, onHover, onUnhover }
 ) {
   container
     .selectAll(".smallDrop")
@@ -119,25 +110,9 @@ function updateSmallDropSVG(
         .attr("class", "smallDrop")
         .each(function ({ levs }, i) {
           // TODO replace with tooltip, remove unnec svg
-          // d3.select(this.parentNode)
-          //   .append("g")
-          //   .attr("id", `drop-${i}`)
-          //   .append("g")
-          //   .attr("class", "text-scale")
-          //   .append("text")
-          //   .style("font-size", LOD_2_RAD_PX * 0.2)
-          //   .attr("text-anchor", "middle");
 
           const s = d3.select(this);
           s.append("rect").attr("class", "bbox").style("visibility", "hidden");
-
-          s.on("mouseover", function () {
-            d3.select(this)
-              .select(".bump")
-              .style("transform", `translateY(${-LOD_2_RAD_PX * 0.1}px)`);
-          }).on("mouseout", function () {
-            d3.select(this).select(".bump").style("transform", "translateY(0)");
-          });
 
           const stops = d3
             .select(this)
@@ -160,38 +135,44 @@ function updateSmallDropSVG(
               .attr("stop-color", interpolateWatercolorBlue(i / LOD_1_LEVELS));
           });
 
-          const g = d3.select(this).append("g").attr("class", "bump");
-
-          g.append("path")
+          s.append("path")
             .attr("d", DROPLET_SHAPE)
             .attr("class", "outline")
             .attr("fill", "none")
             .attr("stroke", "lightgray")
             .attr("stroke-width", 0.05);
 
-          g.append("path")
+          s.append("path")
             .attr("class", "fill")
             .attr("d", DROPLET_SHAPE)
             .attr("fill", `url(#drop-fill-${i})`);
+
+          s.append("g")
+            .attr("class", "circlet")
+            .append("circle")
+            .attr("fill", "transparent")
+            .attr("stroke", "transparent")
+            .attr("stroke-dasharray", 3)
+            .attr("stroke-width", 3)
+            .attr("vector-effect", "non-scaling-stroke")
+            .attr("r", 1.5);
         });
     })
+    .attr("display", "initial")
     .attr(
       "transform",
       ({ globalX, globalY, tilt, x, y }) =>
-        `translate(${globalX + x * 0.5}, ${globalY + y * 0.5}) rotate(${0})`
+        `translate(${globalX}, ${globalY}) rotate(${0})`
     )
-    .each(function ({ levs, maxLev, key, globalX, globalY, x, y }, i) {
+    .each(function ({ levs, maxLev, key }, i) {
       const s = d3.select(this);
 
-      d3.select(`#drop-${i}`).style("opacity", 0).select("text").text(key);
+      s.select(".outline").attr("transform", `scale(${LOD_2_RAD_PX * 0.95})`);
+      s.select(".fill").attr("transform", `scale(${LOD_2_RAD_PX})`);
 
-      s.select(".outline").attr(
-        "transform",
-        `scale(${(LOD_2_RAD_PX / 2) * 0.95})`
-      );
-      s.select(".fill").attr("transform", `scale(${LOD_2_RAD_PX / 2})`);
-
-      s.select(".outline").style("display", "initial");
+      s.select(".circlet")
+        .attr("class", null)
+        .attr("class", "circlet " + key);
 
       s.selectAll("stop").each(function (_, i) {
         let actI = Math.floor(i / 2);
@@ -201,6 +182,8 @@ function updateSmallDropSVG(
 
         if (actI === -1) {
           d3.select(this).attr("offset", `${0}%`);
+        } else if (actI === levs.length) {
+          d3.select(this).attr("offset", `100%`);
         } else {
           d3.select(this).attr("offset", `${(1 - levs[actI] / maxLev) * 100}%`);
         }
@@ -213,5 +196,26 @@ function updateSmallDropSVG(
         .attr("y", d.node().getBBox().y)
         .attr("width", d.node().getBBox().width)
         .attr("height", d.node().getBBox().height);
-    });
+    })
+    .on("click", function (e, d) {
+      onClick && onClick(d);
+    })
+    .on("mouseenter", function (e, d) {
+      if (!d3.select(this).select(".circlet").classed("active"))
+        d3.select(this).select("circle").attr("stroke", "orange");
+      onHover && onHover(d);
+    })
+    .on("mouseleave", function (e, d) {
+      if (!d3.select(this).select(".circlet").classed("active"))
+        d3.select(this).select("circle").attr("stroke", "transparent");
+      onUnhover && onUnhover(d);
+    })
+    .transition()
+    .delay(transitionDelay)
+    .duration(1000)
+    .attr(
+      "transform",
+      ({ globalX, globalY, tilt, x, y }) =>
+        `translate(${globalX + x * 0.5}, ${globalY + y * 0.5}) rotate(${0})`
+    );
 }

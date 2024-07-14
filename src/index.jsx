@@ -1,5 +1,3 @@
-// generated using `generate_index.py`
-
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";

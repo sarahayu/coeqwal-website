@@ -41,6 +41,7 @@ import {
   renderer,
   dropsMesh,
   pointsMesh,
+  getOutlineOpac,
 } from "three-resources";
 
 // pre-calculate these so we don't lag later
@@ -58,9 +59,14 @@ console.timeEnd("drops mesh creating");
 // pointsMesh.createMesh(waterdrops);
 
 export default function App() {
-  const [state, setState, stateRef] = useStateRef([]);
+  const [state, setState, stateRef] = useStateRef({});
   const [activeWaterdrops, setActiveWaterdrops] = useState([]);
   const [goBack, setGoBack] = useState(null);
+  const [
+    disableCamAdjustments,
+    setDisableCamAdjustments,
+    disableCamAdjustmentsRef,
+  ] = useStateRef(false);
 
   useEffect(function initialize() {
     document.querySelector("#mosaic-webgl").appendChild(renderer.domElement);
@@ -71,39 +77,65 @@ export default function App() {
       .append("g")
       .attr("class", "svg-trans");
 
-    camera.mount(d3.select(".bubbles-wrapper").node());
+    camera.mount(
+      d3.select(".bubbles-wrapper").node(),
+      d3.select("#mosaic-svg").select(".svg-trans").node()
+    );
+    camera.setZoomFn((transform) => {
+      if (!disableCamAdjustmentsRef.current) {
+        dropsMesh.updateOutlineVisibility(getOutlineOpac(transform.k));
+      }
+    });
     camera.setSize(appWidth, appHeight);
 
     renderer.setAnimationLoop(() => {
       renderer.render(scene, camera.camera);
     });
 
-    camera.callZoomFromWorldViewport({
-      worldX: 0,
-      worldY: 0,
-      farHeight: camera.getZFromFarHeight(waterdrops.height),
-    });
-
+    resetCamera(false);
     setState({ state: "WideView" });
   }, []);
 
-  const resetCamera = useCallback((callback) => {
-    zoomTo([0, 0, camera.getZFromFarHeight(waterdrops.height)], callback);
+  const resetCamera = useCallback((animated = true, callback) => {
+    const pos = [
+      0,
+      -waterdrops.height * 0.08,
+      camera.getZFromFarHeight(waterdrops.height),
+    ];
+    if (animated) {
+      const { start } = zoomTo(pos, callback);
+      start();
+    } else {
+      camera.callZoomFromWorldViewport({
+        worldX: pos[0],
+        worldY: -pos[1],
+        farHeight: waterdrops.height,
+      });
+      callback && callback();
+    }
   }, []);
 
   const zoomTo = useCallback((xyz, callback) => {
     const i = camera.interpolateZoomCamera(xyz);
 
-    const t = d3.timer((elapsed) => {
-      const et = Math.min(elapsed / (i.duration / 2), 1);
+    const duration = i.duration / 2;
 
-      camera.callZoom(i(et));
+    const start = () => {
+      const t = d3.timer((elapsed) => {
+        const et = Math.min(elapsed / duration, 1);
+        camera.callZoom(i(et));
 
-      if (et === 1) {
-        t.stop();
-        callback && callback();
-      }
-    });
+        if (et === 1) {
+          t.stop();
+          callback && callback();
+        }
+      });
+    };
+
+    return {
+      start,
+      duration,
+    };
   }, []);
 
   return (
@@ -115,6 +147,7 @@ export default function App() {
         setState,
         activeWaterdrops,
         setActiveWaterdrops,
+        setDisableCamAdjustments,
         waterdrops,
         scene,
         camera,
@@ -150,15 +183,13 @@ function initWaterdrops(grouping) {
   const amtGroups = groupKeys.length;
   const amtPerGroup = memberKeys.length;
 
-  const largeDropRad = Math.max(
-    1,
+  const largeDropRad =
     Math.sqrt(amtPerGroup / Math.PI) *
-      LOD_2_RAD_PX *
-      2 *
-      LOD_2_SMALL_DROP_PAD_FACTOR *
-      LOD_2_LARGE_DROP_PAD_FACTOR
-  );
-  const smallDropRad = Math.max(2, LOD_2_RAD_PX * LOD_2_SMALL_DROP_PAD_FACTOR);
+    LOD_2_RAD_PX *
+    2 *
+    LOD_2_SMALL_DROP_PAD_FACTOR *
+    LOD_2_LARGE_DROP_PAD_FACTOR;
+  const smallDropRad = LOD_2_RAD_PX * LOD_2_SMALL_DROP_PAD_FACTOR;
 
   const largeNodesPhys = placeDropsUsingPhysics(
     0,
@@ -184,7 +215,6 @@ function initWaterdrops(grouping) {
 
   const nodes = [];
   const groupNodes = [];
-  const nodeIDtoIdx = {};
 
   const groupToNodes = {};
 
@@ -226,8 +256,6 @@ function initWaterdrops(grouping) {
     if (!groupToNodes[groupID]) groupToNodes[groupID] = [];
 
     groupToNodes[groupID].push(node);
-
-    nodeIDtoIdx[id] = idx++;
   }
 
   for (const groupKey of groupKeys) {
@@ -243,7 +271,6 @@ function initWaterdrops(grouping) {
 
   return {
     nodes: nodes,
-    nodeIDtoIdx,
     groups: groupNodes,
     height: largeNodesPhys.height,
   };
