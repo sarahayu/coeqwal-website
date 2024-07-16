@@ -2,6 +2,14 @@
   font-family: Helvetica, sans-serif !important;
 }
 
+h1,
+h2,
+h3,
+h4,
+.fancy-font {
+  font-family: "Quattrocento", serif;
+}
+
 body {
   background-color: rgb(251, 251, 255);
   margin: 0;
@@ -602,7 +610,7 @@ main {
 }
 
 text {
-  font-size: 0.8rem;
+  /* font-size: 0.8rem; */
   pointer-events: none;
   z-index: 1;
 }

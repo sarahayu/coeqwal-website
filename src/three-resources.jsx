@@ -24,10 +24,4 @@ const camera = new Camera({
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 
-const getOutlineOpac = d3
-  .scaleLinear()
-  .domain([1, 5])
-  .range([0.1, 1])
-  .clamp(true);
-
-export { scene, camera, renderer, dropsMesh, pointsMesh, getOutlineOpac };
+export { scene, camera, renderer, dropsMesh, pointsMesh };

@@ -10,7 +10,7 @@ export const SCENARIO_KEY_STRING = "scens";
 export const DELIV_KEY_STRING = "delivs";
 
 export const OBJECTIVES_DATA = await (async function load() {
-  const objs = await (await fetch("./all_objectives.json")).json();
+  const objs = await (await fetch("./objectives.json")).json();
 
   for (const obj of objs) {
     obj[SCENARIO_KEY_STRING] = obj[SCENARIO_KEY_STRING];

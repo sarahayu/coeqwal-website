@@ -1,11 +1,21 @@
 import * as d3 from "d3";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { AppContext } from "AppContext";
 
 import { GROUP_HOVER_AREA_FACTOR } from "settings";
-import { dropsMesh, getOutlineOpac, pointsMesh, scene } from "three-resources";
-import { isState } from "utils/misc-utils";
+import { camera, dropsMesh, pointsMesh, scene } from "three-resources";
+import { isState, useStateRef } from "utils/misc-utils";
+import { BiCross, BiNetworkChart } from "react-icons/bi";
+import { DESCRIPTIONS_DATA } from "data/descriptions-data";
+
+const wrap = (s) => s.replace(/(?![^\n]{1,15}$)([^\n]{1,15})\s/g, "$1\n");
 
 export default function WideView() {
   const {
@@ -17,13 +27,114 @@ export default function WideView() {
     setActiveWaterdrops,
     activeWaterdrops,
     setDisableCamAdjustments,
+    getOutlineOpac,
+    addZoomHandler,
   } = useContext(AppContext);
 
   const [activeWDObjs, setActiveWDObjs] = useState([]);
+  const [enableZoom, setEnableZoom, enableZoomRef] = useStateRef(false);
+
+  const mousePos = useRef();
+  const curK = useRef(1);
+
+  useEffect(() => {
+    let lastK = 0;
+    addZoomHandler(function (transform) {
+      curK.current = transform.k;
+
+      if (!enableZoomRef.current) return;
+
+      d3.select("#mosaic-svg")
+        .select(".svg-trans")
+        .selectAll("text")
+        .each(function (d) {
+          const s = d3.select(this);
+          const tNode = s.node();
+
+          const posx =
+              tNode.getBoundingClientRect().left +
+              tNode.getBoundingClientRect().width / 2,
+            posy =
+              tNode.getBoundingClientRect().top +
+              tNode.getBoundingClientRect().height / 2;
+
+          const dist =
+            distSq([posx, posy], mousePos.current) / curK.current ** 2;
+          const width =
+              ((tNode.getBBox().width * camera.height) / camera.far) * 8,
+            height =
+              ((tNode.getBBox().height * camera.height) / camera.far) * 10;
+
+          s.attr(
+            "font-size",
+            ((dist > 75 ** 2 ? 0 : fontSize(dist)) / curK.current) * 3
+          );
+
+          d3.select(this.parentNode.parentNode)
+            .select("image")
+            .attr("x", -width / 2)
+            .attr("y", -height / 2)
+            .attr("width", width)
+            .attr("height", height);
+        });
+    });
+
+    const distSq = ([x1, y1], [x2, y2]) => (x2 - x1) ** 2 + (y2 - y1) ** 2;
+    const fontSize = d3
+      .scaleLinear()
+      .domain([75 ** 2, 10 ** 2])
+      .range([0.1, 0.2])
+      .clamp(true);
+
+    const mouseListener = (e) => {
+      mousePos.current = [e.x, e.y];
+
+      d3.select("#mosaic-svg")
+        .select(".svg-trans")
+        .selectAll("text")
+        .each(function (d) {
+          const s = d3.select(this);
+          const tNode = s.node();
+
+          const posx =
+              tNode.getBoundingClientRect().left +
+              tNode.getBoundingClientRect().width / 2,
+            posy =
+              tNode.getBoundingClientRect().top +
+              tNode.getBoundingClientRect().height / 2;
+
+          const dist =
+            distSq([posx, posy], mousePos.current) / curK.current ** 2;
+          const width =
+              ((tNode.getBBox().width * camera.height) / camera.far) * 8,
+            height =
+              ((tNode.getBBox().height * camera.height) / camera.far) * 10;
+
+          s.attr(
+            "font-size",
+            ((dist > 75 ** 2 ? 0 : fontSize(dist)) / curK.current) * 3
+          );
+
+          d3.select(this.parentNode.parentNode)
+            .select("image")
+            .attr("x", -width / 2)
+            .attr("y", -height / 2)
+            .attr("width", width)
+            .attr("height", height);
+        });
+    };
+
+    window.addEventListener("mousemove", mouseListener);
+
+    return function cleanup() {
+      window.removeEventListener("mousemove", mouseListener);
+    };
+  }, []);
 
   useEffect(
     function update() {
       if (isState(state, "WideView")) {
+        setEnableZoom(true);
         const { transitionDuration = 2e3 } = state;
         console.time("drawing");
         dropsMesh.draw(scene);
@@ -80,6 +191,7 @@ export default function WideView() {
             .select(".svg-trans")
             .selectAll(".largeDrop")
             .attr("display", "none");
+          setEnableZoom(false);
         };
       }
     },
@@ -161,7 +273,8 @@ export default function WideView() {
   if (isState(state, "WideView") && activeWaterdrops.length)
     return (
       <button onClick={handleClick} className="wide-view-action-btn">
-        {activeWaterdrops.length == 1 ? "examine >>" : "compare >>"}
+        {activeWaterdrops.length == 1 ? <BiCross /> : <BiNetworkChart />}
+        {activeWaterdrops.length == 1 ? "examine" : "compare"}
       </button>
     );
 }
@@ -191,6 +304,20 @@ function updateLargeDropSVG(
             .attr("stroke-width", 3)
             .attr("vector-effect", "non-scaling-stroke")
             .attr("r", 1);
+
+          const textGroup = s.append("g");
+          textGroup
+            .append("g")
+            .append("image")
+            .attr("href", "glow.png")
+            .attr("preserveAspectRatio", "none")
+            .attr("opacity", 0.8);
+          textGroup
+            .append("g")
+            .append("text")
+            .attr("class", "fancy-font")
+            .attr("text-anchor", "middle")
+            .attr("font-size", 0);
         });
     })
     .each(function (d) {
@@ -198,6 +325,25 @@ function updateLargeDropSVG(
         .select(".circlet")
         .attr("class", null)
         .attr("class", "circlet " + d.key);
+
+      const tNode = d3
+        .select(this)
+        .select("text")
+        .call((s) => {
+          s.selectAll("*").remove();
+          const lines = wrap(
+            DESCRIPTIONS_DATA[d.key].display_name || DESCRIPTIONS_DATA[d.key].id
+          ).split("\n");
+
+          lines.forEach((line, i) => {
+            s.append("tspan")
+              .attr("x", 0)
+              .attr("y", `${-lines.length / 2 + 0.5}em`)
+              .attr("dy", `${i}em`)
+              .text(line);
+          });
+        })
+        .node();
     })
     .attr("display", "initial")
     .attr(

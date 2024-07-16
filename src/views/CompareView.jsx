@@ -2,6 +2,8 @@ import { AppContext } from "AppContext";
 import { interpolateWatercolorBlue } from "bucket-lib/utils";
 import * as d3 from "d3";
 import React, { act, useContext, useEffect, useRef, useState } from "react";
+import { LOD_2_SMALL_DROP_PAD_FACTOR } from "settings";
+import { LOD_1_SMALL_DROP_PAD_FACTOR } from "settings";
 import { LOD_2_RAD_PX } from "settings";
 import { GROUP_HOVER_AREA_FACTOR } from "settings";
 import { LOD_1_LEVELS } from "settings";
@@ -32,8 +34,10 @@ export default function CompareView() {
         const node = group.nodes.find((n) => n.key === activeMinidrop);
 
         positions.push([
-          node.x * 1.5 + groupPos[0],
-          node.y * 1.5 + groupPos[1],
+          (node.x * LOD_1_SMALL_DROP_PAD_FACTOR) / LOD_2_SMALL_DROP_PAD_FACTOR +
+            groupPos[0],
+          (node.y * LOD_1_SMALL_DROP_PAD_FACTOR) / LOD_2_SMALL_DROP_PAD_FACTOR +
+            groupPos[1],
         ]);
       }
 
@@ -286,7 +290,12 @@ function updateDropsSVG(
         .duration(1000)
         .attr(
           "transform",
-          ({ tilt, x, y }) => `translate(${x * 1.5}, ${y * 1.5}) rotate(${0})`
+          ({ tilt, x, y }) =>
+            `translate(${
+              (x * LOD_1_SMALL_DROP_PAD_FACTOR) / LOD_2_SMALL_DROP_PAD_FACTOR
+            }, ${
+              (y * LOD_1_SMALL_DROP_PAD_FACTOR) / LOD_2_SMALL_DROP_PAD_FACTOR
+            }) rotate(${0})`
         );
     })
     .transition()

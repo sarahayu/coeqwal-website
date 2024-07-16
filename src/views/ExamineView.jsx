@@ -9,6 +9,8 @@ import { interpolateWatercolorBlue, ticksExact } from "bucket-lib/utils";
 import { DROPLET_SHAPE } from "utils/render-utils";
 import { LOD_2_RAD_PX } from "settings";
 import { FLATTENED_DATA } from "data/objectives-data";
+import { LOD_1_SMALL_DROP_PAD_FACTOR } from "settings";
+import { LOD_2_SMALL_DROP_PAD_FACTOR } from "settings";
 
 export default function ExamineView() {
   const {
@@ -216,6 +218,12 @@ function updateSmallDropSVG(
     .attr(
       "transform",
       ({ globalX, globalY, tilt, x, y }) =>
-        `translate(${globalX + x * 0.5}, ${globalY + y * 0.5}) rotate(${0})`
+        `translate(${
+          globalX +
+          x * (LOD_1_SMALL_DROP_PAD_FACTOR / LOD_2_SMALL_DROP_PAD_FACTOR - 1)
+        }, ${
+          globalY +
+          y * (LOD_1_SMALL_DROP_PAD_FACTOR / LOD_2_SMALL_DROP_PAD_FACTOR - 1)
+        }) rotate(${0})`
     );
 }
