@@ -10,6 +10,8 @@ import { LOD_1_LEVELS } from "settings";
 import { isState } from "utils/misc-utils";
 import { DROPLET_SHAPE } from "utils/render-utils";
 
+const SPREAD = LOD_1_SMALL_DROP_PAD_FACTOR / LOD_2_SMALL_DROP_PAD_FACTOR;
+
 export default function CompareView() {
   const {
     state,
@@ -146,7 +148,7 @@ function getWaterdropGroups(keyArr, waterdrops, center) {
   const groups = waterdrops.groups.filter((g) => keyArr.includes(g.key));
 
   const groupPositions = [];
-  const rad = groups[0].height;
+  const rad = groups[0].height * SPREAD * 0.75;
 
   for (let i = 0, n = groups.length; i < n; i++) {
     groupPositions.push([
@@ -291,11 +293,7 @@ function updateDropsSVG(
         .attr(
           "transform",
           ({ tilt, x, y }) =>
-            `translate(${
-              (x * LOD_1_SMALL_DROP_PAD_FACTOR) / LOD_2_SMALL_DROP_PAD_FACTOR
-            }, ${
-              (y * LOD_1_SMALL_DROP_PAD_FACTOR) / LOD_2_SMALL_DROP_PAD_FACTOR
-            }) rotate(${0})`
+            `translate(${x * SPREAD}, ${y * SPREAD}) rotate(${0})`
         );
     })
     .transition()

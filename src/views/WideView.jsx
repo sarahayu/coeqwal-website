@@ -14,6 +14,8 @@ import { camera, dropsMesh, pointsMesh, scene } from "three-resources";
 import { isState, useStateRef } from "utils/misc-utils";
 import { BiCross, BiNetworkChart } from "react-icons/bi";
 import { DESCRIPTIONS_DATA } from "data/descriptions-data";
+import { LOD_1_SMALL_DROP_PAD_FACTOR } from "settings";
+import { LOD_2_SMALL_DROP_PAD_FACTOR } from "settings";
 
 const wrap = (s) => s.replace(/(?![^\n]{1,15}$)([^\n]{1,15})\s/g, "$1\n");
 
@@ -203,7 +205,15 @@ export default function WideView() {
       const d = activeWDObjs[0];
 
       const { start, duration } = zoomTo(
-        [d.x, d.y - d.height * 0.08, camera.getZFromFarHeight(d.height * 2)],
+        [
+          d.x,
+          d.y - d.height * 0.08,
+          camera.getZFromFarHeight(
+            ((d.height * LOD_1_SMALL_DROP_PAD_FACTOR) /
+              LOD_2_SMALL_DROP_PAD_FACTOR) *
+              1.5
+          ),
+        ],
         () => {
           setDisableCamAdjustments(false);
         }
@@ -237,7 +247,12 @@ export default function WideView() {
         [
           avgCoord[0],
           avgCoord[1],
-          camera.getZFromFarHeight(waterdrops.groups[0].height * 2 * 2),
+          camera.getZFromFarHeight(
+            ((waterdrops.groups[0].height * 2 * LOD_1_SMALL_DROP_PAD_FACTOR) /
+              LOD_2_SMALL_DROP_PAD_FACTOR) *
+              0.75 *
+              2
+          ),
         ],
         () => {
           setDisableCamAdjustments(false);
@@ -326,14 +341,18 @@ function updateLargeDropSVG(
         .attr("class", null)
         .attr("class", "circlet " + d.key);
 
+      let display_name = d.key;
+
+      if (DESCRIPTIONS_DATA[d.key])
+        display_name =
+          DESCRIPTIONS_DATA[d.key].display_name || DESCRIPTIONS_DATA[d.key].id;
+
       const tNode = d3
         .select(this)
         .select("text")
         .call((s) => {
           s.selectAll("*").remove();
-          const lines = wrap(
-            DESCRIPTIONS_DATA[d.key].display_name || DESCRIPTIONS_DATA[d.key].id
-          ).split("\n");
+          const lines = wrap(display_name).split("\n");
 
           lines.forEach((line, i) => {
             s.append("tspan")

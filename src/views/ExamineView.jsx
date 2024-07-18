@@ -23,19 +23,6 @@ export default function ExamineView() {
     waterdrops,
   } = useContext(AppContext);
 
-  useEffect(function init() {
-    // do this now so it won't lag later
-    // TODO fix
-    // updateSmallDropSVG(
-    //   d3.select("#mosaic-svg").select(".svg-trans"),
-    //   getWaterdrops(
-    //     waterdrops.groups[0].nodes.map((n) => n.id),
-    //     waterdrops.nodes
-    //   ),
-    //   0
-    // );
-  }, []);
-
   useEffect(
     function update() {
       if (isState(state, "ExamineView")) {
