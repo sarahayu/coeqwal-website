@@ -1,23 +1,23 @@
 import { AppContext } from "AppContext";
 import { interpolateWatercolorBlue } from "bucket-lib/utils";
 import * as d3 from "d3";
-import React, { act, useContext, useEffect, useRef, useState } from "react";
-import { LOD_2_SMALL_DROP_PAD_FACTOR } from "settings";
-import { LOD_1_SMALL_DROP_PAD_FACTOR } from "settings";
-import { LOD_2_RAD_PX } from "settings";
-import { GROUP_HOVER_AREA_FACTOR } from "settings";
-import { LOD_1_LEVELS } from "settings";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import {
+  LOD_1_RAD_PX,
+  LOD_1_LEVELS,
+  LOD_1_SMALL_DROP_PAD_FACTOR,
+  LOD_2_SMALL_DROP_PAD_FACTOR,
+} from "settings";
 import { isState } from "utils/misc-utils";
 import { DROPLET_SHAPE } from "utils/render-utils";
 
-const SPREAD = LOD_1_SMALL_DROP_PAD_FACTOR / LOD_2_SMALL_DROP_PAD_FACTOR;
+const SPREAD = LOD_2_SMALL_DROP_PAD_FACTOR / LOD_1_SMALL_DROP_PAD_FACTOR;
 
 export default function CompareView() {
   const {
     state,
     setState,
     setGoBack,
-    camera,
     resetCamera,
     activeWaterdrops,
     waterdrops,
@@ -36,16 +36,16 @@ export default function CompareView() {
         const node = group.nodes.find((n) => n.key === activeMinidrop);
 
         positions.push([
-          (node.x * LOD_1_SMALL_DROP_PAD_FACTOR) / LOD_2_SMALL_DROP_PAD_FACTOR +
+          (node.x * LOD_2_SMALL_DROP_PAD_FACTOR) / LOD_1_SMALL_DROP_PAD_FACTOR +
             groupPos[0],
-          (node.y * LOD_1_SMALL_DROP_PAD_FACTOR) / LOD_2_SMALL_DROP_PAD_FACTOR +
+          (node.y * LOD_2_SMALL_DROP_PAD_FACTOR) / LOD_1_SMALL_DROP_PAD_FACTOR +
             groupPos[1],
         ]);
       }
 
       const lines = [];
 
-      const height = LOD_2_RAD_PX * 2;
+      const height = LOD_1_RAD_PX * 2;
       for (let i = 0; i < positions.length; i++) {
         const from = Array.from(positions[i]),
           to = Array.from(positions[i + 1 == positions.length ? 0 : i + 1]);
@@ -239,10 +239,7 @@ function updateDropsSVG(
         .selectAll(".compSmallDrop")
         .data(nodes)
         .attr("display", "initial")
-        .attr(
-          "transform",
-          ({ tilt, x, y }) => `translate(${x}, ${y}) rotate(${0})`
-        )
+        .attr("transform", ({ x, y }) => `translate(${x}, ${y})`)
         .on("click", function (e, d) {
           onClick && onClick(d);
         })
@@ -252,14 +249,14 @@ function updateDropsSVG(
         .on("mouseleave", function (e, d) {
           onUnhover && onUnhover(d);
         })
-        .each(function ({ levs, maxLev, key }, i) {
+        .each(function ({ levs, maxLev }, i) {
           const s = d3.select(this);
 
           s.select(".outline").attr(
             "transform",
-            `scale(${LOD_2_RAD_PX * 0.95})`
+            `scale(${LOD_1_RAD_PX * 0.95})`
           );
-          s.select(".fill").attr("transform", `scale(${LOD_2_RAD_PX})`);
+          s.select(".fill").attr("transform", `scale(${LOD_1_RAD_PX})`);
 
           s.selectAll("stop").each(function (_, i) {
             let actI = Math.floor(i / 2);
@@ -292,8 +289,7 @@ function updateDropsSVG(
         .duration(1000)
         .attr(
           "transform",
-          ({ tilt, x, y }) =>
-            `translate(${x * SPREAD}, ${y * SPREAD}) rotate(${0})`
+          ({ x, y }) => `translate(${x * SPREAD}, ${y * SPREAD})`
         );
     })
     .transition()

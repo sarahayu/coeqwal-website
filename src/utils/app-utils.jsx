@@ -1,10 +1,10 @@
 import { ticksExact } from "bucket-lib/utils";
 import {
-  LOD_2_LARGE_DROP_PAD_FACTOR,
-  LOD_2_LEVELS,
-  LOD_2_MIN_LEV_VAL,
-  LOD_2_RAD_PX,
-  LOD_2_SMALL_DROP_PAD_FACTOR,
+  LOD_1_LARGE_DROP_PAD_FACTOR,
+  LOD_1_LEVELS,
+  LOD_1_MIN_LEV_VAL,
+  LOD_1_RAD_PX,
+  LOD_1_SMALL_DROP_PAD_FACTOR,
 } from "settings";
 
 import {
@@ -29,11 +29,11 @@ export function initWaterdrops(grouping) {
 
   const largeDropRad =
     Math.sqrt(amtPerGroup / Math.PI) *
-    LOD_2_RAD_PX *
+    LOD_1_RAD_PX *
     2 *
-    LOD_2_SMALL_DROP_PAD_FACTOR *
-    LOD_2_LARGE_DROP_PAD_FACTOR;
-  const smallDropRad = LOD_2_RAD_PX * LOD_2_SMALL_DROP_PAD_FACTOR;
+    LOD_1_SMALL_DROP_PAD_FACTOR *
+    LOD_1_LARGE_DROP_PAD_FACTOR;
+  const smallDropRad = LOD_1_RAD_PX * LOD_1_SMALL_DROP_PAD_FACTOR;
 
   const largeNodesPhys = placeDropsUsingPhysics(
     0,
@@ -68,10 +68,10 @@ export function initWaterdrops(grouping) {
     const { id, objective, scenario, deliveries } = nodeData;
 
     const i = createInterpsFromDelivs(deliveries, MAX_DELIVS);
-    const wds = ticksExact(0, 1, LOD_2_LEVELS + 1).map((d) => i(d));
+    const wds = ticksExact(0, 1, LOD_1_LEVELS + 1).map((d) => i(d));
 
     const levs = wds.map(
-      (w, i) => Math.max(w, i == 0 ? LOD_2_MIN_LEV_VAL : 0) * LOD_2_RAD_PX
+      (w, i) => Math.max(w, i == 0 ? LOD_1_MIN_LEV_VAL : 0) * LOD_1_RAD_PX
     );
 
     const groupID = grouping === "objective" ? objective : scenario;
@@ -83,7 +83,7 @@ export function initWaterdrops(grouping) {
     const node = {
       id,
       levs,
-      maxLev: LOD_2_RAD_PX,
+      maxLev: LOD_1_RAD_PX,
       domLev: calcDomLev(levs),
       tilt: Math.random() * 50 - 25,
       dur: Math.random() * 100 + 400,

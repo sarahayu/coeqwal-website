@@ -1,23 +1,21 @@
 import * as d3 from "d3";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 
 import { AppContext } from "AppContext";
 
 import { GROUP_HOVER_AREA_FACTOR } from "settings";
-import { camera, dropsMesh, pointsMesh, scene } from "three-resources";
-import { isState, useStateRef } from "utils/misc-utils";
+import { dropsMesh, scene } from "three-resources";
+import { isState, useStateRef, wrap } from "utils/misc-utils";
 import { BiCross, BiNetworkChart } from "react-icons/bi";
 import { DESCRIPTIONS_DATA } from "data/descriptions-data";
-import { LOD_1_SMALL_DROP_PAD_FACTOR } from "settings";
 import { LOD_2_SMALL_DROP_PAD_FACTOR } from "settings";
-
-const wrap = (s) => s.replace(/(?![^\n]{1,15}$)([^\n]{1,15})\s/g, "$1\n");
+import { LOD_1_SMALL_DROP_PAD_FACTOR } from "settings";
+import { dist, distSq, getCenterDomRect } from "utils/math-utils";
+import {
+  CALIFORNIA_OUTLINE,
+  SPATIAL_DATA,
+  SPATIAL_FEATURES,
+} from "data/spatial-data";
 
 export default function WideView() {
   const {
@@ -31,102 +29,136 @@ export default function WideView() {
     setDisableCamAdjustments,
     getOutlineOpac,
     addZoomHandler,
+    appWidth,
+    appHeight,
   } = useContext(AppContext);
 
   const [activeWDObjs, setActiveWDObjs] = useState([]);
   const [enableZoom, setEnableZoom, enableZoomRef] = useStateRef(false);
 
-  const mousePos = useRef();
-  const curK = useRef(1);
+  const [transformInfo, setTransformInfo] = useState({
+    zoom: 1,
+    mouseX: 0,
+    mouseY: 0,
+  });
+
+  const [curInfo, setCurInfo] = useState(null);
+
+  const fontSize = (d, transformZoom) => {
+    const MAX_RAD = window.innerHeight / 9;
+
+    const zoomRel = ((1 / transformZoom) * camera.height) / waterdrops.height;
+
+    const absFontSize = (_d) =>
+      _d > MAX_RAD
+        ? 0
+        : d3.scaleLinear().domain([0, MAX_RAD]).range([1, 0.4]).clamp(true)(_d);
+
+    return absFontSize(d * zoomRel) * Math.min(zoomRel, 0.4);
+  };
 
   useEffect(() => {
-    let lastK = 0;
+    d3.select(".infobox").attr("display", "none");
+
+    if (!enableZoomRef.current) return;
+
+    d3.select("#mosaic-svg")
+      .select(".svg-trans")
+      .selectAll("text")
+      .each(function () {
+        const s = d3.select(this);
+        const tNode = s.node();
+
+        const [posx, posy] = getCenterDomRect(tNode.getBoundingClientRect());
+
+        const width =
+            ((tNode.getBBox().width * camera.height) / camera.far) * 8,
+          height = ((tNode.getBBox().height * camera.height) / camera.far) * 10;
+
+        const dis = dist(
+          [posx, posy],
+          [transformInfo.mouseX, transformInfo.mouseY]
+        );
+
+        s.attr("font-size", fontSize(dis, transformInfo.zoom));
+
+        d3.select(this.parentNode.parentNode)
+          .select("image")
+          .attr("x", -width / 2)
+          .attr("y", -height / 2)
+          .attr("width", width)
+          .attr("height", height);
+      });
+  }, [transformInfo]);
+
+  useEffect(() => {
     addZoomHandler(function (transform) {
-      curK.current = transform.k;
-
-      if (!enableZoomRef.current) return;
-
-      d3.select("#mosaic-svg")
-        .select(".svg-trans")
-        .selectAll("text")
-        .each(function (d) {
-          const s = d3.select(this);
-          const tNode = s.node();
-
-          const posx =
-              tNode.getBoundingClientRect().left +
-              tNode.getBoundingClientRect().width / 2,
-            posy =
-              tNode.getBoundingClientRect().top +
-              tNode.getBoundingClientRect().height / 2;
-
-          const dist =
-            distSq([posx, posy], mousePos.current) / curK.current ** 2;
-          const width =
-              ((tNode.getBBox().width * camera.height) / camera.far) * 8,
-            height =
-              ((tNode.getBBox().height * camera.height) / camera.far) * 10;
-
-          s.attr(
-            "font-size",
-            ((dist > 75 ** 2 ? 0 : fontSize(dist)) / curK.current) * 3
-          );
-
-          d3.select(this.parentNode.parentNode)
-            .select("image")
-            .attr("x", -width / 2)
-            .attr("y", -height / 2)
-            .attr("width", width)
-            .attr("height", height);
-        });
+      setTransformInfo((ti) => ({
+        ...ti,
+        zoom: transform.k,
+      }));
     });
 
-    const distSq = ([x1, y1], [x2, y2]) => (x2 - x1) ** 2 + (y2 - y1) ** 2;
-    const fontSize = d3
-      .scaleLinear()
-      .domain([75 ** 2, 10 ** 2])
-      .range([0.1, 0.2])
-      .clamp(true);
-
     const mouseListener = (e) => {
-      mousePos.current = [e.x, e.y];
-
-      d3.select("#mosaic-svg")
-        .select(".svg-trans")
-        .selectAll("text")
-        .each(function (d) {
-          const s = d3.select(this);
-          const tNode = s.node();
-
-          const posx =
-              tNode.getBoundingClientRect().left +
-              tNode.getBoundingClientRect().width / 2,
-            posy =
-              tNode.getBoundingClientRect().top +
-              tNode.getBoundingClientRect().height / 2;
-
-          const dist =
-            distSq([posx, posy], mousePos.current) / curK.current ** 2;
-          const width =
-              ((tNode.getBBox().width * camera.height) / camera.far) * 8,
-            height =
-              ((tNode.getBBox().height * camera.height) / camera.far) * 10;
-
-          s.attr(
-            "font-size",
-            ((dist > 75 ** 2 ? 0 : fontSize(dist)) / curK.current) * 3
-          );
-
-          d3.select(this.parentNode.parentNode)
-            .select("image")
-            .attr("x", -width / 2)
-            .attr("y", -height / 2)
-            .attr("width", width)
-            .attr("height", height);
-        });
+      setTransformInfo((ti) => ({
+        ...ti,
+        mouseX: e.x,
+        mouseY: e.y,
+      }));
     };
 
     window.addEventListener("mousemove", mouseListener);
+
+    const mmWidth = 200,
+      mmHeight = 250;
+
+    const minimap = d3
+      .select("#minimap")
+      .attr("width", mmWidth)
+      .attr("height", mmHeight);
+
+    const mmProj = d3
+      .geoMercator()
+      .scale(1000)
+      .center([-119, 37.7749])
+      .translate([mmWidth / 2, mmHeight / 2]);
+
+    minimap
+      .selectAll("path")
+      .data([
+        ...SPATIAL_DATA.features.filter(
+          (f, i) => f.geometry.type === "MultiPolygon"
+        ),
+        CALIFORNIA_OUTLINE,
+      ])
+      .join("path")
+      .attr("d", (d) => d3.geoPath().projection(mmProj)(d))
+      .attr("class", (d) => "outline " + d.properties.CalLiteID)
+      .attr("stroke", (d) =>
+        d.properties.CalLiteID ? "transparent" : "lightgray"
+      )
+      .attr("stroke-width", 1)
+      .attr("fill", "transparent");
+
+    minimap
+      .selectAll("circle")
+      .data([
+        ...SPATIAL_DATA.features.filter(
+          (f, i) => f.geometry.type === "MultiPoint"
+        ),
+      ])
+      .join("circle")
+      .each(function (d) {
+        const s = d3.select(this);
+
+        const [x, y] = mmProj(d.geometry.coordinates[0]);
+
+        s.attr("cx", x);
+        s.attr("cy", y);
+      })
+      .attr("r", 2)
+      .attr("class", (d) => "outline " + d.properties.CalLiteID)
+      .attr("fill", "transparent");
 
     return function cleanup() {
       window.removeEventListener("mousemove", mouseListener);
@@ -137,7 +169,8 @@ export default function WideView() {
     function update() {
       if (isState(state, "WideView")) {
         setEnableZoom(true);
-        const { transitionDuration = 2e3 } = state;
+        setTransformInfo((ti) => ({ ...ti, zoom: camera.curTransform.k }));
+
         console.time("drawing");
         dropsMesh.draw(scene);
         console.timeEnd("drawing");
@@ -147,17 +180,8 @@ export default function WideView() {
         dropsMesh.updateVisibility(1);
         dropsMesh.updateOutlineVisibility(origOpac);
 
-        const t = d3.timer((elapsed) => {
-          const et = Math.min(1, elapsed / (transitionDuration / 2));
-
-          // dropsMesh.updateVisibility(origOpac * et);
-
-          if (et >= 1) {
-            t.stop();
-          }
-        });
-
         const container = d3.select("#mosaic-svg").select(".svg-trans");
+        d3.select(".infobox").style("display", "initial");
 
         updateLargeDropSVG(container, waterdrops, {
           onClick: (d) => {
@@ -182,6 +206,27 @@ export default function WideView() {
               return [...wd];
             });
           },
+          onHover: (d) => {
+            setCurInfo({
+              id: d.key,
+              description: DESCRIPTIONS_DATA[d.key].desc,
+            });
+
+            if (!SPATIAL_FEATURES[d.key]) return;
+
+            d3.select("#minimap")
+              .select(".outline." + d.key)
+              .attr("fill", "gray");
+          },
+          onUnhover: (d) => {
+            setCurInfo(null);
+
+            if (!SPATIAL_FEATURES[d.key]) return;
+
+            d3.select("#minimap")
+              .select(".outline." + d.key)
+              .attr("fill", "transparent");
+          },
         });
 
         for (const wd of activeWDObjs) {
@@ -193,6 +238,7 @@ export default function WideView() {
             .select(".svg-trans")
             .selectAll(".largeDrop")
             .attr("display", "none");
+          d3.select(".infobox").style("display", "none");
           setEnableZoom(false);
         };
       }
@@ -209,8 +255,8 @@ export default function WideView() {
           d.x,
           d.y - d.height * 0.08,
           camera.getZFromFarHeight(
-            ((d.height * LOD_1_SMALL_DROP_PAD_FACTOR) /
-              LOD_2_SMALL_DROP_PAD_FACTOR) *
+            ((d.height * LOD_2_SMALL_DROP_PAD_FACTOR) /
+              LOD_1_SMALL_DROP_PAD_FACTOR) *
               1.5
           ),
         ],
@@ -239,17 +285,16 @@ export default function WideView() {
       });
     } else if (activeWDObjs.length > 1) {
       const coords = activeWDObjs.map((w) => [w.x, w.y]);
-      const avgCoord = [
-        d3.mean(coords, (c) => c[0]),
-        d3.mean(coords, (c) => c[1]),
-      ];
+      const avgX = d3.mean(coords, (c) => c[0]);
+      const avgY = d3.mean(coords, (c) => c[1]);
+
       const { start, duration } = zoomTo(
         [
-          avgCoord[0],
-          avgCoord[1],
+          avgX,
+          avgY,
           camera.getZFromFarHeight(
-            ((waterdrops.groups[0].height * 2 * LOD_1_SMALL_DROP_PAD_FACTOR) /
-              LOD_2_SMALL_DROP_PAD_FACTOR) *
+            ((waterdrops.groups[0].height * 2 * LOD_2_SMALL_DROP_PAD_FACTOR) /
+              LOD_1_SMALL_DROP_PAD_FACTOR) *
               0.75 *
               2
           ),
@@ -264,7 +309,7 @@ export default function WideView() {
       setState({
         state: "CompareView",
         transitionDuration: duration,
-        avgCoord,
+        avgCoord: [avgX, avgY],
       });
 
       const origOpac = getOutlineOpac(camera.curTransform.k);
@@ -285,13 +330,40 @@ export default function WideView() {
     }
   }, [activeWDObjs]);
 
-  if (isState(state, "WideView") && activeWaterdrops.length)
-    return (
-      <button onClick={handleClick} className="wide-view-action-btn">
-        {activeWaterdrops.length == 1 ? <BiCross /> : <BiNetworkChart />}
-        {activeWaterdrops.length == 1 ? "examine" : "compare"}
-      </button>
-    );
+  let actionBtn;
+
+  if (isState(state, "WideView")) {
+    if (activeWaterdrops.length)
+      actionBtn = (
+        <button
+          onClick={handleClick}
+          className="wide-view-action-btn fancy-font"
+        >
+          {activeWaterdrops.length == 1 ? <BiCross /> : <BiNetworkChart />}
+          {activeWaterdrops.length == 1 ? "examine" : "compare"}
+        </button>
+      );
+  }
+
+  return (
+    <>
+      <div className="infobox">
+        <svg id="minimap"></svg>
+        {curInfo && (
+          <div className="details">
+            {!SPATIAL_FEATURES[curInfo.id] && (
+              <p className="no-loc-data">No Location Data</p>
+            )}
+            <p className="curDesc">{curInfo.description}</p>
+            <p className="curKey">
+              id: <span> {curInfo.id} </span>
+            </p>
+          </div>
+        )}
+      </div>
+      {actionBtn}
+    </>
+  );
 }
 
 function updateLargeDropSVG(
@@ -340,19 +412,13 @@ function updateLargeDropSVG(
         .select(".circlet")
         .attr("class", null)
         .attr("class", "circlet " + d.key);
-
-      let display_name = d.key;
-
-      if (DESCRIPTIONS_DATA[d.key])
-        display_name =
-          DESCRIPTIONS_DATA[d.key].display_name || DESCRIPTIONS_DATA[d.key].id;
-
-      const tNode = d3
-        .select(this)
+      d3.select(this)
         .select("text")
         .call((s) => {
           s.selectAll("*").remove();
-          const lines = wrap(display_name).split("\n");
+          const lines = wrap(
+            DESCRIPTIONS_DATA[d.key].display_name || DESCRIPTIONS_DATA[d.key].id
+          ).split("\n");
 
           lines.forEach((line, i) => {
             s.append("tspan")
@@ -361,8 +427,7 @@ function updateLargeDropSVG(
               .attr("dy", `${i}em`)
               .text(line);
           });
-        })
-        .node();
+        });
     })
     .attr("display", "initial")
     .attr(
@@ -372,15 +437,15 @@ function updateLargeDropSVG(
           height * GROUP_HOVER_AREA_FACTOR
         })`
     )
-    .on("click", function (e, d) {
+    .on("click", function (_, d) {
       onClick && onClick(d);
     })
-    .on("mouseenter", function (e, d) {
+    .on("mouseenter", function (_, d) {
       if (!d3.select(this).select(".circlet").classed("active"))
         d3.select(this).select("circle").attr("stroke", "orange");
       onHover && onHover(d);
     })
-    .on("mouseleave", function (e, d) {
+    .on("mouseleave", function (_, d) {
       if (!d3.select(this).select(".circlet").classed("active"))
         d3.select(this).select("circle").attr("stroke", "transparent");
       onUnhover && onUnhover(d);

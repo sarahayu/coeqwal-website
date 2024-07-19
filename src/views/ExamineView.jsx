@@ -1,23 +1,21 @@
 import * as d3 from "d3";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect } from "react";
 
 import { AppContext } from "AppContext";
 
 import { isState } from "utils/misc-utils";
 import { LOD_1_LEVELS } from "settings";
-import { interpolateWatercolorBlue, ticksExact } from "bucket-lib/utils";
+import { interpolateWatercolorBlue } from "bucket-lib/utils";
 import { DROPLET_SHAPE } from "utils/render-utils";
-import { LOD_2_RAD_PX } from "settings";
-import { FLATTENED_DATA } from "data/objectives-data";
-import { LOD_1_SMALL_DROP_PAD_FACTOR } from "settings";
+import { LOD_1_RAD_PX } from "settings";
 import { LOD_2_SMALL_DROP_PAD_FACTOR } from "settings";
+import { LOD_1_SMALL_DROP_PAD_FACTOR } from "settings";
 
 export default function ExamineView() {
   const {
     state,
     setState,
     setGoBack,
-    camera,
     resetCamera,
     activeWaterdrops,
     waterdrops,
@@ -31,12 +29,7 @@ export default function ExamineView() {
 
         updateSmallDropSVG(
           container,
-          getWaterdrops(
-            waterdrops.groups
-              .find((g) => g.key === activeWaterdrops[0])
-              .nodes.map((n) => n.id),
-            waterdrops.nodes
-          ),
+          waterdrops.groups.find((g) => g.key === activeWaterdrops[0]).nodes,
           transitionDelay / 2,
           {}
         );
@@ -60,28 +53,6 @@ export default function ExamineView() {
   );
 
   return <></>;
-}
-
-function getWaterdrops(nodeArr, waterdrops) {
-  const wds = [];
-
-  for (const nodeID of nodeArr) {
-    const { id, deliveries } = FLATTENED_DATA[nodeID];
-
-    // const i = createInterpsFromDelivs(deliveries, MAX_DELIVS);
-    // const ls = ticksExact(0, 1, LOD_1_LEVELS + 1).map((d) => i(d));
-
-    // const levs = ls.map(
-    //   (w, i) => Math.max(w, i == 0 ? LOD_2_MIN_LEV_VAL : 0) * LOD_2_RAD_PX
-    // );
-
-    wds.push({
-      ...waterdrops[id],
-      // levs,
-    });
-  }
-
-  return wds;
 }
 
 function updateSmallDropSVG(
@@ -150,14 +121,13 @@ function updateSmallDropSVG(
     .attr("display", "initial")
     .attr(
       "transform",
-      ({ globalX, globalY, tilt, x, y }) =>
-        `translate(${globalX}, ${globalY}) rotate(${0})`
+      ({ globalX, globalY }) => `translate(${globalX}, ${globalY})`
     )
     .each(function ({ levs, maxLev, key }, i) {
       const s = d3.select(this);
 
-      s.select(".outline").attr("transform", `scale(${LOD_2_RAD_PX * 0.95})`);
-      s.select(".fill").attr("transform", `scale(${LOD_2_RAD_PX})`);
+      s.select(".outline").attr("transform", `scale(${LOD_1_RAD_PX * 0.95})`);
+      s.select(".fill").attr("transform", `scale(${LOD_1_RAD_PX})`);
 
       s.select(".circlet")
         .attr("class", null)
@@ -186,15 +156,15 @@ function updateSmallDropSVG(
         .attr("width", d.node().getBBox().width)
         .attr("height", d.node().getBBox().height);
     })
-    .on("click", function (e, d) {
+    .on("click", function (_, d) {
       onClick && onClick(d);
     })
-    .on("mouseenter", function (e, d) {
+    .on("mouseenter", function (_, d) {
       if (!d3.select(this).select(".circlet").classed("active"))
         d3.select(this).select("circle").attr("stroke", "orange");
       onHover && onHover(d);
     })
-    .on("mouseleave", function (e, d) {
+    .on("mouseleave", function (_, d) {
       if (!d3.select(this).select(".circlet").classed("active"))
         d3.select(this).select("circle").attr("stroke", "transparent");
       onUnhover && onUnhover(d);
@@ -204,13 +174,13 @@ function updateSmallDropSVG(
     .duration(1000)
     .attr(
       "transform",
-      ({ globalX, globalY, tilt, x, y }) =>
+      ({ globalX, globalY, x, y }) =>
         `translate(${
           globalX +
-          x * (LOD_1_SMALL_DROP_PAD_FACTOR / LOD_2_SMALL_DROP_PAD_FACTOR - 1)
+          x * (LOD_2_SMALL_DROP_PAD_FACTOR / LOD_1_SMALL_DROP_PAD_FACTOR - 1)
         }, ${
           globalY +
-          y * (LOD_1_SMALL_DROP_PAD_FACTOR / LOD_2_SMALL_DROP_PAD_FACTOR - 1)
+          y * (LOD_2_SMALL_DROP_PAD_FACTOR / LOD_1_SMALL_DROP_PAD_FACTOR - 1)
         }) rotate(${0})`
     );
 }

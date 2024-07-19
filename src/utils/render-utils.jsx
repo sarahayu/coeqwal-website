@@ -2,8 +2,8 @@ import * as d3 from "d3";
 import * as THREE from "three";
 
 import { interpolateWatercolorBlue } from "bucket-lib/utils";
-import { LOD_2_RAD_PX } from "settings";
-import { LOD_2_LEVELS } from "settings";
+import { LOD_1_RAD_PX } from "settings";
+import { LOD_1_LEVELS } from "settings";
 import { sortBy } from "./misc-utils";
 import { toRadians } from "./math-utils";
 
@@ -271,7 +271,7 @@ export class WaterdropMesh {
     const outlineMeshCoords = waterdropDeltaOutline(
       0,
       1,
-      LOD_2_RAD_PX * 2 * 0.975
+      LOD_1_RAD_PX * 2 * 0.975
     );
 
     for (let i = 0; i < waterdrops.nodes.length; i++) {
@@ -284,10 +284,10 @@ export class WaterdropMesh {
         const meshCoords = waterdropDelta(
           l1 / maxLev,
           l2 / maxLev,
-          LOD_2_RAD_PX * 2
+          LOD_1_RAD_PX * 2
         );
         const color = new THREE.Color(
-          interpolateWatercolorBlue(k / LOD_2_LEVELS)
+          interpolateWatercolorBlue(k / LOD_1_LEVELS)
         );
 
         dropsGeometry.addMeshCoords(
@@ -396,7 +396,7 @@ export class WaterdropSimplifiedMesh {
     }
 
     const pointsMaterial = new THREE.PointsMaterial({
-      size: LOD_2_RAD_PX * 2,
+      size: LOD_1_RAD_PX * 2,
       sizeAttenuation: true,
       vertexColors: true,
       map: new THREE.TextureLoader().load("drop.png"),

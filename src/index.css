@@ -1,5 +1,5 @@
 :root {
-  font-family: Helvetica, sans-serif !important;
+  font-family: Georgia, "Times New Roman", Times, serif;
 }
 
 h1,
@@ -764,4 +764,40 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   cursor: pointer;
   padding: 0.5em 1em;
   border-radius: 100vh;
+  font-weight: bold;
+}
+
+.infobox {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  width: min-content;
+  padding: 2rem;
+  pointer-events: none;
+}
+
+.infobox svg {
+  pointer-events: all;
+}
+
+.details {
+  padding-block: 1em;
+}
+
+.curKey {
+  font-size: 0.8em;
+  color: gray;
+  margin-block: 1em;
+}
+
+.curDesc {
+}
+
+.no-loc-data {
+  font-size: 0.8em;
+  color: gray;
+  margin-block: 1em;
+  font-style: italic;
 }

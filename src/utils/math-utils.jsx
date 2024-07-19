@@ -185,3 +185,15 @@ export function interp(x, a, b) {
 export function revInterp(t, a, b) {
   return (t - a) / (b - a);
 }
+
+export function distSq([x1, y1], [x2, y2]) {
+  return (x2 - x1) ** 2 + (y2 - y1) ** 2;
+}
+
+export function dist([x1, y1], [x2, y2]) {
+  return Math.sqrt(distSq([x1, y1], [x2, y2]));
+}
+
+export function getCenterDomRect(domRect) {
+  return [domRect.left + domRect.width / 2, domRect.top + domRect.height / 2];
+}

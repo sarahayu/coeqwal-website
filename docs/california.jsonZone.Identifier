@@ -1,0 +1,3 @@
+[ZoneTransfer]
+ZoneId=3
+HostUrl=https://raw.githubusercontent.com/ropensci/geojsonio/main/inst/examples/california.geojson
