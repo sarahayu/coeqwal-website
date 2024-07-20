@@ -259,20 +259,26 @@ input::-moz-focus-inner {
 }
 
 .pdf-razor {
-  width: 5px;
   height: 100%;
-  transform: translateX(-50%);
   top: 0;
   position: absolute;
-  cursor: col-resize;
+  font-size: 0.7rem;
   border: none;
   border-right: 3px dashed #f00;
-  font-size: 0.9rem;
-  /* background-color: gray; */
+}
+
+.pdf-razor > :first-child::after {
+  content: "";
+  height: 100%;
+  width: 20px;
+  transform: translateX(-50%);
+  position: absolute;
+  cursor: col-resize;
 }
 
 .pdf-razor > * {
   position: relative;
+  height: 100%;
 }
 
 .pdf-razor span:first-child {
@@ -737,11 +743,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   transform: translateX(-0.5em);
 }
 
-.circlet.active circle {
+.circlet.active circle,
+.circletsmall.active circle {
   stroke: "orange";
 }
 
-.circlet.active {
+.circlet.active,
+.circletsmall.active {
   animation: rotating 30s linear infinite;
 }
 
@@ -800,4 +808,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   color: gray;
   margin-block: 1em;
   font-style: italic;
+}
+
+.panel {
+  cursor: grab;
+  background-color: white;
+  padding: 1rem;
+  position: absolute;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+
+  height: 200px;
+  display: flex;
+  align-items: flex-end;
 }

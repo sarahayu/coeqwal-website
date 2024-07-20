@@ -44,7 +44,7 @@ export default function WideView() {
 
   const [curInfo, setCurInfo] = useState(null);
 
-  const fontSize = (d, transformZoom) => {
+  const getFontSize = (d, transformZoom) => {
     const MAX_RAD = window.innerHeight / 9;
 
     const zoomRel = ((1 / transformZoom) * camera.height) / waterdrops.height;
@@ -57,41 +57,45 @@ export default function WideView() {
     return absFontSize(d * zoomRel) * Math.min(zoomRel, 0.4);
   };
 
-  useEffect(() => {
-    d3.select(".infobox").attr("display", "none");
+  useEffect(
+    function updateFontSizes() {
+      d3.select(".infobox").attr("display", "none");
 
-    if (!enableZoomRef.current) return;
+      if (!enableZoomRef.current) return;
 
-    d3.select("#mosaic-svg")
-      .select(".svg-trans")
-      .selectAll("text")
-      .each(function () {
-        const s = d3.select(this);
-        const tNode = s.node();
+      d3.select("#mosaic-svg")
+        .select(".svg-trans")
+        .selectAll("text")
+        .each(function () {
+          const s = d3.select(this);
+          const tNode = s.node();
 
-        const [posx, posy] = getCenterDomRect(tNode.getBoundingClientRect());
+          const [posx, posy] = getCenterDomRect(tNode.getBoundingClientRect());
 
-        const width =
-            ((tNode.getBBox().width * camera.height) / camera.far) * 8,
-          height = ((tNode.getBBox().height * camera.height) / camera.far) * 10;
+          const width =
+              ((tNode.getBBox().width * camera.height) / camera.far) * 8,
+            height =
+              ((tNode.getBBox().height * camera.height) / camera.far) * 10;
 
-        const dis = dist(
-          [posx, posy],
-          [transformInfo.mouseX, transformInfo.mouseY]
-        );
+          const dis = dist(
+            [posx, posy],
+            [transformInfo.mouseX, transformInfo.mouseY]
+          );
 
-        s.attr("font-size", fontSize(dis, transformInfo.zoom));
+          s.attr("font-size", getFontSize(dis, transformInfo.zoom));
 
-        d3.select(this.parentNode.parentNode)
-          .select("image")
-          .attr("x", -width / 2)
-          .attr("y", -height / 2)
-          .attr("width", width)
-          .attr("height", height);
-      });
-  }, [transformInfo]);
+          d3.select(this.parentNode.parentNode)
+            .select("image")
+            .attr("x", -width / 2)
+            .attr("y", -height / 2)
+            .attr("width", width)
+            .attr("height", height);
+        });
+    },
+    [transformInfo]
+  );
 
-  useEffect(() => {
+  useEffect(function initialize() {
     addZoomHandler(function (transform) {
       setTransformInfo((ti) => ({
         ...ti,
@@ -166,7 +170,7 @@ export default function WideView() {
   }, []);
 
   useEffect(
-    function update() {
+    function enterState() {
       if (isState(state, "WideView")) {
         setEnableZoom(true);
         setTransformInfo((ti) => ({ ...ti, zoom: camera.curTransform.k }));
@@ -233,7 +237,7 @@ export default function WideView() {
           container.select(".circlet." + wd.key).classed("active", true);
         }
 
-        return () => {
+        return function exitState() {
           d3.select("#mosaic-svg")
             .select(".svg-trans")
             .selectAll(".largeDrop")
@@ -246,103 +250,102 @@ export default function WideView() {
     [state]
   );
 
-  const handleClick = useCallback(() => {
-    if (activeWDObjs.length == 1) {
-      const d = activeWDObjs[0];
+  const handleClick = useCallback(
+    function () {
+      if (activeWDObjs.length === 1) {
+        const d = activeWDObjs[0];
 
-      const { start, duration } = zoomTo(
-        [
-          d.x,
-          d.y - d.height * 0.08,
-          camera.getZFromFarHeight(
-            ((d.height * LOD_2_SMALL_DROP_PAD_FACTOR) /
-              LOD_1_SMALL_DROP_PAD_FACTOR) *
-              1.5
-          ),
-        ],
-        () => {
-          setDisableCamAdjustments(false);
-        }
-      );
+        const { start, duration } = zoomTo(
+          [
+            d.x,
+            d.y - d.height * 0.08,
+            camera.getZFromFarHeight(
+              ((d.height * LOD_2_SMALL_DROP_PAD_FACTOR) /
+                LOD_1_SMALL_DROP_PAD_FACTOR) *
+                1.5
+            ),
+          ],
+          () => {
+            setDisableCamAdjustments(false);
+          }
+        );
 
-      start();
+        start();
 
-      setState({ state: "ExamineView", transitionDuration: duration });
+        setState({ state: "ExamineView", transitionDuration: duration });
 
-      const origOpac = getOutlineOpac(camera.curTransform.k);
-      setDisableCamAdjustments(true);
+        const origOpac = getOutlineOpac(camera.curTransform.k);
+        setDisableCamAdjustments(true);
 
-      const t = d3.timer((elapsed) => {
-        const et = Math.min(1, elapsed / (duration / 2));
+        const t = d3.timer((elapsed) => {
+          const et = Math.min(1, elapsed / (duration / 2));
 
-        dropsMesh.updateVisibility(1 - et);
-        dropsMesh.updateOutlineVisibility(origOpac * (1 - et));
+          dropsMesh.updateVisibility(1 - et);
+          dropsMesh.updateOutlineVisibility(origOpac * (1 - et));
 
-        if (et >= 1) {
-          t.stop();
-          dropsMesh.remove(scene);
-        }
-      });
-    } else if (activeWDObjs.length > 1) {
-      const coords = activeWDObjs.map((w) => [w.x, w.y]);
-      const avgX = d3.mean(coords, (c) => c[0]);
-      const avgY = d3.mean(coords, (c) => c[1]);
+          if (et >= 1) {
+            t.stop();
+            dropsMesh.remove(scene);
+          }
+        });
+      } else if (activeWDObjs.length > 1) {
+        const coords = activeWDObjs.map((w) => [w.x, w.y]);
+        const avgX = d3.mean(coords, (c) => c[0]);
+        const avgY = d3.mean(coords, (c) => c[1]);
 
-      const { start, duration } = zoomTo(
-        [
-          avgX,
-          avgY,
-          camera.getZFromFarHeight(
-            ((waterdrops.groups[0].height * 2 * LOD_2_SMALL_DROP_PAD_FACTOR) /
-              LOD_1_SMALL_DROP_PAD_FACTOR) *
-              0.75 *
-              2
-          ),
-        ],
-        () => {
-          setDisableCamAdjustments(false);
-        }
-      );
+        const { start, duration } = zoomTo(
+          [
+            avgX,
+            avgY,
+            camera.getZFromFarHeight(
+              ((waterdrops.groups[0].height * 2 * LOD_2_SMALL_DROP_PAD_FACTOR) /
+                LOD_1_SMALL_DROP_PAD_FACTOR) *
+                0.75 *
+                2
+            ),
+          ],
+          () => {
+            setDisableCamAdjustments(false);
+          }
+        );
 
-      start();
+        start();
 
-      setState({
-        state: "CompareView",
-        transitionDuration: duration,
-        avgCoord: [avgX, avgY],
-      });
+        setState({
+          state: "CompareView",
+          transitionDuration: duration,
+          avgCoord: [avgX, avgY],
+        });
 
-      const origOpac = getOutlineOpac(camera.curTransform.k);
-      setDisableCamAdjustments(true);
+        const origOpac = getOutlineOpac(camera.curTransform.k);
+        setDisableCamAdjustments(true);
 
-      const t = d3.timer((elapsed) => {
-        const et = Math.min(1, elapsed / (duration / 5));
+        const t = d3.timer((elapsed) => {
+          const et = Math.min(1, elapsed / (duration / 5));
 
-        dropsMesh.updateVisibility(1 - et);
-        dropsMesh.updateOutlineVisibility(origOpac * (1 - et));
+          dropsMesh.updateVisibility(1 - et);
+          dropsMesh.updateOutlineVisibility(origOpac * (1 - et));
 
-        if (et >= 1) {
-          t.stop();
+          if (et >= 1) {
+            t.stop();
 
-          dropsMesh.remove(scene);
-        }
-      });
-    }
-  }, [activeWDObjs]);
+            dropsMesh.remove(scene);
+          }
+        });
+      }
+    },
+    [activeWDObjs]
+  );
 
   let actionBtn;
 
-  if (isState(state, "WideView")) {
-    if (activeWaterdrops.length)
-      actionBtn = (
-        <button
-          onClick={handleClick}
-          className="wide-view-action-btn fancy-font"
-        >
-          {activeWaterdrops.length == 1 ? <BiCross /> : <BiNetworkChart />}
-          {activeWaterdrops.length == 1 ? "examine" : "compare"}
-        </button>
-      );
+  if (isState(state, "WideView") && activeWaterdrops.length) {
+    actionBtn = (
+      <button onClick={handleClick} className="wide-view-action-btn fancy-font">
+        {activeWaterdrops.length === 1 ? <BiCross /> : <BiNetworkChart />}
+        {activeWaterdrops.length === 1 ? "examine" : "compare"}
+      </button>
+    );
   }
 
   return (

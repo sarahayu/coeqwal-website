@@ -86,7 +86,7 @@ export default function App() {
     setState({ state: "WideView" });
   }, []);
 
-  const resetCamera = useCallback((animated = true, callback) => {
+  const resetCamera = useCallback(function (animated = true, callback) {
     const pos = [
       0,
       -waterdrops.height * 0.08,
@@ -105,7 +105,7 @@ export default function App() {
     }
   }, []);
 
-  const zoomTo = useCallback((xyz, callback) => {
+  const zoomTo = useCallback(function (xyz, callback) {
     const i = camera.interpolateZoomCamera(xyz);
 
     const duration = i.duration / 2;
@@ -128,7 +128,7 @@ export default function App() {
     };
   }, []);
 
-  const addZoomHandler = useCallback((cb) => {
+  const addZoomHandler = useCallback(function (cb) {
     setZoomCallbacks((cbs) => [...cbs, cb]);
   }, []);
 

@@ -1,15 +1,27 @@
 import * as d3 from "d3";
-import React, { useContext, useEffect } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { AppContext } from "AppContext";
 
-import { isState } from "utils/misc-utils";
-import { LOD_1_LEVELS } from "settings";
 import { interpolateWatercolorBlue } from "bucket-lib/utils";
+import {
+  LOD_1_LEVELS,
+  LOD_1_RAD_PX,
+  LOD_1_SMALL_DROP_PAD_FACTOR,
+  LOD_2_SMALL_DROP_PAD_FACTOR,
+} from "settings";
+import { isState } from "utils/misc-utils";
 import { DROPLET_SHAPE } from "utils/render-utils";
-import { LOD_1_RAD_PX } from "settings";
-import { LOD_2_SMALL_DROP_PAD_FACTOR } from "settings";
-import { LOD_1_SMALL_DROP_PAD_FACTOR } from "settings";
+import { FLATTENED_DATA } from "data/objectives-data";
+import DotHistogram from "components/DotHistogram";
+
+const SPREAD = LOD_2_SMALL_DROP_PAD_FACTOR / LOD_1_SMALL_DROP_PAD_FACTOR;
 
 export default function ExamineView() {
   const {
@@ -19,10 +31,76 @@ export default function ExamineView() {
     resetCamera,
     activeWaterdrops,
     waterdrops,
+    camera,
+    addZoomHandler,
   } = useContext(AppContext);
 
+  const [activeMinidrops, setActiveMinidrops] = useState([]);
+  const [panels, setPanels] = useState([]);
+  const [cameraChangeFlag, setCameraChangeFlag] = useState(false);
+  const [goal, setGoal] = useState(200);
+
+  const mouseDownInfo = useRef({});
+
+  function addDetailPanel(dropId) {
+    const { globalX, globalY, x, y, id, key } = waterdrops.nodes[dropId];
+    setPanels((p) => {
+      const newPanel = {
+        text: key,
+        x: globalX + x * (SPREAD - 1),
+        y: globalY + y * (SPREAD - 1),
+        offsetX: 20,
+        offsetY: 40,
+        id,
+      };
+
+      return [...p, newPanel];
+    });
+  }
+
+  function removeDetailPanel(dropId) {
+    const { id } = waterdrops.nodes[dropId];
+    setPanels((p) => {
+      p.splice(
+        p.findIndex((v) => v.id === id),
+        1
+      );
+
+      return [...p];
+    });
+  }
+
+  useEffect(function initialize() {
+    addZoomHandler(function () {
+      setCameraChangeFlag((f) => !f);
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (mouseDownInfo.current.startX === undefined) return;
+
+      mouseDownInfo.current.deltaX = e.x - mouseDownInfo.current.startX;
+      mouseDownInfo.current.deltaY = e.y - mouseDownInfo.current.startY;
+
+      setPanels((p) => {
+        if (mouseDownInfo.current.startX === undefined) return p;
+
+        const f = p.find((v) => v.id === mouseDownInfo.current.id);
+        f.offsetX = f.oldOffsetX + mouseDownInfo.current.deltaX;
+        f.offsetY = f.oldOffsetY + mouseDownInfo.current.deltaY;
+
+        return [...p];
+      });
+    });
+
+    window.addEventListener("mouseup", (e) => {
+      if (mouseDownInfo.current.startX === undefined) return;
+
+      mouseDownInfo.current = {};
+    });
+  }, []);
+
   useEffect(
-    function update() {
+    function enterState() {
       if (isState(state, "ExamineView")) {
         const transitionDelay = state.transitionDuration;
         const container = d3.select("#mosaic-svg").select(".svg-trans");
@@ -31,7 +109,28 @@ export default function ExamineView() {
           container,
           waterdrops.groups.find((g) => g.key === activeWaterdrops[0]).nodes,
           transitionDelay / 2,
-          {}
+          {
+            onClick: (d) => {
+              setActiveMinidrops((wd) => {
+                if (wd.includes(d.id)) {
+                  wd.splice(wd.indexOf(d.id), 1);
+                  container
+                    .select(".circletsmall.i" + d.id)
+                    .classed("active", false);
+
+                  removeDetailPanel(d.id);
+                } else {
+                  wd.push(d.id);
+                  container
+                    .select(".circletsmall.i" + d.id)
+                    .classed("active", true);
+
+                  addDetailPanel(d.id);
+                }
+                return [...wd];
+              });
+            },
+          }
         );
 
         setGoBack(() => () => {
@@ -40,11 +139,19 @@ export default function ExamineView() {
           resetCamera();
         });
 
-        return () => {
+        return function exitState() {
           d3.select("#mosaic-svg")
             .select(".svg-trans")
             .selectAll(".smallDrop")
             .attr("display", "none");
+
+          container
+            .selectAll(".circletsmall")
+            .classed("active", false)
+            .select("circle")
+            .attr("stroke", "transparent");
+          setPanels([]);
+          setActiveMinidrops([]);
           setGoBack(null);
         };
       }
@@ -52,7 +159,48 @@ export default function ExamineView() {
     [state]
   );
 
-  return <></>;
+  const onPanelClick = (e, id) => {
+    if (e.target.className === "") return;
+
+    mouseDownInfo.current = { startX: e.clientX, startY: e.clientY, id };
+
+    setPanels((p) => {
+      const f = p.find((v) => v.id === id);
+
+      f.oldOffsetX = f.offsetX;
+      f.oldOffsetY = f.offsetY;
+
+      return [...p];
+    });
+  };
+
+  return (
+    <>
+      {panels.map(({ text, x, y, id, offsetX, offsetY }) => (
+        <div
+          className="panel"
+          key={id}
+          style={{
+            left: `${
+              x * camera.curTransform.k + camera.curTransform.x + offsetX
+            }px`,
+            top: `${
+              y * camera.curTransform.k + camera.curTransform.y + offsetY
+            }px`,
+          }}
+          onMouseDown={(e) => onPanelClick(e, id)}
+        >
+          <DotHistogram
+            width={300}
+            height={200}
+            data={FLATTENED_DATA[id].deliveries}
+            goal={goal}
+            setGoal={setGoal}
+          />
+        </div>
+      ))}
+    </>
+  );
 }
 
 function updateSmallDropSVG(
@@ -108,7 +256,7 @@ function updateSmallDropSVG(
             .attr("fill", `url(#drop-fill-${i})`);
 
           s.append("g")
-            .attr("class", "circlet")
+            .attr("class", "circletsmall")
             .append("circle")
             .attr("fill", "transparent")
             .attr("stroke", "transparent")
@@ -123,15 +271,15 @@ function updateSmallDropSVG(
       "transform",
       ({ globalX, globalY }) => `translate(${globalX}, ${globalY})`
     )
-    .each(function ({ levs, maxLev, key }, i) {
+    .each(function ({ levs, maxLev, key, id }, i) {
       const s = d3.select(this);
 
       s.select(".outline").attr("transform", `scale(${LOD_1_RAD_PX * 0.95})`);
       s.select(".fill").attr("transform", `scale(${LOD_1_RAD_PX})`);
 
-      s.select(".circlet")
+      s.select(".circletsmall")
         .attr("class", null)
-        .attr("class", "circlet " + key);
+        .attr("class", "circletsmall i" + id);
 
       s.selectAll("stop").each(function (_, i) {
         let actI = Math.floor(i / 2);
@@ -160,12 +308,12 @@ function updateSmallDropSVG(
       onClick && onClick(d);
     })
     .on("mouseenter", function (_, d) {
-      if (!d3.select(this).select(".circlet").classed("active"))
+      if (!d3.select(this).select(".circletsmall").classed("active"))
         d3.select(this).select("circle").attr("stroke", "orange");
       onHover && onHover(d);
     })
     .on("mouseleave", function (_, d) {
-      if (!d3.select(this).select(".circlet").classed("active"))
+      if (!d3.select(this).select(".circletsmall").classed("active"))
         d3.select(this).select("circle").attr("stroke", "transparent");
       onUnhover && onUnhover(d);
     })
@@ -175,12 +323,8 @@ function updateSmallDropSVG(
     .attr(
       "transform",
       ({ globalX, globalY, x, y }) =>
-        `translate(${
-          globalX +
-          x * (LOD_2_SMALL_DROP_PAD_FACTOR / LOD_1_SMALL_DROP_PAD_FACTOR - 1)
-        }, ${
-          globalY +
-          y * (LOD_2_SMALL_DROP_PAD_FACTOR / LOD_1_SMALL_DROP_PAD_FACTOR - 1)
+        `translate(${globalX + x * (SPREAD - 1)}, ${
+          globalY + y * (SPREAD - 1)
         }) rotate(${0})`
     );
 }

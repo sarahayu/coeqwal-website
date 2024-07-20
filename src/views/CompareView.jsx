@@ -26,79 +26,86 @@ export default function CompareView() {
   const [activeMinidrop, setActiveMinidrop] = useState();
   const groupsRef = useRef();
 
-  useEffect(() => {
-    if (activeMinidrop) {
-      const positions = [];
-      for (let i = 0; i < groupsRef.current.groups.length; i++) {
-        const group = groupsRef.current.groups[i];
-        const groupPos = groupsRef.current.groupPositions[i];
+  useEffect(
+    function updateCirclets() {
+      if (activeMinidrop) {
+        const positions = [];
+        for (let i = 0; i < groupsRef.current.groups.length; i++) {
+          const group = groupsRef.current.groups[i];
+          const groupPos = groupsRef.current.groupPositions[i];
 
-        const node = group.nodes.find((n) => n.key === activeMinidrop);
+          const node = group.nodes.find((n) => n.key === activeMinidrop);
 
-        positions.push([
-          (node.x * LOD_2_SMALL_DROP_PAD_FACTOR) / LOD_1_SMALL_DROP_PAD_FACTOR +
-            groupPos[0],
-          (node.y * LOD_2_SMALL_DROP_PAD_FACTOR) / LOD_1_SMALL_DROP_PAD_FACTOR +
-            groupPos[1],
-        ]);
+          positions.push([
+            (node.x * LOD_2_SMALL_DROP_PAD_FACTOR) /
+              LOD_1_SMALL_DROP_PAD_FACTOR +
+              groupPos[0],
+            (node.y * LOD_2_SMALL_DROP_PAD_FACTOR) /
+              LOD_1_SMALL_DROP_PAD_FACTOR +
+              groupPos[1],
+          ]);
+        }
+
+        const lines = [];
+
+        const height = LOD_1_RAD_PX * 2;
+        for (let i = 0; i < positions.length; i++) {
+          const from = Array.from(positions[i]),
+            to = Array.from(positions[i + 1 == positions.length ? 0 : i + 1]);
+
+          const len = Math.sqrt(
+            (from[0] - to[0]) ** 2 + (from[1] - to[1]) ** 2
+          );
+          const normed = [(to[0] - from[0]) / len, (to[1] - from[1]) / len];
+
+          from[0] += normed[0] * height;
+          from[1] += normed[1] * height;
+          to[0] -= normed[0] * height;
+          to[1] -= normed[1] * height;
+
+          lines.push([from, to]);
+        }
+
+        d3.select("#mosaic-svg")
+          .select(".svg-trans")
+          .selectAll(".compCirclet")
+          .data(positions)
+          .join("circle")
+          .attr("class", "compCirclet")
+          .attr("display", "initial")
+          .style("pointer-events", "none")
+          .attr("fill", "transparent")
+          .attr("stroke", "orange")
+          .attr("stroke-dasharray", 3)
+          .attr("stroke-width", 3)
+          .attr("vector-effect", "non-scaling-stroke")
+          .attr("r", (height / 2) * 1.2)
+          .transition()
+          .duration(100)
+          .attr("cx", (d) => d[0])
+          .attr("cy", (d) => d[1] - height * 0.08);
+
+        d3.select("#mosaic-svg")
+          .select(".svg-trans")
+          .selectAll(".compLines")
+          .data(lines)
+          .join("path")
+          .attr("class", "compLines")
+          .attr("stroke", "orange")
+          .attr("stroke-dasharray", 3)
+          .attr("opacity", 0.5)
+          .attr("stroke-width", 1)
+          .attr("vector-effect", "non-scaling-stroke")
+          .transition()
+          .duration(100)
+          .attr("d", (d) => d3.line()(d));
       }
-
-      const lines = [];
-
-      const height = LOD_1_RAD_PX * 2;
-      for (let i = 0; i < positions.length; i++) {
-        const from = Array.from(positions[i]),
-          to = Array.from(positions[i + 1 == positions.length ? 0 : i + 1]);
-
-        const len = Math.sqrt((from[0] - to[0]) ** 2 + (from[1] - to[1]) ** 2);
-        const normed = [(to[0] - from[0]) / len, (to[1] - from[1]) / len];
-
-        from[0] += normed[0] * height;
-        from[1] += normed[1] * height;
-        to[0] -= normed[0] * height;
-        to[1] -= normed[1] * height;
-
-        lines.push([from, to]);
-      }
-
-      d3.select("#mosaic-svg")
-        .select(".svg-trans")
-        .selectAll(".compCirclet")
-        .data(positions)
-        .join("circle")
-        .attr("class", "compCirclet")
-        .attr("display", "initial")
-        .style("pointer-events", "none")
-        .attr("fill", "transparent")
-        .attr("stroke", "orange")
-        .attr("stroke-dasharray", 3)
-        .attr("stroke-width", 3)
-        .attr("vector-effect", "non-scaling-stroke")
-        .attr("r", (height / 2) * 1.2)
-        .transition()
-        .duration(100)
-        .attr("cx", (d) => d[0])
-        .attr("cy", (d) => d[1] - height * 0.08);
-
-      d3.select("#mosaic-svg")
-        .select(".svg-trans")
-        .selectAll(".compLines")
-        .data(lines)
-        .join("path")
-        .attr("class", "compLines")
-        .attr("stroke", "orange")
-        .attr("stroke-dasharray", 3)
-        .attr("opacity", 0.5)
-        .attr("stroke-width", 1)
-        .attr("vector-effect", "non-scaling-stroke")
-        .transition()
-        .duration(100)
-        .attr("d", (d) => d3.line()(d));
-    }
-  }, [activeMinidrop]);
+    },
+    [activeMinidrop]
+  );
 
   useEffect(
-    function update() {
+    function enterState() {
       if (isState(state, "CompareView")) {
         const container = d3.select("#mosaic-svg").select(".svg-trans");
 
@@ -123,7 +130,7 @@ export default function CompareView() {
           resetCamera();
         });
 
-        return () => {
+        return function exitState() {
           d3.select("#mosaic-svg")
             .select(".svg-trans")
             .selectAll(".compLargeDrop")
