@@ -1,6 +1,8 @@
 import { AppContext } from "AppContext";
 import { interpolateWatercolorBlue } from "bucket-lib/utils";
+import DotHistogram from "components/DotHistogram";
 import * as d3 from "d3";
+import { FLATTENED_DATA } from "data/objectives-data";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   LOD_1_RAD_PX,
@@ -22,25 +24,126 @@ export default function CompareView() {
     resetCamera,
     activeWaterdrops,
     waterdrops,
+    camera,
+    goal,
+    setGoal,
+    addZoomHandler,
   } = useContext(AppContext);
 
   const [activeMinidrop, setActiveMinidrop] = useState();
   const groupsRef = useRef();
+  const [panels, setPanels] = useState([]);
+  const centerRef = useRef();
+  const [cameraChangeFlag, setCameraChangeFlag] = useState(false);
+  const mouseDownInfo = useRef({});
+
+  function addDetailPanel(dropId) {
+    const { globalX, globalY, x, y, id, key } = waterdrops.nodes[dropId];
+    setPanels((p) => {
+      const newPanel = {
+        text: key,
+        x: globalX + x * (SPREAD - 1),
+        y: globalY + y * (SPREAD - 1),
+        offsetX: 20,
+        offsetY: 40,
+        id,
+      };
+
+      return [...p, newPanel];
+    });
+  }
+
+  function removeDetailPanel(dropId) {
+    const { id } = waterdrops.nodes[dropId];
+    setPanels((p) => {
+      p.splice(
+        p.findIndex((v) => v.id === id),
+        1
+      );
+
+      return [...p];
+    });
+  }
 
   useEffect(function initialize() {
     d3.select("#mosaic-svg")
       .select(".svg-trans")
       .append("g")
       .attr("id", "compare-group");
+
+    addZoomHandler(function () {
+      setCameraChangeFlag((f) => !f);
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (mouseDownInfo.current.startX === undefined) return;
+
+      mouseDownInfo.current.deltaX = e.x - mouseDownInfo.current.startX;
+      mouseDownInfo.current.deltaY = e.y - mouseDownInfo.current.startY;
+
+      setPanels((p) => {
+        if (mouseDownInfo.current.startX === undefined) return p;
+
+        const f = p.find((v) => v.id === mouseDownInfo.current.id);
+        f.offsetX = f.oldOffsetX + mouseDownInfo.current.deltaX;
+        f.offsetY = f.oldOffsetY + mouseDownInfo.current.deltaY;
+
+        return [...p];
+      });
+    });
+
+    window.addEventListener("mouseup", (e) => {
+      if (mouseDownInfo.current.startX === undefined) return;
+
+      mouseDownInfo.current = {};
+    });
   }, []);
+
+  function getIdealGroupPos([x, y], [centerX, centerY]) {
+    let newX = x,
+      newY = y;
+
+    const correctionX = groupsRef.current.groups[0].height;
+
+    if (newX < centerX) newX -= correctionX;
+    else newX += correctionX;
+
+    return [newX, newY, newX < centerX];
+  }
 
   useEffect(
     function updateCirclets() {
       if (activeMinidrop) {
-        const [positions, lines] = calcLinesAndPositions(
+        const [positions, lines, nodes] = calcLinesAndPositions(
           groupsRef.current,
           activeMinidrop
         );
+
+        setPanels((p) => {
+          return nodes.map((n, i) => {
+            let ox = 0,
+              oy = 0;
+
+            if (p[i]) {
+              ox = p[i].offsetX;
+              oy = p[i].offsetY;
+            }
+
+            const pos = getIdealGroupPos(
+              groupsRef.current.groupPositions[i],
+              centerRef.current
+            );
+            return {
+              text: n.key,
+              x: pos[0],
+              y: pos[1],
+              id: n.id,
+              isLeft: pos[2],
+              offsetX: ox,
+              offsetY: oy,
+            };
+          });
+        });
 
         d3.select("#compare-group")
           .selectAll(".circlet")
@@ -83,7 +186,7 @@ export default function CompareView() {
           (groupsRef.current = getWaterdropGroups(
             activeWaterdrops,
             waterdrops,
-            state.avgCoord
+            (centerRef.current = state.avgCoord)
           )),
           state.transitionDuration / 5,
           {
@@ -92,6 +195,10 @@ export default function CompareView() {
             },
           }
         );
+
+        setTimeout(() => {
+          setActiveMinidrop(groupsRef.current.groups[0].nodes[0].key);
+        }, state.transitionDuration + 500);
 
         setGoBack(() => () => {
           setState({ state: "WideView" });
@@ -103,11 +210,55 @@ export default function CompareView() {
           container.selectAll(".large-drop").remove();
           container.selectAll(".circlet").remove();
           container.selectAll(".comp-line").remove();
+          setPanels([]);
           setGoBack(null);
         };
       }
     },
     [state]
+  );
+
+  function onPanelDragStart(e, id) {
+    if (e.target.className === "") return; // we're clicking the razor, disregard
+
+    mouseDownInfo.current = { startX: e.clientX, startY: e.clientY, id };
+
+    setPanels((p) => {
+      const f = p.find((v) => v.id === id);
+
+      f.oldOffsetX = f.offsetX;
+      f.oldOffsetY = f.offsetY;
+
+      return [...p];
+    });
+  }
+
+  return (
+    <>
+      {panels.map(({ x, y, id, isLeft, offsetX, offsetY }, i) => (
+        <div
+          className={"panel compare-panel" + (isLeft ? " left" : "")}
+          key={i}
+          style={{
+            left: `${
+              x * camera.curTransform.k + camera.curTransform.x + offsetX
+            }px`,
+            top: `${
+              y * camera.curTransform.k + camera.curTransform.y + offsetY
+            }px`,
+          }}
+          onMouseDown={(e) => onPanelDragStart(e, id)}
+        >
+          <DotHistogram
+            width={300}
+            height={200}
+            data={FLATTENED_DATA[id].deliveries}
+            goal={goal}
+            setGoal={setGoal}
+          />
+        </div>
+      ))}
+    </>
   );
 }
 
@@ -271,11 +422,14 @@ function updateDropsSVG(
 
 function calcLinesAndPositions(groupsObj, activeMinidrop) {
   const positions = [];
+  const nodes = [];
   for (let i = 0; i < groupsObj.groups.length; i++) {
     const group = groupsObj.groups[i];
     const groupPos = groupsObj.groupPositions[i];
 
     const node = group.nodes.find((n) => n.key === activeMinidrop);
+
+    nodes.push(node);
 
     positions.push([
       node.x * SPREAD + groupPos[0],
@@ -296,5 +450,5 @@ function calcLinesAndPositions(groupsObj, activeMinidrop) {
     lines.push([from, to]);
   }
 
-  return [positions, lines];
+  return [positions, lines, nodes];
 }

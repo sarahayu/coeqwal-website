@@ -26,8 +26,8 @@ export default function DotHistogram({
   width = 600,
   height = 400,
 }) {
-  const { current: razorID } = useRef(Math.floor(Math.random() * 1e5));
-  const { current: razorAreaID } = useRef(Math.floor(Math.random() * 1e5));
+  const { current: razorID } = useRef(Math.floor(Math.random() * 1e9));
+  const { current: razorAreaID } = useRef(Math.floor(Math.random() * 1e9));
 
   const svgSelector = useRef();
   const circles = useMemo(

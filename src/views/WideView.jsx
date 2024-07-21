@@ -17,6 +17,7 @@ import {
   getCenterDomRect,
 } from "utils/math-utils";
 import {
+  CALIFORNIA_CENTER,
   CALIFORNIA_OUTLINE,
   SPATIAL_DATA,
   SPATIAL_FEATURES,
@@ -134,17 +135,22 @@ export default function WideView() {
     const mmProj = d3
       .geoMercator()
       .scale(1000)
-      .center([-119, 37.7749])
+      .center(CALIFORNIA_CENTER)
       .translate([mmWidth / 2, mmHeight / 2]);
+
+    const lineGeom = [
+      ...SPATIAL_DATA.features.filter(
+        (f, i) => f.geometry.type === "MultiPolygon"
+      ),
+      CALIFORNIA_OUTLINE,
+    ];
+    const pointGeom = SPATIAL_DATA.features.filter(
+      (f, i) => f.geometry.type === "MultiPoint"
+    );
 
     minimap
       .selectAll("path")
-      .data([
-        ...SPATIAL_DATA.features.filter(
-          (f, i) => f.geometry.type === "MultiPolygon"
-        ),
-        CALIFORNIA_OUTLINE,
-      ])
+      .data(lineGeom)
       .join("path")
       .attr("d", (d) => d3.geoPath().projection(mmProj)(d))
       .attr("class", (d) => "outline " + d.properties.CalLiteID)
@@ -156,11 +162,7 @@ export default function WideView() {
 
     minimap
       .selectAll("circle")
-      .data([
-        ...SPATIAL_DATA.features.filter(
-          (f, i) => f.geometry.type === "MultiPoint"
-        ),
-      ])
+      .data(pointGeom)
       .join("circle")
       .each(function (d) {
         const s = d3.select(this);

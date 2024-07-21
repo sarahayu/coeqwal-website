@@ -19,3 +19,5 @@ export const CALIFORNIA_OUTLINE = await (async function load() {
 
   return objs;
 })();
+
+export const CALIFORNIA_CENTER = [-119, 37.7749];

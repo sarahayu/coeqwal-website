@@ -43,6 +43,7 @@ export default function App() {
     setDisableCamAdjustments,
     disableCamAdjustmentsRef,
   ] = useStateRef(false);
+  const [goal, setGoal] = useState(200);
 
   const getOutlineOpac = useCallback(
     d3
@@ -149,6 +150,8 @@ export default function App() {
         resetCamera,
         getOutlineOpac,
         addZoomHandler,
+        goal,
+        setGoal,
       }}
     >
       <div className="bubbles-wrapper">

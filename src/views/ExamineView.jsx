@@ -10,7 +10,7 @@ import {
   LOD_1_SMALL_DROP_PAD_FACTOR,
   LOD_2_SMALL_DROP_PAD_FACTOR,
 } from "settings";
-import { isState } from "utils/misc-utils";
+import { isState, useStateRef } from "utils/misc-utils";
 import { DROPLET_SHAPE, circlet } from "utils/render-utils";
 import { FLATTENED_DATA } from "data/objectives-data";
 import DotHistogram from "components/DotHistogram";
@@ -28,12 +28,17 @@ export default function ExamineView() {
     waterdrops,
     camera,
     addZoomHandler,
+    goal,
+    setGoal,
   } = useContext(AppContext);
 
-  const [activeMinidrops, setActiveMinidrops] = useState([]);
+  const [activeMinidrops, setActiveMinidrops, activeMinidropsRef] = useStateRef(
+    []
+  );
+  const [previewMinidrop, setPreviewMinidrop, previewMinidropRef] =
+    useStateRef(null);
   const [panels, setPanels] = useState([]);
   const [cameraChangeFlag, setCameraChangeFlag] = useState(false);
-  const [goal, setGoal] = useState(200);
 
   const mouseDownInfo = useRef({});
 
@@ -128,6 +133,18 @@ export default function ExamineView() {
                 return [...wd];
               });
             },
+            onHover: (d) => {
+              if (!activeMinidropsRef.current.includes(d.id)) {
+                setPreviewMinidrop(d.id);
+                addDetailPanel(d.id);
+              }
+            },
+            onUnhover: (d) => {
+              if (previewMinidropRef.current === d.id) {
+                setPreviewMinidrop(null);
+                removeDetailPanel(d.id);
+              }
+            },
           }
         );
 
@@ -147,6 +164,7 @@ export default function ExamineView() {
             .attr("display", "none");
           setPanels([]);
           setActiveMinidrops([]);
+          setPreviewMinidrop(null);
           setGoBack(null);
         };
       }

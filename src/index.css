@@ -14,6 +14,7 @@ body {
   background-color: rgb(251, 251, 255);
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 
 main {
@@ -812,7 +813,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .panel {
-  cursor: grab;
+  cursor: move;
   background-color: white;
   padding: 1rem;
   position: absolute;
@@ -822,4 +823,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   height: 200px;
   display: flex;
   align-items: flex-end;
+}
+
+.compare-panel {
+  transform: translateY(-50%);
+}
+
+.compare-panel.left {
+  transform: translate(-100%, -50%);
 }
