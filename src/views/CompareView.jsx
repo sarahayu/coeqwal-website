@@ -13,9 +13,10 @@ import { AppContext } from "AppContext";
 import { FLATTENED_DATA } from "data/objectives-data";
 import DotHistogram from "components/DotHistogram";
 
-import { clipEnds, dropCenterCorrection } from "utils/math-utils";
-import { genUUID, isState } from "utils/misc-utils";
+import { avgCoords, clipEnds, dropCenterCorrection } from "utils/math-utils";
+import { genUUID, isState, wrap } from "utils/misc-utils";
 import { DROPLET_SHAPE, circlet } from "utils/render-utils";
+import { DESCRIPTIONS_DATA } from "data/descriptions-data";
 
 const SPREAD = LOD_2_SMALL_DROP_PAD_FACTOR / LOD_1_SMALL_DROP_PAD_FACTOR;
 
@@ -28,8 +29,8 @@ export default function CompareView() {
     activeWaterdrops,
     waterdrops,
     camera,
-    goal,
-    setGoal,
+    goals,
+    setGoals,
     addZoomHandler,
   } = useContext(AppContext);
 
@@ -40,7 +41,7 @@ export default function CompareView() {
   const mouseDownInfo = useRef({});
 
   // TODO trigger rerender another way?
-  const [_, setCameraChangeFlag] = useState(false);
+  const [cameraChangeFlag, setCameraChangeFlag] = useState(false);
 
   useEffect(function initialize() {
     d3.select("#mosaic-svg")
@@ -80,7 +81,7 @@ export default function CompareView() {
     let newX = x,
       newY = y;
 
-    const correctionX = groupsRef.current.groups[0].height;
+    const correctionX = groupsRef.current.groups[0].height * 2;
 
     if (newX < centerX) newX -= correctionX;
     else newX += correctionX;
@@ -115,13 +116,42 @@ export default function CompareView() {
               text: n.key,
               x,
               y,
-              id: n.id,
+              id: groupsRef.current.groups[i].key,
+              nodeID: n.id,
               isLeft,
               offsetX: ox,
               offsetY: oy,
             };
           });
         });
+
+        const [textX, textY] = avgCoords(Array.from(positions));
+
+        const smallTextSize =
+          (groupsRef.current.groups[0].height * SPREAD) / 15;
+        const largeTextSize =
+          (groupsRef.current.groups[0].height * SPREAD) / 10;
+
+        d3.select("#compare-group")
+          .select("#member-label")
+          .text("scenario")
+          .attr("font-size", smallTextSize)
+          .attr("text-anchor", "middle")
+          .transition()
+          .duration(100)
+          .attr("x", textX)
+          .attr("y", textY - smallTextSize * 1.5);
+
+        d3.select("#compare-group")
+          .select("#member-variable")
+          .attr("id", "member-variable")
+          .attr("font-size", largeTextSize)
+          .text(activeMinidrop.slice(4))
+          .attr("text-anchor", "middle")
+          .transition()
+          .duration(100)
+          .attr("x", textX)
+          .attr("y", textY);
 
         d3.select("#compare-group")
           .selectAll(".circlet")
@@ -174,6 +204,9 @@ export default function CompareView() {
           }
         );
 
+        container.append("text").attr("id", "member-variable");
+        container.append("text").attr("id", "member-label");
+
         setTimeout(() => {
           setActiveMinidrop(groupsRef.current.groups[0].nodes[0].key);
         }, state.transitionDuration + 500);
@@ -188,6 +221,8 @@ export default function CompareView() {
           container.selectAll(".large-drop").remove();
           container.selectAll(".circlet").remove();
           container.selectAll(".comp-line").remove();
+          container.select("#member-variable").remove();
+          container.select("#member-label").remove();
 
           setPanels([]);
           setGoBack(null);
@@ -214,7 +249,7 @@ export default function CompareView() {
 
   return (
     <>
-      {panels.map(({ x, y, id, isLeft, offsetX, offsetY }, i) => (
+      {panels.map(({ x, y, id, isLeft, offsetX, offsetY, nodeID }, i) => (
         <div
           className={"panel compare-panel" + (isLeft ? " left" : "")}
           key={i}
@@ -231,9 +266,14 @@ export default function CompareView() {
           <DotHistogram
             width={300}
             height={200}
-            data={FLATTENED_DATA[id].deliveries}
-            goal={goal}
-            setGoal={setGoal}
+            data={FLATTENED_DATA[nodeID].deliveries}
+            goal={goals[id]}
+            setGoal={(newGoal) => {
+              setGoals((g) => {
+                g[id] = newGoal;
+                return { ...g };
+              });
+            }}
           />
         </div>
       ))}
@@ -273,8 +313,14 @@ function updateDropsSVG(
       return enter
         .append("g")
         .attr("class", "large-drop")
-        .each(function ({ nodes }) {
+        .each(function ({ nodes, height }) {
           d3.select(this)
+            .call((s) => {
+              s.append("text")
+                .style("font-size", (height * SPREAD) / 15)
+                .attr("class", "fancy-font water-group-label")
+                .attr("text-anchor", "middle");
+            })
             .selectAll(".small-drop")
             .data(nodes)
             .enter()
@@ -327,8 +373,24 @@ function updateDropsSVG(
     })
     .attr("display", "initial")
     .attr("transform", ({ x, y }) => `translate(${x}, ${y})`)
-    .each(function ({ nodes }) {
+    .each(function ({ nodes, key, height }) {
       d3.select(this)
+        .call((s) => {
+          const t = s.select("text");
+
+          t.selectAll("*").remove();
+          const lines = wrap(
+            DESCRIPTIONS_DATA[key].display_name || DESCRIPTIONS_DATA[key].id
+          ).split("\n");
+
+          lines.forEach((line, i) => {
+            t.append("tspan")
+              .attr("x", 0)
+              .attr("y", (height / 2) * SPREAD)
+              .attr("dy", `${i}em`)
+              .text(line);
+          });
+        })
         .selectAll(".small-drop")
         .data(nodes)
         .attr("display", "initial")

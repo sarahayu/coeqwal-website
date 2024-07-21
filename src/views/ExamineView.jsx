@@ -16,6 +16,7 @@ import DotHistogram from "components/DotHistogram";
 import { isState, useStateRef } from "utils/misc-utils";
 import { DROPLET_SHAPE, circlet } from "utils/render-utils";
 import { dropCenterCorrection } from "utils/math-utils";
+import { DESCRIPTIONS_DATA } from "data/descriptions-data";
 
 const SPREAD = LOD_2_SMALL_DROP_PAD_FACTOR / LOD_1_SMALL_DROP_PAD_FACTOR;
 
@@ -29,8 +30,8 @@ export default function ExamineView() {
     waterdrops,
     camera,
     addZoomHandler,
-    goal,
-    setGoal,
+    goals,
+    setGoals,
   } = useContext(AppContext);
 
   const [activeMinidrops, setActiveMinidrops, activeMinidropsRef] = useStateRef(
@@ -188,8 +189,20 @@ export default function ExamineView() {
     });
   }
 
+  let headerLabel;
+
+  if (isState(state, "ExamineView") && activeWaterdrops.length) {
+    headerLabel = (
+      <h1 className="examine-large-label">
+        {DESCRIPTIONS_DATA[activeWaterdrops[0]].display_name ||
+          DESCRIPTIONS_DATA[activeWaterdrops[0]].id}
+      </h1>
+    );
+  }
+
   return (
     <>
+      {headerLabel}
       {panels.map(({ x, y, id, offsetX, offsetY }) => (
         <div
           className="panel"
@@ -208,8 +221,13 @@ export default function ExamineView() {
             width={300}
             height={200}
             data={FLATTENED_DATA[id].deliveries}
-            goal={goal}
-            setGoal={setGoal}
+            goal={goals[activeWaterdrops[0]]}
+            setGoal={(newGoal) => {
+              setGoals((g) => {
+                g[activeWaterdrops[0]] = newGoal;
+                return { ...g };
+              });
+            }}
           />
         </div>
       ))}

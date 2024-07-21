@@ -266,6 +266,7 @@ input::-moz-focus-inner {
   font-size: 0.7rem;
   border: none;
   border-right: 3px dashed #f00;
+  color: gray;
 }
 
 .pdf-razor > :first-child::after {
@@ -831,4 +832,28 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .compare-panel.left {
   transform: translate(-100%, -50%);
+}
+
+.examine-large-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 1em;
+  width: 15ch;
+  line-height: 1.2;
+  color: gray;
+  opacity: 0.5;
+}
+
+.water-group-label {
+  fill: gray;
+  opacity: 0.5;
+}
+
+#member-label {
+  fill: black;
+}
+#member-variable {
+  fill: orange;
+  font-weight: bold;
 }

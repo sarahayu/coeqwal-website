@@ -18,6 +18,7 @@ import {
   dropsMesh,
   pointsMesh,
 } from "three-resources";
+import { OBJECTIVE_IDS } from "data/objectives-data";
 
 // pre-calculate these so we don't lag later
 const waterdrops = initWaterdrops("objective");
@@ -43,7 +44,12 @@ export default function App() {
     setDisableCamAdjustments,
     disableCamAdjustmentsRef,
   ] = useStateRef(false);
-  const [goal, setGoal] = useState(200);
+  const [goals, setGoals] = useState(() => {
+    const goalMap = {};
+    for (let i = 0; i < OBJECTIVE_IDS.length; i++)
+      goalMap[OBJECTIVE_IDS[i]] = 200;
+    return goalMap;
+  });
 
   const getOutlineOpac = useCallback(
     d3
@@ -150,8 +156,8 @@ export default function App() {
         resetCamera,
         getOutlineOpac,
         addZoomHandler,
-        goal,
-        setGoal,
+        goals,
+        setGoals,
       }}
     >
       <div className="bubbles-wrapper">
