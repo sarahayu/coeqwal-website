@@ -1,19 +1,20 @@
 import * as d3 from "d3";
 import React, { useContext, useEffect, useRef, useState } from "react";
 
-import { AppContext } from "AppContext";
-
 import { interpolateWatercolorBlue } from "bucket-lib/utils";
+
 import {
   LOD_1_LEVELS,
   LOD_1_RAD_PX,
   LOD_1_SMALL_DROP_PAD_FACTOR,
   LOD_2_SMALL_DROP_PAD_FACTOR,
 } from "settings";
-import { isState, useStateRef } from "utils/misc-utils";
-import { DROPLET_SHAPE, circlet } from "utils/render-utils";
+import { AppContext } from "AppContext";
 import { FLATTENED_DATA } from "data/objectives-data";
 import DotHistogram from "components/DotHistogram";
+
+import { isState, useStateRef } from "utils/misc-utils";
+import { DROPLET_SHAPE, circlet } from "utils/render-utils";
 import { dropCenterCorrection } from "utils/math-utils";
 
 const SPREAD = LOD_2_SMALL_DROP_PAD_FACTOR / LOD_1_SMALL_DROP_PAD_FACTOR;
@@ -230,8 +231,6 @@ function updateSmallDropSVG(
         .append("g")
         .attr("class", "small-drop")
         .each(function ({ levs }, i) {
-          // TODO replace with tooltip, remove unnec svg
-
           const s = d3.select(this);
           s.append("rect").attr("class", "bbox").style("visibility", "hidden");
 
@@ -248,12 +247,14 @@ function updateSmallDropSVG(
           stops.append("stop").attr("stop-color", "transparent");
 
           levs.forEach((_, i) => {
-            stops
-              .append("stop")
-              .attr("stop-color", interpolateWatercolorBlue(i / LOD_1_LEVELS));
-            stops
-              .append("stop")
-              .attr("stop-color", interpolateWatercolorBlue(i / LOD_1_LEVELS));
+            for (let j = 0; j < 2; j++) {
+              stops
+                .append("stop")
+                .attr(
+                  "stop-color",
+                  interpolateWatercolorBlue(i / LOD_1_LEVELS)
+                );
+            }
           });
 
           s.append("path")
@@ -282,7 +283,7 @@ function updateSmallDropSVG(
       "transform",
       ({ globalX, globalY }) => `translate(${globalX}, ${globalY})`
     )
-    .each(function ({ levs, maxLev, key, id }, i) {
+    .each(function ({ levs, maxLev, id }, i) {
       const s = d3.select(this);
 
       s.select(".outline").attr("transform", `scale(${LOD_1_RAD_PX * 0.95})`);
@@ -307,13 +308,13 @@ function updateSmallDropSVG(
         }
       });
 
-      const d = s.select(".fill");
+      const dropBBox = s.select(".fill").node().getBBox();
 
       s.select(".bbox")
-        .attr("x", d.node().getBBox().x)
-        .attr("y", d.node().getBBox().y)
-        .attr("width", d.node().getBBox().width)
-        .attr("height", d.node().getBBox().height);
+        .attr("x", dropBBox.x)
+        .attr("y", dropBBox.y)
+        .attr("width", dropBBox.width)
+        .attr("height", dropBBox.height);
     })
     .on("click", function (_, d) {
       onClick && onClick(d);

@@ -1,17 +1,20 @@
-import { AppContext } from "AppContext";
-import { interpolateWatercolorBlue } from "bucket-lib/utils";
-import DotHistogram from "components/DotHistogram";
 import * as d3 from "d3";
-import { FLATTENED_DATA } from "data/objectives-data";
 import React, { useContext, useEffect, useRef, useState } from "react";
+
+import { interpolateWatercolorBlue } from "bucket-lib/utils";
+
 import {
-  LOD_1_RAD_PX,
   LOD_1_LEVELS,
+  LOD_1_RAD_PX,
   LOD_1_SMALL_DROP_PAD_FACTOR,
   LOD_2_SMALL_DROP_PAD_FACTOR,
 } from "settings";
+import { AppContext } from "AppContext";
+import { FLATTENED_DATA } from "data/objectives-data";
+import DotHistogram from "components/DotHistogram";
+
 import { clipEnds, dropCenterCorrection } from "utils/math-utils";
-import { isState } from "utils/misc-utils";
+import { genUUID, isState } from "utils/misc-utils";
 import { DROPLET_SHAPE, circlet } from "utils/render-utils";
 
 const SPREAD = LOD_2_SMALL_DROP_PAD_FACTOR / LOD_1_SMALL_DROP_PAD_FACTOR;
@@ -31,39 +34,13 @@ export default function CompareView() {
   } = useContext(AppContext);
 
   const [activeMinidrop, setActiveMinidrop] = useState();
-  const groupsRef = useRef();
   const [panels, setPanels] = useState([]);
+  const groupsRef = useRef();
   const centerRef = useRef();
-  const [cameraChangeFlag, setCameraChangeFlag] = useState(false);
   const mouseDownInfo = useRef({});
 
-  function addDetailPanel(dropId) {
-    const { globalX, globalY, x, y, id, key } = waterdrops.nodes[dropId];
-    setPanels((p) => {
-      const newPanel = {
-        text: key,
-        x: globalX + x * (SPREAD - 1),
-        y: globalY + y * (SPREAD - 1),
-        offsetX: 20,
-        offsetY: 40,
-        id,
-      };
-
-      return [...p, newPanel];
-    });
-  }
-
-  function removeDetailPanel(dropId) {
-    const { id } = waterdrops.nodes[dropId];
-    setPanels((p) => {
-      p.splice(
-        p.findIndex((v) => v.id === id),
-        1
-      );
-
-      return [...p];
-    });
-  }
+  // TODO trigger rerender another way?
+  const [_, setCameraChangeFlag] = useState(false);
 
   useEffect(function initialize() {
     d3.select("#mosaic-svg")
@@ -129,16 +106,17 @@ export default function CompareView() {
               oy = p[i].offsetY;
             }
 
-            const pos = getIdealGroupPos(
+            const [x, y, isLeft] = getIdealGroupPos(
               groupsRef.current.groupPositions[i],
               centerRef.current
             );
+
             return {
               text: n.key,
-              x: pos[0],
-              y: pos[1],
+              x,
+              y,
               id: n.id,
-              isLeft: pos[2],
+              isLeft,
               offsetX: ox,
               offsetY: oy,
             };
@@ -210,6 +188,7 @@ export default function CompareView() {
           container.selectAll(".large-drop").remove();
           container.selectAll(".circlet").remove();
           container.selectAll(".comp-line").remove();
+
           setPanels([]);
           setGoBack(null);
         };
@@ -307,7 +286,7 @@ function updateDropsSVG(
                 .attr("class", "bbox")
                 .style("visibility", "hidden");
 
-              const randId = Math.floor(Math.random() * 1e9);
+              const randId = genUUID();
 
               const stops = d3
                 .select(this)
@@ -322,18 +301,14 @@ function updateDropsSVG(
               stops.append("stop").attr("stop-color", "transparent");
 
               levs.forEach((_, i) => {
-                stops
-                  .append("stop")
-                  .attr(
-                    "stop-color",
-                    interpolateWatercolorBlue(i / LOD_1_LEVELS)
-                  );
-                stops
-                  .append("stop")
-                  .attr(
-                    "stop-color",
-                    interpolateWatercolorBlue(i / LOD_1_LEVELS)
-                  );
+                for (let j = 0; j < 2; j++) {
+                  stops
+                    .append("stop")
+                    .attr(
+                      "stop-color",
+                      interpolateWatercolorBlue(i / LOD_1_LEVELS)
+                    );
+                }
               });
 
               s.append("path")
@@ -351,7 +326,7 @@ function updateDropsSVG(
         });
     })
     .attr("display", "initial")
-    .attr("transform", ({ x, y }, i) => `translate(${x}, ${y})`)
+    .attr("transform", ({ x, y }) => `translate(${x}, ${y})`)
     .each(function ({ nodes }) {
       d3.select(this)
         .selectAll(".small-drop")
@@ -394,13 +369,13 @@ function updateDropsSVG(
             }
           });
 
-          const d = s.select(".fill");
+          const dropBBox = s.select(".fill").node().getBBox();
 
           s.select(".bbox")
-            .attr("x", d.node().getBBox().x)
-            .attr("y", d.node().getBBox().y)
-            .attr("width", d.node().getBBox().width)
-            .attr("height", d.node().getBBox().height);
+            .attr("x", dropBBox.x)
+            .attr("y", dropBBox.y)
+            .attr("width", dropBBox.width)
+            .attr("height", dropBBox.height);
         })
         .transition()
         .delay(transitionDelay)
@@ -420,14 +395,14 @@ function updateDropsSVG(
     );
 }
 
-function calcLinesAndPositions(groupsObj, activeMinidrop) {
+function calcLinesAndPositions(groupsObj, activeMinidropKey) {
   const positions = [];
   const nodes = [];
   for (let i = 0; i < groupsObj.groups.length; i++) {
     const group = groupsObj.groups[i];
     const groupPos = groupsObj.groupPositions[i];
 
-    const node = group.nodes.find((n) => n.key === activeMinidrop);
+    const node = group.nodes.find((n) => n.key === activeMinidropKey);
 
     nodes.push(node);
 

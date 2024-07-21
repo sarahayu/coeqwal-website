@@ -1,28 +1,32 @@
 import * as d3 from "d3";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-
-import { AppContext } from "AppContext";
-
-import { GROUP_HOVER_AREA_FACTOR } from "settings";
-import { dropsMesh, scene } from "three-resources";
-import { isState, useStateRef, wrap } from "utils/misc-utils";
 import { BiCross, BiNetworkChart } from "react-icons/bi";
-import { DESCRIPTIONS_DATA } from "data/descriptions-data";
-import { LOD_2_SMALL_DROP_PAD_FACTOR } from "settings";
-import { LOD_1_SMALL_DROP_PAD_FACTOR } from "settings";
+
 import {
-  dist,
-  distSq,
-  dropCenterCorrection,
-  getCenterDomRect,
-} from "utils/math-utils";
+  GROUP_HOVER_AREA_FACTOR,
+  LOD_1_SMALL_DROP_PAD_FACTOR,
+  LOD_2_SMALL_DROP_PAD_FACTOR,
+} from "settings";
+import { AppContext } from "AppContext";
+import { DESCRIPTIONS_DATA } from "data/descriptions-data";
 import {
   CALIFORNIA_CENTER,
   CALIFORNIA_OUTLINE,
   SPATIAL_DATA,
   SPATIAL_FEATURES,
 } from "data/spatial-data";
+import { dropsMesh, scene } from "three-resources";
+
+import {
+  avgCoords,
+  dist,
+  dropCenterCorrection,
+  getCenterDomRect,
+} from "utils/math-utils";
+import { isState, useStateRef, wrap } from "utils/misc-utils";
 import { circlet } from "utils/render-utils";
+
+const SPREAD = LOD_2_SMALL_DROP_PAD_FACTOR / LOD_1_SMALL_DROP_PAD_FACTOR;
 
 export default function WideView() {
   const {
@@ -36,8 +40,6 @@ export default function WideView() {
     setDisableCamAdjustments,
     getOutlineOpac,
     addZoomHandler,
-    appWidth,
-    appHeight,
   } = useContext(AppContext);
 
   const [activeWDObjs, setActiveWDObjs] = useState([]);
@@ -140,12 +142,12 @@ export default function WideView() {
 
     const lineGeom = [
       ...SPATIAL_DATA.features.filter(
-        (f, i) => f.geometry.type === "MultiPolygon"
+        (f) => f.geometry.type === "MultiPolygon"
       ),
       CALIFORNIA_OUTLINE,
     ];
     const pointGeom = SPATIAL_DATA.features.filter(
-      (f, i) => f.geometry.type === "MultiPoint"
+      (f) => f.geometry.type === "MultiPoint"
     );
 
     minimap
@@ -264,17 +266,13 @@ export default function WideView() {
   const handleClick = useCallback(
     function () {
       if (activeWDObjs.length === 1) {
-        const d = activeWDObjs[0];
+        const { x, y, height } = activeWDObjs[0];
 
         const { start, duration } = zoomTo(
           [
-            d.x,
-            d.y - d.height * 0.08,
-            camera.getZFromFarHeight(
-              ((d.height * LOD_2_SMALL_DROP_PAD_FACTOR) /
-                LOD_1_SMALL_DROP_PAD_FACTOR) *
-                1.5
-            ),
+            x,
+            y - dropCenterCorrection({ height }),
+            camera.getZFromFarHeight(height * SPREAD * 1.5),
           ],
           () => {
             setDisableCamAdjustments(false);
@@ -300,19 +298,14 @@ export default function WideView() {
           }
         });
       } else if (activeWDObjs.length > 1) {
-        const coords = activeWDObjs.map((w) => [w.x, w.y]);
-        const avgX = d3.mean(coords, (c) => c[0]);
-        const avgY = d3.mean(coords, (c) => c[1]);
+        const [avgX, avgY] = avgCoords(activeWDObjs.map((w) => [w.x, w.y]));
 
         const { start, duration } = zoomTo(
           [
             avgX,
             avgY,
             camera.getZFromFarHeight(
-              ((waterdrops.groups[0].height * 2 * LOD_2_SMALL_DROP_PAD_FACTOR) /
-                LOD_1_SMALL_DROP_PAD_FACTOR) *
-                0.75 *
-                2
+              waterdrops.groups[0].height * 2 * SPREAD * 0.75 * 2
             ),
           ],
           () => {
@@ -385,7 +378,6 @@ function updateLargeDropSVG(
   waterdrops,
   { onClick, onHover, onUnhover }
 ) {
-  console.log("updating svg");
   container
     .selectAll(".large-drop")
     .data(waterdrops.groups)
@@ -393,7 +385,7 @@ function updateLargeDropSVG(
       return enter
         .append("g")
         .attr("class", "large-drop")
-        .each(function (d) {
+        .each(function () {
           const s = d3.select(this);
 
           s.append("g")

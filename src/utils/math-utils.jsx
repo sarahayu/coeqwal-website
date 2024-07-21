@@ -218,3 +218,7 @@ export function dropCenterCorrection({ rad, height }) {
   if (rad !== undefined) return dropRadToDropHeight(rad) * 0.08;
   return height * 0.08;
 }
+
+export function avgCoords(coords) {
+  return [d3.mean(coords, (c) => c[0]), d3.mean(coords, (c) => c[1])];
+}
