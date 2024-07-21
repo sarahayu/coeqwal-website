@@ -197,3 +197,24 @@ export function dist([x1, y1], [x2, y2]) {
 export function getCenterDomRect(domRect) {
   return [domRect.left + domRect.width / 2, domRect.top + domRect.height / 2];
 }
+
+export function clipEnds([from, to], shortenBy) {
+  const len = Math.sqrt((from[0] - to[0]) ** 2 + (from[1] - to[1]) ** 2);
+  const normed = [(to[0] - from[0]) / len, (to[1] - from[1]) / len];
+
+  from[0] += normed[0] * shortenBy;
+  from[1] += normed[1] * shortenBy;
+  to[0] -= normed[0] * shortenBy;
+  to[1] -= normed[1] * shortenBy;
+
+  return [from, to];
+}
+
+export function dropRadToDropHeight(rad) {
+  return (1 + Math.SQRT2) * rad;
+}
+
+export function dropCenterCorrection({ rad, height }) {
+  if (rad !== undefined) return dropRadToDropHeight(rad) * 0.08;
+  return height * 0.08;
+}

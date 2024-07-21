@@ -10,12 +10,18 @@ import { BiCross, BiNetworkChart } from "react-icons/bi";
 import { DESCRIPTIONS_DATA } from "data/descriptions-data";
 import { LOD_2_SMALL_DROP_PAD_FACTOR } from "settings";
 import { LOD_1_SMALL_DROP_PAD_FACTOR } from "settings";
-import { dist, distSq, getCenterDomRect } from "utils/math-utils";
+import {
+  dist,
+  distSq,
+  dropCenterCorrection,
+  getCenterDomRect,
+} from "utils/math-utils";
 import {
   CALIFORNIA_OUTLINE,
   SPATIAL_DATA,
   SPATIAL_FEATURES,
 } from "data/spatial-data";
+import { circlet } from "utils/render-utils";
 
 export default function WideView() {
   const {
@@ -63,8 +69,7 @@ export default function WideView() {
 
       if (!enableZoomRef.current) return;
 
-      d3.select("#mosaic-svg")
-        .select(".svg-trans")
+      d3.select("#wide-group")
         .selectAll("text")
         .each(function () {
           const s = d3.select(this);
@@ -96,6 +101,11 @@ export default function WideView() {
   );
 
   useEffect(function initialize() {
+    d3.select("#mosaic-svg")
+      .select(".svg-trans")
+      .append("g")
+      .attr("id", "wide-group");
+
     addZoomHandler(function (transform) {
       setTransformInfo((ti) => ({
         ...ti,
@@ -184,7 +194,7 @@ export default function WideView() {
         dropsMesh.updateVisibility(1);
         dropsMesh.updateOutlineVisibility(origOpac);
 
-        const container = d3.select("#mosaic-svg").select(".svg-trans");
+        const container = d3.select("#wide-group");
         d3.select(".infobox").style("display", "initial");
 
         updateLargeDropSVG(container, waterdrops, {
@@ -238,9 +248,8 @@ export default function WideView() {
         }
 
         return function exitState() {
-          d3.select("#mosaic-svg")
-            .select(".svg-trans")
-            .selectAll(".largeDrop")
+          d3.select("#wide-group")
+            .selectAll(".large-drop")
             .attr("display", "none");
           d3.select(".infobox").style("display", "none");
           setEnableZoom(false);
@@ -376,23 +385,20 @@ function updateLargeDropSVG(
 ) {
   console.log("updating svg");
   container
-    .selectAll(".largeDrop")
+    .selectAll(".large-drop")
     .data(waterdrops.groups)
     .join((enter) => {
       return enter
         .append("g")
-        .attr("class", "largeDrop")
+        .attr("class", "large-drop")
         .each(function (d) {
           const s = d3.select(this);
 
           s.append("g")
             .attr("class", "circlet")
             .append("circle")
-            .attr("fill", "transparent")
-            .attr("stroke", "transparent")
-            .attr("stroke-dasharray", 3)
-            .attr("stroke-width", 3)
-            .attr("vector-effect", "non-scaling-stroke")
+            .call(circlet)
+            .attr("display", "none")
             .attr("r", 1);
 
           const textGroup = s.append("g");
@@ -436,7 +442,7 @@ function updateLargeDropSVG(
     .attr(
       "transform",
       ({ x, y, height }) =>
-        `translate(${x}, ${y - height * 0.08}) scale(${
+        `translate(${x}, ${y - dropCenterCorrection({ height })}) scale(${
           height * GROUP_HOVER_AREA_FACTOR
         })`
     )
@@ -445,12 +451,12 @@ function updateLargeDropSVG(
     })
     .on("mouseenter", function (_, d) {
       if (!d3.select(this).select(".circlet").classed("active"))
-        d3.select(this).select("circle").attr("stroke", "orange");
+        d3.select(this).select("circle").attr("display", "initial");
       onHover && onHover(d);
     })
     .on("mouseleave", function (_, d) {
       if (!d3.select(this).select(".circlet").classed("active"))
-        d3.select(this).select("circle").attr("stroke", "transparent");
+        d3.select(this).select("circle").attr("display", "none");
       onUnhover && onUnhover(d);
     });
 }

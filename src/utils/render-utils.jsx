@@ -616,3 +616,11 @@ export class Camera {
     return this.raycaster.intersectObject(mesh);
   }
 }
+
+export function circlet(s) {
+  s.attr("fill", "transparent")
+    .attr("stroke", "orange")
+    .attr("stroke-dasharray", 3)
+    .attr("stroke-width", 3)
+    .attr("vector-effect", "non-scaling-stroke");
+}

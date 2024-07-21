@@ -59,11 +59,7 @@ export default function App() {
   useEffect(function initialize() {
     document.querySelector("#mosaic-webgl").appendChild(renderer.domElement);
 
-    d3.select("#mosaic-svg")
-      .attr("width", appWidth)
-      .attr("height", appHeight)
-      .append("g")
-      .attr("class", "svg-trans");
+    d3.select("#mosaic-svg").attr("width", appWidth).attr("height", appHeight);
 
     camera.mount(
       d3.select(".bubbles-wrapper").node(),
@@ -157,7 +153,9 @@ export default function App() {
     >
       <div className="bubbles-wrapper">
         <div id="mosaic-webgl"></div>
-        <svg id="mosaic-svg"></svg>
+        <svg id="mosaic-svg">
+          <g className="svg-trans"></g>
+        </svg>
       </div>
       <WideView />
       <ExamineView />

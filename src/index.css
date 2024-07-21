@@ -621,9 +621,8 @@ text {
   z-index: 1;
 }
 
-.smallDrop,
-.largeDrop,
-.compSmallDrop {
+.small-drop,
+.large-drop {
   cursor: pointer;
 }
 
@@ -743,13 +742,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   transform: translateX(-0.5em);
 }
 
-.circlet.active circle,
-.circletsmall.active circle {
+.circlet {
+  pointer-events: none;
+}
+
+.circlet.active circle {
   stroke: "orange";
 }
 
-.circlet.active,
-.circletsmall.active {
+.circlet.active {
   animation: rotating 30s linear infinite;
 }
 

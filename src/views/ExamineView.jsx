@@ -1,11 +1,5 @@
 import * as d3 from "d3";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 import { AppContext } from "AppContext";
 
@@ -17,9 +11,10 @@ import {
   LOD_2_SMALL_DROP_PAD_FACTOR,
 } from "settings";
 import { isState } from "utils/misc-utils";
-import { DROPLET_SHAPE } from "utils/render-utils";
+import { DROPLET_SHAPE, circlet } from "utils/render-utils";
 import { FLATTENED_DATA } from "data/objectives-data";
 import DotHistogram from "components/DotHistogram";
+import { dropCenterCorrection } from "utils/math-utils";
 
 const SPREAD = LOD_2_SMALL_DROP_PAD_FACTOR / LOD_1_SMALL_DROP_PAD_FACTOR;
 
@@ -71,6 +66,11 @@ export default function ExamineView() {
   }
 
   useEffect(function initialize() {
+    d3.select("#mosaic-svg")
+      .select(".svg-trans")
+      .append("g")
+      .attr("id", "examine-group");
+
     addZoomHandler(function () {
       setCameraChangeFlag((f) => !f);
     });
@@ -103,7 +103,7 @@ export default function ExamineView() {
     function enterState() {
       if (isState(state, "ExamineView")) {
         const transitionDelay = state.transitionDuration;
-        const container = d3.select("#mosaic-svg").select(".svg-trans");
+        const container = d3.select("#examine-group");
 
         updateSmallDropSVG(
           container,
@@ -115,15 +115,13 @@ export default function ExamineView() {
                 if (wd.includes(d.id)) {
                   wd.splice(wd.indexOf(d.id), 1);
                   container
-                    .select(".circletsmall.i" + d.id)
+                    .select(".circlet.i" + d.id)
                     .classed("active", false);
 
                   removeDetailPanel(d.id);
                 } else {
                   wd.push(d.id);
-                  container
-                    .select(".circletsmall.i" + d.id)
-                    .classed("active", true);
+                  container.select(".circlet.i" + d.id).classed("active", true);
 
                   addDetailPanel(d.id);
                 }
@@ -140,16 +138,13 @@ export default function ExamineView() {
         });
 
         return function exitState() {
-          d3.select("#mosaic-svg")
-            .select(".svg-trans")
-            .selectAll(".smallDrop")
-            .attr("display", "none");
+          container.selectAll(".small-drop").attr("display", "none");
 
           container
-            .selectAll(".circletsmall")
+            .selectAll(".circlet")
             .classed("active", false)
             .select("circle")
-            .attr("stroke", "transparent");
+            .attr("display", "none");
           setPanels([]);
           setActiveMinidrops([]);
           setGoBack(null);
@@ -159,8 +154,8 @@ export default function ExamineView() {
     [state]
   );
 
-  const onPanelClick = (e, id) => {
-    if (e.target.className === "") return;
+  function onPanelDragStart(e, id) {
+    if (e.target.className === "") return; // we're clicking the razor, disregard
 
     mouseDownInfo.current = { startX: e.clientX, startY: e.clientY, id };
 
@@ -172,11 +167,11 @@ export default function ExamineView() {
 
       return [...p];
     });
-  };
+  }
 
   return (
     <>
-      {panels.map(({ text, x, y, id, offsetX, offsetY }) => (
+      {panels.map(({ x, y, id, offsetX, offsetY }) => (
         <div
           className="panel"
           key={id}
@@ -188,7 +183,7 @@ export default function ExamineView() {
               y * camera.curTransform.k + camera.curTransform.y + offsetY
             }px`,
           }}
-          onMouseDown={(e) => onPanelClick(e, id)}
+          onMouseDown={(e) => onPanelDragStart(e, id)}
         >
           <DotHistogram
             width={300}
@@ -210,12 +205,12 @@ function updateSmallDropSVG(
   { onClick, onHover, onUnhover }
 ) {
   container
-    .selectAll(".smallDrop")
+    .selectAll(".small-drop")
     .data(waterdrops)
     .join((enter) => {
       return enter
         .append("g")
-        .attr("class", "smallDrop")
+        .attr("class", "small-drop")
         .each(function ({ levs }, i) {
           // TODO replace with tooltip, remove unnec svg
 
@@ -256,13 +251,11 @@ function updateSmallDropSVG(
             .attr("fill", `url(#drop-fill-${i})`);
 
           s.append("g")
-            .attr("class", "circletsmall")
+            .attr("class", "circlet")
             .append("circle")
-            .attr("fill", "transparent")
-            .attr("stroke", "transparent")
-            .attr("stroke-dasharray", 3)
-            .attr("stroke-width", 3)
-            .attr("vector-effect", "non-scaling-stroke")
+            .call(circlet)
+            .attr("display", "none")
+            .attr("cy", -dropCenterCorrection({ rad: 1 }))
             .attr("r", 1.5);
         });
     })
@@ -277,9 +270,9 @@ function updateSmallDropSVG(
       s.select(".outline").attr("transform", `scale(${LOD_1_RAD_PX * 0.95})`);
       s.select(".fill").attr("transform", `scale(${LOD_1_RAD_PX})`);
 
-      s.select(".circletsmall")
+      s.select(".circlet")
         .attr("class", null)
-        .attr("class", "circletsmall i" + id);
+        .attr("class", "circlet i" + id);
 
       s.selectAll("stop").each(function (_, i) {
         let actI = Math.floor(i / 2);
@@ -308,13 +301,13 @@ function updateSmallDropSVG(
       onClick && onClick(d);
     })
     .on("mouseenter", function (_, d) {
-      if (!d3.select(this).select(".circletsmall").classed("active"))
-        d3.select(this).select("circle").attr("stroke", "orange");
+      if (!d3.select(this).select(".circlet").classed("active"))
+        d3.select(this).select("circle").attr("display", "initial");
       onHover && onHover(d);
     })
     .on("mouseleave", function (_, d) {
-      if (!d3.select(this).select(".circletsmall").classed("active"))
-        d3.select(this).select("circle").attr("stroke", "transparent");
+      if (!d3.select(this).select(".circlet").classed("active"))
+        d3.select(this).select("circle").attr("display", "none");
       onUnhover && onUnhover(d);
     })
     .transition()

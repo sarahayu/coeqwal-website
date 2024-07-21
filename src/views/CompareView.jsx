@@ -8,8 +8,9 @@ import {
   LOD_1_SMALL_DROP_PAD_FACTOR,
   LOD_2_SMALL_DROP_PAD_FACTOR,
 } from "settings";
+import { clipEnds, dropCenterCorrection } from "utils/math-utils";
 import { isState } from "utils/misc-utils";
-import { DROPLET_SHAPE } from "utils/render-utils";
+import { DROPLET_SHAPE, circlet } from "utils/render-utils";
 
 const SPREAD = LOD_2_SMALL_DROP_PAD_FACTOR / LOD_1_SMALL_DROP_PAD_FACTOR;
 
@@ -26,71 +27,39 @@ export default function CompareView() {
   const [activeMinidrop, setActiveMinidrop] = useState();
   const groupsRef = useRef();
 
+  useEffect(function initialize() {
+    d3.select("#mosaic-svg")
+      .select(".svg-trans")
+      .append("g")
+      .attr("id", "compare-group");
+  }, []);
+
   useEffect(
     function updateCirclets() {
       if (activeMinidrop) {
-        const positions = [];
-        for (let i = 0; i < groupsRef.current.groups.length; i++) {
-          const group = groupsRef.current.groups[i];
-          const groupPos = groupsRef.current.groupPositions[i];
+        const [positions, lines] = calcLinesAndPositions(
+          groupsRef.current,
+          activeMinidrop
+        );
 
-          const node = group.nodes.find((n) => n.key === activeMinidrop);
-
-          positions.push([
-            (node.x * LOD_2_SMALL_DROP_PAD_FACTOR) /
-              LOD_1_SMALL_DROP_PAD_FACTOR +
-              groupPos[0],
-            (node.y * LOD_2_SMALL_DROP_PAD_FACTOR) /
-              LOD_1_SMALL_DROP_PAD_FACTOR +
-              groupPos[1],
-          ]);
-        }
-
-        const lines = [];
-
-        const height = LOD_1_RAD_PX * 2;
-        for (let i = 0; i < positions.length; i++) {
-          const from = Array.from(positions[i]),
-            to = Array.from(positions[i + 1 == positions.length ? 0 : i + 1]);
-
-          const len = Math.sqrt(
-            (from[0] - to[0]) ** 2 + (from[1] - to[1]) ** 2
-          );
-          const normed = [(to[0] - from[0]) / len, (to[1] - from[1]) / len];
-
-          from[0] += normed[0] * height;
-          from[1] += normed[1] * height;
-          to[0] -= normed[0] * height;
-          to[1] -= normed[1] * height;
-
-          lines.push([from, to]);
-        }
-
-        d3.select("#mosaic-svg")
-          .select(".svg-trans")
-          .selectAll(".compCirclet")
+        d3.select("#compare-group")
+          .selectAll(".circlet")
           .data(positions)
           .join("circle")
-          .attr("class", "compCirclet")
+          .attr("class", "circlet")
+          .call(circlet)
           .attr("display", "initial")
-          .style("pointer-events", "none")
-          .attr("fill", "transparent")
-          .attr("stroke", "orange")
-          .attr("stroke-dasharray", 3)
-          .attr("stroke-width", 3)
-          .attr("vector-effect", "non-scaling-stroke")
-          .attr("r", (height / 2) * 1.2)
+          .attr("r", LOD_1_RAD_PX * 1.5)
           .transition()
           .duration(100)
           .attr("cx", (d) => d[0])
-          .attr("cy", (d) => d[1] - height * 0.08);
+          .attr("cy", (d) => d[1]);
 
-        d3.select("#mosaic-svg")
-          .select(".svg-trans")
-          .selectAll(".compLines")
+        d3.select("#compare-group")
+          .selectAll(".comp-line")
           .data(lines)
           .join("path")
-          .attr("class", "compLines")
+          .attr("class", "comp-line")
           .attr("stroke", "orange")
           .attr("stroke-dasharray", 3)
           .attr("opacity", 0.5)
@@ -107,7 +76,7 @@ export default function CompareView() {
   useEffect(
     function enterState() {
       if (isState(state, "CompareView")) {
-        const container = d3.select("#mosaic-svg").select(".svg-trans");
+        const container = d3.select("#compare-group");
 
         updateDropsSVG(
           container,
@@ -131,18 +100,9 @@ export default function CompareView() {
         });
 
         return function exitState() {
-          d3.select("#mosaic-svg")
-            .select(".svg-trans")
-            .selectAll(".compLargeDrop")
-            .remove();
-          d3.select("#mosaic-svg")
-            .select(".svg-trans")
-            .selectAll(".compCirclet")
-            .remove();
-          d3.select("#mosaic-svg")
-            .select(".svg-trans")
-            .selectAll(".compLines")
-            .remove();
+          container.selectAll(".large-drop").remove();
+          container.selectAll(".circlet").remove();
+          container.selectAll(".comp-line").remove();
           setGoBack(null);
         };
       }
@@ -177,19 +137,19 @@ function updateDropsSVG(
   { onClick, onHover, onUnhover }
 ) {
   container
-    .selectAll(".compLargeDrop")
+    .selectAll(".large-drop")
     .data(waterdropGroups.groups)
     .join((enter) => {
       return enter
         .append("g")
-        .attr("class", "compLargeDrop")
+        .attr("class", "large-drop")
         .each(function ({ nodes }) {
           d3.select(this)
-            .selectAll(".compSmallDrop")
+            .selectAll(".small-drop")
             .data(nodes)
             .enter()
             .append("g")
-            .attr("class", "compSmallDrop")
+            .attr("class", "small-drop")
             .each(function ({ levs }) {
               const s = d3.select(this);
               s.append("rect")
@@ -243,7 +203,7 @@ function updateDropsSVG(
     .attr("transform", ({ x, y }, i) => `translate(${x}, ${y})`)
     .each(function ({ nodes }) {
       d3.select(this)
-        .selectAll(".compSmallDrop")
+        .selectAll(".small-drop")
         .data(nodes)
         .attr("display", "initial")
         .attr("transform", ({ x, y }) => `translate(${x}, ${y})`)
@@ -307,4 +267,34 @@ function updateDropsSVG(
       (_, i) =>
         `translate(${waterdropGroups.groupPositions[i][0]}, ${waterdropGroups.groupPositions[i][1]})`
     );
+}
+
+function calcLinesAndPositions(groupsObj, activeMinidrop) {
+  const positions = [];
+  for (let i = 0; i < groupsObj.groups.length; i++) {
+    const group = groupsObj.groups[i];
+    const groupPos = groupsObj.groupPositions[i];
+
+    const node = group.nodes.find((n) => n.key === activeMinidrop);
+
+    positions.push([
+      node.x * SPREAD + groupPos[0],
+      node.y * SPREAD +
+        groupPos[1] -
+        dropCenterCorrection({ rad: LOD_1_RAD_PX }),
+    ]);
+  }
+
+  const lines = [];
+
+  for (let i = 0; i < positions.length; i++) {
+    const from = Array.from(positions[i]),
+      to = Array.from(positions[i + 1 == positions.length ? 0 : i + 1]);
+
+    clipEnds([from, to], LOD_1_RAD_PX * 2);
+
+    lines.push([from, to]);
+  }
+
+  return [positions, lines];
 }
