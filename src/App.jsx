@@ -9,6 +9,7 @@ import { initWaterdrops } from "utils/app-utils";
 
 import WideView from "views/WideView";
 import ExamineView from "views/ExamineView";
+import TutorialView from "views/TutorialView";
 import CompareView from "views/CompareView";
 
 import {
@@ -86,7 +87,7 @@ export default function App() {
     });
 
     resetCamera(false);
-    setState({ state: "WideView" });
+    setState({ state: "TutorialView" });
   }, []);
 
   const resetCamera = useCallback(function (animated = true, callback) {
@@ -161,11 +162,12 @@ export default function App() {
       }}
     >
       <div className="bubbles-wrapper">
-        <div id="mosaic-webgl"></div>
-        <svg id="mosaic-svg">
+        <div id="mosaic-webgl" style={{ display: "none" }}></div>
+        <svg id="mosaic-svg" style={{ display: "none" }}>
           <g className="svg-trans"></g>
         </svg>
       </div>
+      <TutorialView />
       <WideView />
       <ExamineView />
       <CompareView />

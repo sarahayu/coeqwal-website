@@ -14,7 +14,7 @@ export const CIRC_RAD = Math.SQRT1_2;
 export const DROP_RAD = 1;
 export const CIRC_HEIGHT = CIRC_RAD + CIRC_RAD;
 export const DROP_HEIGHT = DROP_RAD + CIRC_RAD;
-const HAT_START = 0.75;
+const HAT_START = (CIRC_RAD + DROP_RAD / 2) / DROP_HEIGHT;
 
 // half width at widest is 1
 function yToHalfWidth(y) {
@@ -50,12 +50,12 @@ function fracDropToCirc(v) {
   return v / (CIRC_HEIGHT / DROP_HEIGHT);
 }
 
-export function waterdropDeltaOutline(yStart, yEnd, size = 2) {
+export function waterdropDeltaOutline(yStart, yEnd, size = 2, subdivs = 10) {
   if (Math.abs(yStart - yEnd) < 0.01) return [];
 
   const rad = (size / 2 / DROP_RAD) * CIRC_RAD;
 
-  const Y_DELTA = 0.1;
+  const Y_DELTA = 1 / subdivs;
 
   const rightCoords = [];
   const leftCoords = [];

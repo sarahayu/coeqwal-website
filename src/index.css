@@ -14,7 +14,6 @@ body {
   background-color: rgb(251, 251, 255);
   margin: 0;
   padding: 0;
-  overflow: hidden;
 }
 
 main {
@@ -267,6 +266,7 @@ input::-moz-focus-inner {
   border: none;
   border-right: 3px dashed #f00;
   color: gray;
+  font-family: sans-serif;
 }
 
 .pdf-razor > :first-child::after {
@@ -289,7 +289,7 @@ input::-moz-focus-inner {
   width: 20ch;
   text-align: center;
   top: 2rem;
-  right: 2rem;
+  right: 1rem;
 }
 
 .pdf-razor span:last-child {
@@ -298,7 +298,7 @@ input::-moz-focus-inner {
   width: 20ch;
   text-align: center;
   top: 2rem;
-  left: 2rem;
+  left: 1rem;
 }
 
 .ridgeline-overlay {
@@ -856,4 +856,155 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #member-variable {
   fill: orange;
   font-weight: bold;
+}
+
+.panel-tab {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  background: white;
+  padding: 0.2em 1em 0 1em;
+  font-size: 0.8rem;
+  border-radius: 0.5em 0.5em 0 0;
+}
+
+.panel-tab span {
+  font-weight: bold;
+  color: orange;
+  font-size: 1.5em;
+}
+
+.panel line,
+.panel path {
+  stroke: #bbbbbb;
+  stroke-width: 0.5px;
+}
+
+.panel text {
+  fill: #bbbbbb;
+}
+
+.tutorial-view {
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.scrollama {
+  padding-bottom: 1px;
+}
+
+.scrollama-1 {
+}
+
+.tutorial-view {
+  background-color: #efefef;
+  isolation: isolate;
+}
+
+.tut-graph-wrapper {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: min-content;
+  margin-inline: auto;
+  z-index: -1;
+  display: grid;
+  grid-template-areas: "area";
+}
+
+.tut-graph-wrapper > * {
+  place-self: center;
+  grid-area: area;
+}
+
+.tut-text-card {
+  padding: 2rem;
+  max-width: 30vw;
+  margin-inline: auto;
+  position: relative;
+  isolation: isolate;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 1em;
+}
+
+.tut-text-card + .tut-text-card {
+  margin-top: 20rem;
+}
+
+.tut-text-card:last-of-type {
+  margin-bottom: 40vh;
+}
+
+.card1 {
+  display: flex;
+  max-width: 60vw;
+  align-items: center;
+  margin: 10rem auto;
+}
+
+.card1 > p {
+  position: relative;
+  isolation: isolate;
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 1em;
+}
+
+.tut-drop-graphics-wrapper {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  margin-inline: auto;
+  z-index: -1;
+  display: grid;
+}
+
+.tut-drop-graphics-wrapper > :first-child {
+  place-self: center;
+}
+
+.vardrop {
+  position: absolute;
+  display: none;
+}
+
+.vardrop path {
+  stroke-dasharray: 10 10;
+}
+
+.drop1 {
+  left: 0;
+  top: 3rem;
+}
+
+.drop2 {
+  right: 0;
+  top: 3rem;
+}
+
+.drop3 {
+  left: 0;
+  bottom: 3rem;
+}
+
+.drop4 {
+  right: 0;
+  bottom: 3rem;
+}
+
+.tutorial-view button {
+  display: block;
+  margin: 1em auto;
+  background-color: none;
+  border: 2px solid lightgray;
+  background-color: transparent;
+  padding: 0.5em 1em;
+  border-radius: 1em;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.tutorial-view button:hover {
+  background-color: lightgray;
 }

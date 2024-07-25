@@ -66,43 +66,6 @@ export default function WideView() {
     return absFontSize(d * zoomRel) * Math.min(zoomRel, 0.4);
   };
 
-  useEffect(
-    function updateFontSizes() {
-      d3.select(".infobox").attr("display", "none");
-
-      if (!enableZoomRef.current) return;
-
-      d3.select("#wide-group")
-        .selectAll("text")
-        .each(function () {
-          const s = d3.select(this);
-          const tNode = s.node();
-
-          const [posx, posy] = getCenterDomRect(tNode.getBoundingClientRect());
-
-          const width =
-              ((tNode.getBBox().width * camera.height) / camera.far) * 8,
-            height =
-              ((tNode.getBBox().height * camera.height) / camera.far) * 10;
-
-          const dis = dist(
-            [posx, posy],
-            [transformInfo.mouseX, transformInfo.mouseY]
-          );
-
-          s.attr("font-size", getFontSize(dis, transformInfo.zoom));
-
-          d3.select(this.parentNode.parentNode)
-            .select("image")
-            .attr("x", -width / 2)
-            .attr("y", -height / 2)
-            .attr("width", width)
-            .attr("height", height);
-        });
-    },
-    [transformInfo]
-  );
-
   useEffect(function initialize() {
     d3.select("#mosaic-svg")
       .select(".svg-trans")
@@ -178,14 +141,55 @@ export default function WideView() {
       .attr("class", (d) => "outline " + d.properties.CalLiteID)
       .attr("fill", "transparent");
 
+    d3.select(".infobox").style("display", "none");
+
     return function cleanup() {
       window.removeEventListener("mousemove", mouseListener);
     };
   }, []);
 
   useEffect(
+    function updateFontSizes() {
+      d3.select(".infobox").attr("display", "none");
+
+      if (!enableZoomRef.current) return;
+
+      d3.select("#wide-group")
+        .selectAll("text")
+        .each(function () {
+          const s = d3.select(this);
+          const tNode = s.node();
+
+          const [posx, posy] = getCenterDomRect(tNode.getBoundingClientRect());
+
+          const width =
+              ((tNode.getBBox().width * camera.height) / camera.far) * 8,
+            height =
+              ((tNode.getBBox().height * camera.height) / camera.far) * 10;
+
+          const dis = dist(
+            [posx, posy],
+            [transformInfo.mouseX, transformInfo.mouseY]
+          );
+
+          s.attr("font-size", getFontSize(dis, transformInfo.zoom));
+
+          d3.select(this.parentNode.parentNode)
+            .select("image")
+            .attr("x", -width / 2)
+            .attr("y", -height / 2)
+            .attr("width", width)
+            .attr("height", height);
+        });
+    },
+    [transformInfo]
+  );
+
+  useEffect(
     function enterState() {
       if (isState(state, "WideView")) {
+        d3.select("body").style("overflow", "hidden");
+
         setEnableZoom(true);
         setTransformInfo((ti) => ({ ...ti, zoom: camera.curTransform.k }));
 
@@ -200,6 +204,8 @@ export default function WideView() {
 
         const container = d3.select("#wide-group");
         d3.select(".infobox").style("display", "initial");
+        d3.select("#mosaic-webgl").style("display", "initial");
+        d3.select("#mosaic-svg").style("display", "initial");
 
         updateLargeDropSVG(container, waterdrops, {
           onClick: (d) => {

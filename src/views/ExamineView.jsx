@@ -48,7 +48,7 @@ export default function ExamineView() {
     const { globalX, globalY, x, y, id, key } = waterdrops.nodes[dropId];
     setPanels((p) => {
       const newPanel = {
-        text: key,
+        text: key.slice(4),
         x: globalX + x * (SPREAD - 1),
         y: globalY + y * (SPREAD - 1),
         offsetX: 20,
@@ -203,7 +203,7 @@ export default function ExamineView() {
   return (
     <>
       {headerLabel}
-      {panels.map(({ x, y, id, offsetX, offsetY }) => (
+      {panels.map(({ text, x, y, id, offsetX, offsetY }) => (
         <div
           className="panel"
           key={id}
@@ -217,6 +217,9 @@ export default function ExamineView() {
           }}
           onMouseDown={(e) => onPanelDragStart(e, id)}
         >
+          <div className="panel-tab">
+            scenario <span>{text}</span>
+          </div>
           <DotHistogram
             width={300}
             height={200}
