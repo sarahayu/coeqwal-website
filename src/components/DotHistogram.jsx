@@ -25,6 +25,7 @@ export default function DotHistogram({
   setGoal,
   width = 600,
   height = 400,
+  shortForm = false,
 }) {
   const { current: razorID } = useRef(Math.floor(Math.random() * 1e9));
   const { current: razorAreaID } = useRef(Math.floor(Math.random() * 1e9));
@@ -138,13 +139,17 @@ export default function DotHistogram({
 
   return (
     <div className={`dot-${razorAreaID}`} id={`i${razorAreaID}`}>
-      <div className={`pdf-razor`} id={`i${razorID}`}>
+      <div
+        className={`pdf-razor ` + (shortForm ? "short-form" : "")}
+        id={`i${razorID}`}
+      >
         <div>
           <span>
-            {circles.length - count} / {NUM_CIRCLES} yrs WILL NOT meet demand
+            {circles.length - count} / {NUM_CIRCLES}{" "}
+            {shortForm ? "" : "yrs WILL NOT meet demand"}
           </span>
           <span>
-            {count} / {NUM_CIRCLES} yrs WILL meet demand
+            {count} / {NUM_CIRCLES} {shortForm ? "" : "yrs WILL meet demand"}
           </span>
         </div>
       </div>

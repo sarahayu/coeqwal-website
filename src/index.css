@@ -301,6 +301,14 @@ input::-moz-focus-inner {
   left: 1rem;
 }
 
+.pdf-razor.short-form span:first-child {
+  width: 6ch;
+}
+
+.pdf-razor.short-form span:last-child {
+  width: 6ch;
+}
+
 .ridgeline-overlay {
   background-color: rgb(200, 200, 200);
   position: fixed;
@@ -956,7 +964,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   top: 0;
   height: 100vh;
   margin-inline: auto;
-  z-index: -1;
   display: grid;
 }
 
@@ -966,7 +973,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .vardrop {
   position: absolute;
-  display: none;
 }
 
 .vardrop path {
@@ -975,22 +981,33 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .drop1 {
   left: 0;
-  top: 3rem;
+  top: 2rem;
+}
+
+.drop1.highlighted::after {
+  content: "";
+  position: absolute;
+  top: -1rem;
+  left: 2rem;
+  right: 2rem;
+  bottom: -1rem;
+  border: 3px solid orange;
+  border-radius: 1rem;
 }
 
 .drop2 {
   right: 0;
-  top: 3rem;
+  top: 2rem;
 }
 
 .drop3 {
   left: 0;
-  bottom: 3rem;
+  bottom: 2rem;
 }
 
 .drop4 {
   right: 0;
-  bottom: 3rem;
+  bottom: 2rem;
 }
 
 .tutorial-view button {
@@ -1007,4 +1024,42 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .tutorial-view button:hover {
   background-color: lightgray;
+}
+
+.vardrop > p {
+  display: block;
+  text-align: center;
+  margin-top: 1em;
+}
+
+.vardrop .scen-number {
+  color: orange;
+  font-weight: bold;
+}
+
+.vardrop > :last-child {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.drop1 > :last-child,
+.drop3 > :last-child {
+  left: 60%;
+}
+
+.drop2 > :last-child,
+.drop4 > :last-child {
+  right: 60%;
+}
+
+.main-histogram {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.scrollama-2 text {
+  font-size: 0.5rem;
 }

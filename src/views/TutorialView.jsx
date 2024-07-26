@@ -16,6 +16,7 @@ import {
 import { ticksExact } from "bucket-lib/utils";
 import BucketGlyph from "bucket-lib/BucketGlyph";
 import WaterdropGlyph from "components/WaterdropGlyph";
+import DotHistogram from "components/DotHistogram";
 
 const DATE_START = 1921;
 const INTERP_COLOR = d3.interpolateRgbBasis([
@@ -64,6 +65,26 @@ const VARIATIONS = [
   [1, 1, 0, 3, 0],
 ];
 
+const VARIATIONS_DELIVS = VARIATIONS.map(
+  (vars) =>
+    OBJECTIVES_DATA["DEL_CVP_PAG_N"][SCENARIO_KEY_STRING][serialize(...vars)][
+      DELIV_KEY_STRING
+    ]
+);
+
+const VARIATIONS_INTERPERS = VARIATIONS_DELIVS.map((varDelivs) =>
+  d3
+    .scaleLinear()
+    .domain(ticksExact(0, 1, varDelivs.length))
+    .range(
+      varDelivs
+        .map((v) => v / MAX_DELIVS)
+        .sort()
+        .reverse()
+    )
+    .clamp(true)
+);
+
 export default function TutorialView() {
   const {
     waterdrops,
@@ -79,6 +100,7 @@ export default function TutorialView() {
   } = useContext(AppContext);
 
   const [slide, setSlide] = useState(0);
+  const [userGoal, setUserGoal] = useState(200);
   const [bucketInterper, setBucketInterper] = useState(() =>
     d3.scaleLinear().range([0, 0])
   );
@@ -104,6 +126,10 @@ export default function TutorialView() {
       if (isState(state, "TutorialView")) {
         document.querySelector(".bucket-wrapper").style.display = "none";
         const svgContainer = d3.select("#tut-bar-graph");
+        d3.selectAll(".vardrop").style("display", "none");
+        d3.selectAll(".vardrop p").style("display", "none");
+        d3.selectAll(".vardrop > :last-child").style("display", "none");
+        d3.select(".main-histogram").style("display", "none");
 
         const svgGroup = svgContainer
           .attr("width", width + margin.left + margin.right)
@@ -160,9 +186,16 @@ export default function TutorialView() {
   );
 
   const [currentStepIndex, setCurrentStepIndex] = useState(null);
+  const maxSlideReachedRef = useRef(-1);
 
-  const onStepEnter = async ({ data }) => {
+  const onStepEnter = async ({ data, direction }) => {
     setCurrentStepIndex(data);
+
+    if (direction === "up") return;
+
+    if (data <= maxSlideReachedRef.current) return;
+
+    maxSlideReachedRef.current = data;
 
     const svgGroup = d3.select(".svg-group");
     const { x, xaxis, dataDescending } = d3Refs.current;
@@ -279,35 +312,40 @@ export default function TutorialView() {
       );
     }
 
-    if (data === 7) {
+    if (data === 8) {
       d3.selectAll(".vardrop").style("display", "initial");
     }
 
-    if (data === 8) {
+    if (data === 9) {
       d3.selectAll(".vardrop path").style("stroke-dasharray", "none");
-      setVariationInterpers(() =>
-        VARIATIONS.map((vars) =>
-          d3
-            .scaleLinear()
-            .domain(
-              ticksExact(
-                0,
-                1,
-                OBJECTIVES_DATA["DEL_CVP_PAG_N"][SCENARIO_KEY_STRING][
-                  serialize(...vars)
-                ][DELIV_KEY_STRING].length
-              )
-            )
-            .range(
-              OBJECTIVES_DATA["DEL_CVP_PAG_N"][SCENARIO_KEY_STRING][
-                serialize(...vars)
-              ][DELIV_KEY_STRING].map((v) => v / MAX_DELIVS)
-                .sort()
-                .reverse()
-            )
-            .clamp(true)
-        )
-      );
+      setVariationInterpers(VARIATIONS_INTERPERS);
+    }
+
+    if (data === 10) {
+      d3.selectAll(".vardrop p").style("display", "block");
+    }
+
+    if (data === 11) {
+      d3.select(".drop1").classed("highlighted", true);
+    }
+
+    if (data === 12) {
+      d3.select(".drop1").classed("highlighted", false);
+      d3.select(".drop1-border").style("visibility", "hidden");
+      d3.selectAll(".vardrop p").style("opacity", "0.5");
+      d3.selectAll(".vardrop p, .vardrop span").style("color", "gray");
+      d3.selectAll(".drop1 > :first-child, .drop3 > :first-child")
+        .transition()
+        .style("transform", "translate(-50px, 15px) scale(0.5)");
+      d3.selectAll(".drop2 > :first-child, .drop4 > :first-child")
+        .transition()
+        .style("transform", "translate(50px, 15px) scale(0.5)");
+      d3.select(".main-histogram").style("display", "initial");
+      d3.select(".main-waterdrop")
+        .transition()
+        .style("transform", "translateY(-100px) scale(0.5)");
+      d3.selectAll(".vardrop > :last-child").style("display", "initial");
+      d3.selectAll(".vardrop > :last-child").style("display", "initial");
     }
   };
 
@@ -357,7 +395,7 @@ export default function TutorialView() {
             </div>
           </Step>
           <Step data={5} key={5}>
-            <div className="tut-text-card">
+            <div className="tut-text-card" style={{ marginBottom: "80vh" }}>
               What we get is a bucket of water showing which water levels are
               most likely, with the darker areas being the most likely water
               levels.
@@ -365,20 +403,50 @@ export default function TutorialView() {
           </Step>
         </Scrollama>
       </div>
-      <div className="scrollama">
+      <div className="scrollama scrollama-2">
         <div className="tut-drop-graphics-wrapper">
-          <WaterdropGlyph
-            levelInterp={dropInterper}
-            width={400}
-            height={height}
-            colorInterp={INTERP_COLOR}
-          />
+          <div className="main-waterdrop">
+            <WaterdropGlyph
+              levelInterp={dropInterper}
+              width={400}
+              height={height}
+              colorInterp={INTERP_COLOR}
+            />
+          </div>
+          <div className="main-histogram">
+            <DotHistogram
+              width={210}
+              height={140}
+              data={
+                OBJECTIVES_DATA["DEL_CVP_PAG_N"][SCENARIO_KEY_STRING][
+                  serialize(...Object.values(DEFAULT_SCENARIO))
+                ][DELIV_KEY_STRING]
+              }
+              goal={userGoal}
+              setGoal={(newGoal) => {
+                setUserGoal(newGoal);
+              }}
+            />
+          </div>
           <div className="vardrop drop1">
             <WaterdropGlyph
               levelInterp={variationInterpers[0]}
               width={400}
               height={(height * 2) / 3}
               colorInterp={INTERP_COLOR}
+            />
+            <p>
+              scenario <span className="scen-number">0180</span>
+            </p>
+            <DotHistogram
+              shortForm
+              width={210}
+              height={140}
+              data={VARIATIONS_DELIVS[0]}
+              goal={userGoal}
+              setGoal={(newGoal) => {
+                setUserGoal(newGoal);
+              }}
             />
           </div>
           <div className="vardrop drop2">
@@ -388,6 +456,19 @@ export default function TutorialView() {
               height={(height * 2) / 3}
               colorInterp={INTERP_COLOR}
             />
+            <p>
+              scenario <span className="scen-number">0200</span>
+            </p>
+            <DotHistogram
+              shortForm
+              width={210}
+              height={140}
+              data={VARIATIONS_DELIVS[1]}
+              goal={userGoal}
+              setGoal={(newGoal) => {
+                setUserGoal(newGoal);
+              }}
+            />
           </div>
           <div className="vardrop drop3">
             <WaterdropGlyph
@@ -395,6 +476,19 @@ export default function TutorialView() {
               width={400}
               height={(height * 2) / 3}
               colorInterp={INTERP_COLOR}
+            />
+            <p>
+              scenario <span className="scen-number">0164</span>
+            </p>
+            <DotHistogram
+              shortForm
+              width={210}
+              height={140}
+              data={VARIATIONS_DELIVS[2]}
+              goal={userGoal}
+              setGoal={(newGoal) => {
+                setUserGoal(newGoal);
+              }}
             />
           </div>
           <div className="vardrop drop4">
@@ -404,40 +498,85 @@ export default function TutorialView() {
               height={(height * 2) / 3}
               colorInterp={INTERP_COLOR}
             />
+            <p>
+              scenario <span className="scen-number">0175</span>
+            </p>
+            <DotHistogram
+              shortForm
+              width={210}
+              height={140}
+              data={VARIATIONS_DELIVS[3]}
+              goal={userGoal}
+              setGoal={(newGoal) => {
+                setUserGoal(newGoal);
+              }}
+            />
           </div>
         </div>
         <Scrollama offset={0.5} onStepEnter={onStepEnter}>
           <Step data={6} key={6}>
-            <div className="tut-text-card">Here it is as a drop of water.</div>
+            <div className="tut-text-card">
+              Here it is as a drop of water. We see here that the lightest color
+              reaches the midpoint of the maximum water possible, meaning that
+              there is a chance that this group will receive 600 TAF of water.
+            </div>
           </Step>
           <Step data={7} key={7}>
+            <div className="tut-text-card">
+              The darker colors, however, indicate that it's more likely this
+              group will receive less than a quarter of the maximum, or around
+              300 TAF. As we'll later see, this is not a lot compared to other
+              areas of California.
+            </div>
+          </Step>
+          <Step data={8} key={8}>
             <div className="tut-text-card">
               But what if we could <em>change reality</em>? What if we could
               increase the likelihood of getting as much water as possible by
               changing the way we manage it?
             </div>
           </Step>
-          <Step data={8} key={8}>
+          <Step data={9} key={9}>
             <div className="tut-text-card">
-              Fortunately, we can do that with the help of a simulator called
+              Fortunately, we can explore those possibilities with the help of a
+              simulator called
               <b> CalSim</b>.
             </div>
           </Step>
-          <Step data={9} key={9}>
+          <Step data={10} key={10}>
             <div className="tut-text-card">
-              What are the ways we can manage California's water, and what are
-              their outcomes? Go to the next step to find out!
-              <button
-                className="fancy-font"
-                onClick={() => setState({ state: "WideView" })}
-              >
-                click to explore!
-              </button>
+              These variations are called <em>scenarios</em> and are labelled
+              with unique numbers.
+            </div>
+          </Step>
+          <Step data={11} key={11}>
+            <div className="tut-text-card">
+              At a glance, we can easily see that scenario 0180 appears to be
+              the best scenario since the darker water levels reach higher than
+              those of the other scenarios. To more concretely compare these
+              scenarios, however, we'll use a different view.
+            </div>
+          </Step>
+          <Step data={12} key={12}>
+            <div className="tut-text-card" style={{ marginBottom: "120vh" }}>
+              Try moving the red line to change the minimum demand and see how
+              well each of these scenarios meet those demands.
             </div>
           </Step>
         </Scrollama>
       </div>
-      <div></div>
+      <div>
+        <div className="tut-text-card">
+          What are the ways we can manage California's water, and what are their
+          outcomes? Go to the next step to find out!
+          <button
+            className="fancy-font"
+            onClick={() => setState({ state: "WideView" })}
+          >
+            click to explore!
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
