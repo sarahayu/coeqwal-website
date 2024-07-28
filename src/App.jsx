@@ -52,7 +52,7 @@ export default function App() {
     return goalMap;
   });
 
-  const getOutlineOpac = useCallback(
+  const getOutlineOpacity = useCallback(
     d3
       .scaleLinear()
       .domain([
@@ -75,7 +75,7 @@ export default function App() {
     );
     camera.setZoomFn((transform) => {
       if (!disableCamAdjustmentsRef.current) {
-        dropsMesh.updateOutlineVisibility(getOutlineOpac(transform.k));
+        dropsMesh.updateOutlineVisibility(getOutlineOpacity(transform.k));
       }
 
       for (const cb of zoomCallbacksRef.current) cb(transform);
@@ -97,7 +97,7 @@ export default function App() {
       camera.getZFromFarHeight(waterdrops.height),
     ];
     if (animated) {
-      const { start } = zoomTo(pos, callback);
+      const [start] = zoomTo(pos, callback);
       start();
     } else {
       camera.callZoomFromWorldViewport({
@@ -126,10 +126,7 @@ export default function App() {
       });
     };
 
-    return {
-      start,
-      duration,
-    };
+    return [start, duration];
   }, []);
 
   const addZoomHandler = useCallback(function (cb) {
@@ -155,15 +152,15 @@ export default function App() {
         setGoBack,
         zoomTo,
         resetCamera,
-        getOutlineOpac,
+        getOutlineOpacity,
         addZoomHandler,
         goals,
         setGoals,
       }}
     >
       <div className="bubbles-wrapper">
-        <div id="mosaic-webgl" style={{ display: "none" }}></div>
-        <svg id="mosaic-svg" style={{ display: "none" }}>
+        <div id="mosaic-webgl"></div>
+        <svg id="mosaic-svg">
           <g className="svg-trans"></g>
         </svg>
       </div>

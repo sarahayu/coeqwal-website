@@ -74,3 +74,12 @@ export function wrap(s) {
 export function genUUID() {
   return Math.floor(Math.random() * 1e9);
 }
+
+export function arrRemove(arr, item) {
+  if (typeof item === "function") {
+    arr.splice(arr.findIndex(item), 1);
+  } else {
+    arr.splice(arr.indexOf(item), 1);
+  }
+  return arr;
+}

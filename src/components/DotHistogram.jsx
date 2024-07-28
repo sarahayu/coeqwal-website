@@ -138,7 +138,10 @@ export default function DotHistogram({
   }, [goal, circles]);
 
   return (
-    <div className={`dot-${razorAreaID}`} id={`i${razorAreaID}`}>
+    <div
+      className={`dot-${razorAreaID} dot-histogram-wrapper`}
+      id={`i${razorAreaID}`}
+    >
       <div
         className={`pdf-razor ` + (shortForm ? "short-form" : "")}
         id={`i${razorID}`}

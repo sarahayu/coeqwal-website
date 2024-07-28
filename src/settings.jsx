@@ -7,3 +7,5 @@ export const LOD_1_LARGE_DROP_PAD_FACTOR = 1.2;
 export const LOD_2_SMALL_DROP_PAD_FACTOR = 3;
 
 export const GROUP_HOVER_AREA_FACTOR = 1.1 / (1 + Math.SQRT1_2);
+export const SPREAD_1_2 =
+  LOD_2_SMALL_DROP_PAD_FACTOR / LOD_1_SMALL_DROP_PAD_FACTOR;

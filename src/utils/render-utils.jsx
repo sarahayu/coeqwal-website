@@ -624,3 +624,15 @@ export function circlet(s) {
     .attr("stroke-width", 3)
     .attr("vector-effect", "non-scaling-stroke");
 }
+
+export function showElems(elemStr, container) {
+  (container || d3).selectAll(elemStr).style("display", "initial");
+}
+
+export function hideElems(elemStr, container) {
+  (container || d3).selectAll(elemStr).style("display", "none");
+}
+
+export function removeElems(elemStr, container) {
+  (container || d3).selectAll(elemStr).remove();
+}

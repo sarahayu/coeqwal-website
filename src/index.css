@@ -786,7 +786,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   font-weight: bold;
 }
 
-.infobox {
+#infobox {
   position: absolute;
   top: 0;
   right: 0;
@@ -797,7 +797,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   pointer-events: none;
 }
 
-.infobox svg {
+#infobox svg {
   pointer-events: all;
 }
 
@@ -840,6 +840,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .compare-panel.left {
   transform: translate(-100%, -50%);
+}
+
+.comp-line {
+  stroke: orange;
+  stroke-dasharray: 3;
+  opacity: 0.5;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+#member-label,
+#member-variable {
+  text-anchor: middle;
 }
 
 .examine-large-label {
@@ -896,18 +909,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   position: absolute;
   top: 0;
   width: 100%;
+  background-color: #efefef;
+  isolation: isolate;
 }
 
 .scrollama {
   padding-bottom: 1px;
-}
-
-.scrollama-1 {
-}
-
-.tutorial-view {
-  background-color: #efefef;
-  isolation: isolate;
 }
 
 .tut-graph-wrapper {
@@ -1037,19 +1044,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   font-weight: bold;
 }
 
-.vardrop > :last-child {
+.vardrop > .dot-histogram-wrapper {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
 }
 
-.drop1 > :last-child,
-.drop3 > :last-child {
+.drop1 > .dot-histogram-wrapper,
+.drop3 > .dot-histogram-wrapper {
   left: 60%;
 }
 
-.drop2 > :last-child,
-.drop4 > :last-child {
+.drop2 > .dot-histogram-wrapper,
+.drop4 > .dot-histogram-wrapper {
   right: 60%;
 }
 
