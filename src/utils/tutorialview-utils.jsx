@@ -1,23 +1,22 @@
 import * as d3 from "d3";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Scrollama, Step } from "react-scrollama";
+import { useEffect, useRef, useState } from "react";
 
-import { AppContext } from "AppContext";
-
-import { isState } from "utils/misc-utils";
-
-import yearlyData from "data/yearly.json";
+import { interpolateWatercolorBlue, ticksExact } from "bucket-lib/utils";
 import {
   DELIV_KEY_STRING,
   MAX_DELIVS,
   OBJECTIVES_DATA,
   SCENARIO_KEY_STRING,
 } from "data/objectives-data";
-import { ticksExact } from "bucket-lib/utils";
-import BucketGlyph from "bucket-lib/BucketGlyph";
-import WaterdropGlyph from "components/WaterdropGlyph";
-import DotHistogram from "components/DotHistogram";
-import { hideElems, showElems } from "utils/render-utils";
+import yearlyData from "data/yearly.json";
+import { DESCRIPTIONS_DATA } from "data/descriptions-data";
+import { LOD_1_LEVELS } from "settings";
+import { SPREAD_1_2 } from "settings";
+import { DROPLET_SHAPE, circlet, hideElems, showElems } from "./render-utils";
+import { LOD_1_RAD_PX } from "settings";
+import { avgCoords } from "./math-utils";
+import { calcLinesAndPositions, getWaterdropGroups } from "./compareview-utils";
+import { genUUID, wrap } from "./misc-utils";
 
 export const DATE_START = 1921;
 export const INTERP_COLOR = d3.interpolateRgbBasis([
@@ -42,6 +41,8 @@ export const DEFAULT_DELIVS =
   OBJECTIVES_DATA[DEFAULT_OBJECTIVE][SCENARIO_KEY_STRING][
     serialize(...DEFAULT_SCENARIO)
   ][DELIV_KEY_STRING];
+
+export const COMP_OBJECTIVE = "DEL_CVP_PRF_S";
 
 export const VARIATIONS = [
   [1, 1, 1, 0, 0], // expl0180
@@ -263,25 +264,316 @@ export function useTutorialGraph() {
   };
 }
 
+export function useTutorialComparer() {
+  const [activeMinidrop, setActiveMinidrop] = useState();
+  const groupsRef = useRef();
+  const camCentersRef = useRef({});
+
+  useEffect(
+    function updateCirclets() {
+      if (activeMinidrop) {
+        const [positions, lines] = calcLinesAndPositions(
+          groupsRef.current,
+          activeMinidrop
+        );
+
+        updateLabel(avgCoords(positions));
+        updateScenIndicators(positions, lines);
+      }
+    },
+    [activeMinidrop]
+  );
+
+  function initComparer(waterdrops, camera) {
+    groupsRef.current = getWaterdropGroups(
+      [COMP_OBJECTIVE, DEFAULT_OBJECTIVE],
+      waterdrops,
+      [0, 0]
+    );
+
+    const farHeight = waterdrops.groups[0].height * 2 * SPREAD_1_2 * 0.75;
+    const k = camera.height / farHeight;
+
+    let x = camera.width / 2;
+    let y = camera.height / 2;
+
+    const camMidpoint = {
+      x,
+      y,
+      k,
+    };
+
+    x = -(groupsRef.current.groupPositions[1][0] * k) + camera.width / 2;
+    y = groupsRef.current.groupPositions[1][1] * k + camera.height / 2;
+
+    const camFirstDrop = {
+      x,
+      y,
+      k,
+    };
+
+    camCentersRef.current.firstDrop = camFirstDrop;
+    camCentersRef.current.midpoint = camMidpoint;
+
+    const container = d3
+      .select("#comparer-graphics")
+      .attr("width", window.innerWidth)
+      .attr("height", window.innerHeight)
+      .append("g")
+      .attr("class", "svg-group")
+      .attr(
+        "transform",
+        d3.zoomIdentity
+          .translate(camFirstDrop.x, camFirstDrop.y)
+          .scale(camFirstDrop.k)
+      );
+
+    const indicatorGroup = container
+      .append("g")
+      .attr("class", "indicator-group");
+
+    indicatorGroup.append("text").attr("id", "member-variable");
+    indicatorGroup.append("text").attr("id", "member-label");
+
+    updateDropsSVG(container, groupsRef.current, {
+      onHover: (d) => {
+        setActiveMinidrop(d.key);
+      },
+    });
+    setActiveMinidrop("expl0160");
+    hideElems(`.large-drop.${COMP_OBJECTIVE}, .indicator-group`, container);
+  }
+
+  function updateLabel(pos) {
+    const [textX, textY] = pos;
+
+    const smallTextSize =
+      (groupsRef.current.groups[0].height * SPREAD_1_2) / 15;
+    const largeTextSize =
+      (groupsRef.current.groups[0].height * SPREAD_1_2) / 10;
+
+    d3.select("#comparer-graphics")
+      .select("#member-label")
+      .text("scenario")
+      .attr("font-size", smallTextSize)
+      .transition()
+      .duration(100)
+      .attr("x", textX)
+      .attr("y", textY - smallTextSize * 1.5);
+
+    d3.select("#comparer-graphics")
+      .select("#member-variable")
+      .attr("font-size", largeTextSize)
+      .text(activeMinidrop.slice(4))
+      .transition()
+      .duration(100)
+      .attr("x", textX)
+      .attr("y", textY);
+  }
+
+  function updateScenIndicators(positions, lines) {
+    d3.select("#comparer-graphics .indicator-group")
+      .selectAll(".circlet")
+      .data(positions)
+      .join("circle")
+      .attr("class", "circlet")
+      .call(circlet)
+      .attr("r", LOD_1_RAD_PX * 1.5)
+      .transition()
+      .duration(100)
+      .attr("cx", (d) => d[0])
+      .attr("cy", (d) => d[1]);
+
+    d3.select("#comparer-graphics .indicator-group")
+      .selectAll(".comp-line")
+      .data(lines)
+      .join("path")
+      .attr("class", "comp-line")
+      .transition()
+      .duration(100)
+      .attr("d", (d) => d3.line()(d));
+  }
+
+  function introDrop2() {
+    const container = d3.select("#comparer-graphics");
+
+    container
+      .select(".svg-group")
+      .transition()
+      .attr(
+        "transform",
+        d3.zoomIdentity
+          .translate(
+            camCentersRef.current.midpoint.x,
+            camCentersRef.current.midpoint.y
+          )
+          .scale(camCentersRef.current.midpoint.k)
+      );
+    showElems(`.large-drop.${COMP_OBJECTIVE}, .indicator-group`, container);
+  }
+
+  return { initComparer, introDrop2 };
+}
+
 export const DROP_VARIATIONS = [
   {
     idx: 0,
     scen: "0180",
     clas: "drop1",
+    desc: "increase priority",
   },
   {
     idx: 1,
     scen: "0200",
     clas: "drop2",
+    desc: "increase carryover",
   },
   {
     idx: 2,
     scen: "0164",
     clas: "drop3",
+    desc: "increase min. flow",
   },
   {
     idx: 3,
     scen: "0175",
     clas: "drop4",
+    desc: "increase regs.",
   },
 ];
+
+function updateDropsSVG(container, waterdropGroups, { onHover }) {
+  container
+    .selectAll(".large-drop")
+    .data(waterdropGroups.groups)
+    .join((enter) => {
+      return enter.append("g").each(function ({ nodes, height, key }) {
+        d3.select(this)
+          .call((s) => {
+            s.append("text")
+              .style("font-size", (height * SPREAD_1_2) / 15)
+              .attr("class", "fancy-font water-group-label")
+              .attr("text-anchor", "middle");
+          })
+          .attr("class", "large-drop " + key)
+          .selectAll(".small-drop")
+          .data(nodes)
+          .enter()
+          .append("g")
+          .attr("class", "small-drop")
+          .each(function ({ levs }) {
+            const s = d3.select(this);
+            s.append("rect")
+              .attr("class", "bbox")
+              .style("visibility", "hidden");
+
+            const randId = genUUID();
+
+            const stops = d3
+              .select(this)
+              .append("defs")
+              .append("linearGradient")
+              .attr("id", `${randId}`)
+              .attr("x1", "0%")
+              .attr("x2", "0%")
+              .attr("y1", "0%")
+              .attr("y2", "100%");
+            stops.append("stop").attr("stop-color", "transparent");
+            stops.append("stop").attr("stop-color", "transparent");
+
+            levs.forEach((_, i) => {
+              for (let j = 0; j < 2; j++) {
+                stops
+                  .append("stop")
+                  .attr(
+                    "stop-color",
+                    interpolateWatercolorBlue(i / LOD_1_LEVELS)
+                  );
+              }
+            });
+
+            s.append("path")
+              .attr("d", DROPLET_SHAPE)
+              .attr("class", "outline")
+              .attr("fill", "none")
+              .attr("stroke", "lightgray")
+              .attr("stroke-width", 0.05);
+
+            s.append("path")
+              .attr("class", "fill")
+              .attr("d", DROPLET_SHAPE)
+              .attr("fill", `url(#${randId})`);
+          });
+      });
+    })
+    .attr("display", "initial")
+    .attr(
+      "transform",
+      (_, i) =>
+        `translate(${waterdropGroups.groupPositions[i][0]}, ${waterdropGroups.groupPositions[i][1]})`
+    )
+    .each(function ({ nodes, key, height }) {
+      d3.select(this)
+        .call((s) => {
+          const t = s.select("text");
+
+          t.selectAll("*").remove();
+          const lines = wrap(
+            DESCRIPTIONS_DATA[key].display_name || DESCRIPTIONS_DATA[key].id
+          ).split("\n");
+
+          lines.forEach((line, i) => {
+            t.append("tspan")
+              .attr("x", 0)
+              .attr("y", (height / 2) * SPREAD_1_2)
+              .attr("dy", `${i}em`)
+              .text(line);
+          });
+        })
+        .selectAll(".small-drop")
+        .data(nodes)
+        .attr("display", "initial")
+        .attr(
+          "transform",
+          ({ x, y }) => `translate(${x * SPREAD_1_2}, ${y * SPREAD_1_2})`
+        )
+        .on("mouseenter", function (e, d) {
+          onHover && onHover(d);
+        })
+        .each(function ({ levs, maxLev }, i) {
+          const s = d3.select(this);
+
+          s.select(".outline").attr(
+            "transform",
+            `scale(${LOD_1_RAD_PX * 0.95})`
+          );
+          s.select(".fill").attr("transform", `scale(${LOD_1_RAD_PX})`);
+
+          s.selectAll("stop").each(function (_, i) {
+            let actI = Math.floor(i / 2);
+            const isEnd = i % 2;
+
+            if (isEnd === 0) actI -= 1;
+
+            if (actI === -1) {
+              d3.select(this).attr("offset", `${0}%`);
+            } else if (actI === levs.length) {
+              d3.select(this).attr("offset", `100%`);
+            } else {
+              d3.select(this).attr(
+                "offset",
+                `${(1 - levs[actI] / maxLev) * 100}%`
+              );
+            }
+          });
+
+          const dropBBox = s.select(".fill").node().getBBox();
+
+          s.select(".bbox")
+            .attr("x", dropBBox.x)
+            .attr("y", dropBBox.y)
+            .attr("width", dropBBox.width)
+            .attr("height", dropBBox.height);
+        });
+    });
+}

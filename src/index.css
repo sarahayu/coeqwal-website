@@ -939,7 +939,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   margin-inline: auto;
   position: relative;
   isolation: isolate;
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.8);
   border-radius: 1em;
 }
 
@@ -962,7 +962,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   position: relative;
   isolation: isolate;
   padding: 2rem;
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.8);
   border-radius: 1em;
 }
 
@@ -1060,6 +1060,41 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   right: 60%;
 }
 
+.vardrop.hasarrow::before {
+  content: attr(desc);
+  display: block;
+  position: absolute;
+  color: gray;
+  width: 30ch;
+  text-align: center;
+  transform-origin: center center;
+  border-bottom: 1px dashed gray;
+}
+
+.drop1.hasarrow::before {
+  top: 50%;
+  left: 80%;
+  transform: rotate(30deg);
+}
+
+.drop2.hasarrow::before {
+  top: 50%;
+  right: 80%;
+  transform: rotate(-30deg);
+}
+
+.drop3.hasarrow::before {
+  bottom: 50%;
+  left: 80%;
+  transform: rotate(-30deg);
+}
+
+.drop4.hasarrow::before {
+  bottom: 50%;
+  right: 80%;
+  transform: rotate(30deg);
+}
+
 .main-histogram {
   position: absolute;
   top: 50%;
@@ -1067,6 +1102,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   transform: translateX(-50%);
 }
 
-.scrollama-2 text {
+.scrollama-2 .dot-histogram-wrapper text {
   font-size: 0.5rem;
+}
+
+.tut-comparer-graphics-wrapper {
+  position: sticky;
+  top: 0;
+}
+
+.tut-comparer-graphics-wrapper > * {
+  max-width: 100%;
 }

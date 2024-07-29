@@ -10,7 +10,7 @@ import { genUUID, wrap } from "utils/misc-utils";
 import { DROPLET_SHAPE } from "utils/render-utils";
 
 export function getWaterdropGroups(keyArr, waterdrops, center) {
-  const groups = waterdrops.groups.filter((g) => keyArr.includes(g.key));
+  const groups = keyArr.map((k) => waterdrops.groups.find((g) => g.key === k));
 
   const groupPositions = [];
   const rad = groups[0].height * SPREAD_1_2 * 0.75;

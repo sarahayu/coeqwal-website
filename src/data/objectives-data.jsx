@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import { clamp } from "utils/math-utils";
 import { mapBy } from "utils/misc-utils";
 
-const SCEN_DIVISOR = 20; // debugging purposes, don't render all scenarios to speed things up
+const SCEN_DIVISOR = 1; // debugging purposes, don't render all scenarios to speed things up
 
 export const MAX_DELIVS = 1200;
 export const SCENARIO_KEY_STRING = "scens";
@@ -85,18 +85,18 @@ export const [FLATTENED_DATA, DATA_GROUPINGS] = (function preprocessData() {
   const orderedDataGroupings = {};
 
   for (const criteria of Object.keys(dataGroupings)) {
-    const asdfasdf = [];
+    const objScens = [];
     for (const key of Object.keys(dataGroupings[criteria])) {
       const ids = dataGroupings[criteria][key];
       const sortedObjScens = ids.sort((a, b) => means[b] - means[a]);
-      asdfasdf.push({
+      objScens.push({
         key,
         sorted: sortedObjScens,
         mean: d3.mean(ids.map((id) => flattenedData[id].deliveries).flat()),
       });
     }
 
-    const sortedObjScens = asdfasdf.sort((a, b) => b.mean - a.mean);
+    const sortedObjScens = objScens.sort((a, b) => b.mean - a.mean);
 
     orderedDataGroupings[criteria] = {};
 

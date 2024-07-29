@@ -25,11 +25,12 @@ import {
   VARIATIONS_INTERPERS,
   useTutorialGraph,
   useTutorialState,
+  useTutorialComparer,
   DROP_VARIATIONS,
 } from "utils/tutorialview-utils";
 
 export default function TutorialView() {
-  const { state, setState } = useContext(AppContext);
+  const { state, setState, waterdrops, camera } = useContext(AppContext);
 
   const {
     userGoal,
@@ -43,6 +44,7 @@ export default function TutorialView() {
   } = useTutorialState();
 
   const { initGraphArea, initBars, condenseBars } = useTutorialGraph();
+  const { initComparer, introDrop2 } = useTutorialComparer();
 
   const maxSlideReachedRef = useRef(-1);
 
@@ -50,10 +52,11 @@ export default function TutorialView() {
     function enterState() {
       if (isState(state, "TutorialView")) {
         hideElems(
-          ".bucket-wrapper, .vardrop, .vardroplabel, .vardrop .dot-histogram-wrapper, .main-histogram"
+          ".bucket-wrapper, .vardrop, .vardroplabel, .vardrop .dot-histogram-wrapper, .main-histogram, .tut-comparer-graphics-wrapper"
         );
 
         initGraphArea();
+        initComparer(waterdrops, camera);
 
         return function exitState() {
           hideElems(".tutorial-view");
@@ -86,7 +89,9 @@ export default function TutorialView() {
       },
 
       8: () => {
-        d3.selectAll(".vardrop").style("display", "initial");
+        d3.selectAll(".vardrop")
+          .style("display", "initial")
+          .classed("hasarrow", true);
       },
 
       9: () => {
@@ -104,6 +109,7 @@ export default function TutorialView() {
 
       12: () => {
         d3.select(".drop1").classed("highlighted", false);
+        d3.selectAll(".vardrop").classed("hasarrow", false);
 
         d3.selectAll(".vardroplabel").style("opacity", "0.5");
         d3.selectAll(".vardroplabel, .scen-number").style("color", "gray");
@@ -123,6 +129,15 @@ export default function TutorialView() {
           "display",
           "initial"
         );
+      },
+
+      13: () => {
+        hideElems(".scrollama-2 .tut-drop-graphics-wrapper");
+        showElems(".scrollama-2 .tut-comparer-graphics-wrapper");
+      },
+
+      15: () => {
+        introDrop2();
       },
     }),
     []
@@ -144,7 +159,7 @@ export default function TutorialView() {
       <div className="card1">
         <p>
           <em>How much water do the people of California get?</em> For starters,
-          let's focus on the agriculture sector in the north of the delta.
+          let's focus on the agriculture sector north of the delta.
         </p>
         <img
           src="./northdelta.png"
@@ -173,7 +188,7 @@ export default function TutorialView() {
             <div className="tut-text-card">
               Here, it is presented as a bar graph, with the bottom axis
               representing the year and the side axis representing the amount of
-              water in thousand acre-feet (TAF).
+              water delivered in thousand acre-feet (TAF).
             </div>
           </Step>
           <Step data={4}>
@@ -212,8 +227,8 @@ export default function TutorialView() {
               }}
             />
           </div>
-          {DROP_VARIATIONS.map(({ idx, scen, clas }) => (
-            <div className={`vardrop ${clas}`} key={idx}>
+          {DROP_VARIATIONS.map(({ idx, scen, clas, desc }) => (
+            <div className={`vardrop ${clas}`} key={idx} desc={desc}>
               <WaterdropGlyph
                 levelInterp={variationInterpers[idx]}
                 width={400}
@@ -236,26 +251,30 @@ export default function TutorialView() {
             </div>
           ))}
         </div>
+        <div className="tut-comparer-graphics-wrapper">
+          <svg id="comparer-graphics"></svg>
+        </div>
         <Scrollama offset={0.5} onStepEnter={onStepEnter}>
           <Step data={6}>
             <div className="tut-text-card">
               Here it is as a drop of water. We see here that the lightest color
               reaches the midpoint of the maximum water possible, meaning that
-              there is a chance that this group will receive 600 TAF of water.
+              there is a chance 600 TAF of water will be delivered to this
+              group.
             </div>
           </Step>
           <Step data={7}>
             <div className="tut-text-card">
-              The darker colors, however, indicate that it's more likely this
-              group will receive less than a quarter of the maximum, or around
-              300 TAF. As we'll later see, this is not a lot compared to other
+              The darker colors, however, indicate that it's more likely that
+              less than a quarter of the maximum, or around 300 TAF, will be
+              delivered. As we'll later see, this is not a lot compared to other
               areas of California.
             </div>
           </Step>
           <Step data={8}>
             <div className="tut-text-card">
               But what if we could <em>change reality</em>? What if we could
-              increase the likelihood of getting as much water as possible by
+              increase the likelihood of delivering as much water as possible by
               changing the way we manage it?
             </div>
           </Step>
@@ -286,12 +305,36 @@ export default function TutorialView() {
               well each of these scenarios meet those demands.
             </div>
           </Step>
+          <Step data={13}>
+            <div className="tut-text-card">
+              We'll collect all the possible scenarios and sort them by their
+              average deliveries.
+            </div>
+          </Step>
+          <Step data={14}>
+            <div className="tut-text-card">
+              So why don't we just choose the best scenario? Well, it's because
+              it's not just this group that wants water. Other groups, which we
+              call <em>objectives</em>, want scenarios that best fit{" "}
+              <em>them.</em>
+            </div>
+          </Step>
+          <Step data={15}>
+            <div className="tut-text-card" style={{ marginBottom: "120vh" }}>
+              For example, the refuge group south of the delta. The scenarios
+              that benefit the agriculture group do not always benefit the
+              refuge group, and vice versa. Hover over the waterdrops to see how
+              the same scenarios place for each objective. (Can you find a
+              scenario that benefits both?)
+            </div>
+          </Step>
         </Scrollama>
       </div>
       <div>
         <div className="tut-text-card">
-          What are the ways we can manage California's water, and what are their
-          outcomes? Go to the next step to find out!
+          Thus, tradeoffs must often be made when managing California's water
+          supply. What are the ways we can manage California's water, and how do
+          their outcomes compare? Go to the next step to find out!
           <button
             className="fancy-font"
             onClick={() => setState({ state: "WideView" })}

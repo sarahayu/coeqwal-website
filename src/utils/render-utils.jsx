@@ -626,7 +626,7 @@ export function circlet(s) {
 }
 
 export function showElems(elemStr, container) {
-  (container || d3).selectAll(elemStr).style("display", "initial");
+  (container || d3).selectAll(elemStr).style("display", "block");
 }
 
 export function hideElems(elemStr, container) {
