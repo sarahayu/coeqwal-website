@@ -87,10 +87,7 @@ export function updateDropsSVG(
 
               s.append("path")
                 .attr("d", DROPLET_SHAPE)
-                .attr("class", "outline")
-                .attr("fill", "none")
-                .attr("stroke", "lightgray")
-                .attr("stroke-width", 0.05);
+                .attr("class", "outline");
 
               s.append("path")
                 .attr("class", "fill")

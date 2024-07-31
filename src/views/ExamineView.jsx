@@ -11,6 +11,35 @@ import { updateSmallDropSVG } from "utils/examineview-utils";
 import { arrRemove, isState } from "utils/misc-utils";
 import { removeElems } from "utils/render-utils";
 
+const NUM_OPTS = {
+  demand: 5,
+  carryover: 3,
+  priority: 2,
+  regs: 4,
+  minflow: 5,
+};
+
+function deserialize(scenStr) {
+  let scenNum = parseInt(scenStr);
+
+  const minflow = scenNum % NUM_OPTS.minflow;
+  scenNum = (scenNum - minflow) / NUM_OPTS.minflow;
+
+  const regs = scenNum % NUM_OPTS.regs;
+  scenNum = (scenNum - regs) / NUM_OPTS.regs;
+
+  const priority = scenNum % NUM_OPTS.priority;
+  scenNum = (scenNum - priority) / NUM_OPTS.priority;
+
+  const carryover = scenNum % NUM_OPTS.carryover;
+  scenNum = (scenNum - carryover) / NUM_OPTS.carryover;
+
+  const demand = scenNum % NUM_OPTS.demand;
+  scenNum = (scenNum - demand) / NUM_OPTS.demand;
+
+  return [demand, carryover, priority, regs, minflow];
+}
+
 export default function ExamineView() {
   const {
     state,
@@ -186,7 +215,7 @@ export default function ExamineView() {
         </h1>
         {panels.map(({ text, x, y, id, offsetX, offsetY }) => (
           <div
-            className="panel"
+            className="panel examine-panel"
             key={id}
             style={getStyle(x, y, offsetX, offsetY)}
             onMouseDown={(e) => onPanelDragStart(e, id)}
@@ -206,9 +235,53 @@ export default function ExamineView() {
                 });
               }}
             />
+            <SceneSettings settings={deserialize(text)} />
           </div>
         ))}
       </>
     );
   }
+}
+
+const ABBREVS = ["D", "C", "P", "R", "M"];
+const FULLS = ["Demand", "Carryover", "Priority", "Regs.", "Min. Flow"];
+const VAL_STEPS = [
+  [1, 0.9, 0.8, 0.7, 0.6], // demand
+  [1.0, 1.2, 1.3], // carryover
+  [0, 1], // priority
+  [1, 2, 3, 4], // regs
+  [0, 0.4, 0.6, 0.7, 0.8], // minflow
+];
+
+function SceneSettings({ settings }) {
+  return (
+    <div className="scen-settings">
+      <div className="condense">
+        {settings.map((s, i) => (
+          <div className="sett-dot-wrapper" key={i}>
+            <span>{ABBREVS[i]}</span>
+            {d3.range(s + 1).map((i) => (
+              <span className="sett-dot" key={i}></span>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="full">
+        <div className="full-container">
+          <span>The settings for this scenario are:</span>
+          {settings.map((v, i) => (
+            <div className="full-card" key={i}>
+              <span>{FULLS[i]}</span>
+              <span>{VAL_STEPS[i][v]}</span>
+              <div className="sett-dot-wrapper">
+                {d3.range(v + 1).map((i) => (
+                  <span className="sett-dot" key={i}></span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }

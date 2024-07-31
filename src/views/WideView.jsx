@@ -254,15 +254,30 @@ export default function WideView() {
     fadeOutDrops(dropsMesh, scene, startOpacity, transitionDuration / 5);
   }
 
-  let actionBtn;
+  let examineBtn, compareBtn;
 
   if (isState(state, "WideView") && activeWaterdrops.length) {
-    actionBtn = (
-      <button onClick={handleClick} className="wide-view-action-btn fancy-font">
-        {activeWaterdrops.length === 1 ? <BiCross /> : <BiNetworkChart />}
-        {activeWaterdrops.length === 1 ? "examine" : "compare"}
-      </button>
-    );
+    if (activeWaterdrops.length === 1) {
+      examineBtn = (
+        <button
+          onClick={handleClick}
+          className="wide-view-action-btn fancy-font"
+        >
+          <BiCross />
+          <span>examine</span>
+        </button>
+      );
+    } else {
+      compareBtn = (
+        <button
+          onClick={handleClick}
+          className="wide-view-action-btn fancy-font"
+        >
+          <BiNetworkChart />
+          <span>compare</span>
+        </button>
+      );
+    }
   }
 
   return (
@@ -281,7 +296,8 @@ export default function WideView() {
           </div>
         )}
       </div>
-      {actionBtn}
+      {examineBtn}
+      {compareBtn}
     </>
   );
 }

@@ -14,6 +14,7 @@ body {
   background-color: rgb(251, 251, 255);
   margin: 0;
   padding: 0;
+  line-height: 1.2;
 }
 
 main {
@@ -283,30 +284,28 @@ input::-moz-focus-inner {
   height: 100%;
 }
 
-.pdf-razor span:first-child {
+.pdf-razor span {
   position: absolute;
   display: block;
   width: 20ch;
   text-align: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 0.5em;
+  padding: 0.5em;
+}
+
+.pdf-razor span:first-child {
   top: 2rem;
   right: 1rem;
 }
 
 .pdf-razor span:last-child {
-  position: absolute;
-  display: block;
-  width: 20ch;
-  text-align: center;
   top: 2rem;
   left: 1rem;
 }
 
-.pdf-razor.short-form span:first-child {
-  width: 6ch;
-}
-
-.pdf-razor.short-form span:last-child {
-  width: 6ch;
+.pdf-razor.short-form span {
+  width: 8ch;
 }
 
 .ridgeline-overlay {
@@ -636,6 +635,13 @@ text {
   cursor: pointer;
 }
 
+.small-drop .outline {
+  fill: none;
+  stroke: lightgray;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
 /* Loading waterdrop */
 
 /* 
@@ -778,12 +784,33 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   bottom: 1em;
   right: 1em;
   font-size: 2rem;
-  background: lightgray;
-  border: none;
+  background: #efefef;
+  opacity: 0.8;
+  border: 2px solid black;
   cursor: pointer;
   padding: 0.5em 1em;
   border-radius: 100vh;
   font-weight: bold;
+  display: flex;
+  gap: 0.3em;
+  align-items: center;
+  transition: background-color 0.1s;
+
+  animation: enterView 0.1s;
+}
+
+.wide-view-action-btn:hover {
+  background-color: white;
+}
+
+@keyframes enterView {
+  from {
+    transform: translateY(2rem);
+  }
+
+  to {
+    transform: translateY(0);
+  }
 }
 
 #infobox {
@@ -830,8 +857,21 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 
   height: 200px;
+  width: min-content;
   display: flex;
-  align-items: flex-end;
+  gap: 1rem;
+  flex-direction: column;
+}
+
+.panel > .dot-histogram-wrapper {
+  display: flex;
+  align-items: end;
+  position: relative;
+  min-height: 0;
+}
+
+.examine-panel {
+  height: 250px;
 }
 
 .compare-panel {
@@ -1113,4 +1153,144 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .tut-comparer-graphics-wrapper > * {
   max-width: 100%;
+}
+
+.scen-settings {
+  flex-grow: 1;
+  font-size: 0.7rem;
+  font-family: sans-serif;
+  color: #333;
+  cursor: initial;
+}
+
+.scen-settings .condense {
+  display: flex;
+  gap: 0.5em 1em;
+  justify-content: center;
+  flex-wrap: wrap;
+  flex-shrink: 1;
+  background-color: inherit;
+}
+
+.scen-settings .condense .sett-dot-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.2em;
+  background-color: var(--dot-color-light, rgb(255, 189, 189));
+  border-radius: 0.5em;
+  padding: 0.2em 0.5em;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+}
+
+.scen-settings .condense .sett-dot-wrapper:nth-child(1),
+.scen-settings .full .full-card:nth-of-type(1) {
+  --dot-color: red;
+  --dot-color-light: rgb(255, 233, 233);
+}
+
+.scen-settings .condense .sett-dot-wrapper:nth-child(2),
+.scen-settings .full .full-card:nth-of-type(2) {
+  --dot-color: orange;
+  --dot-color-light: rgb(255, 246, 230);
+}
+
+.scen-settings .condense .sett-dot-wrapper:nth-child(3),
+.scen-settings .full .full-card:nth-of-type(3) {
+  --dot-color: blue;
+  --dot-color-light: rgb(211, 211, 255);
+}
+
+.scen-settings .condense .sett-dot-wrapper:nth-child(4),
+.scen-settings .full .full-card:nth-of-type(4) {
+  --dot-color: green;
+  --dot-color-light: rgb(234, 255, 234);
+}
+
+.scen-settings .condense .sett-dot-wrapper:nth-child(5),
+.scen-settings .full .full-card:nth-of-type(5) {
+  --dot-color: magenta;
+  --dot-color-light: rgb(255, 225, 255);
+}
+
+.scen-settings .sett-dot {
+  height: 1em;
+  width: 1em;
+  background-color: var(--dot-color, red);
+  display: block;
+  border-radius: 100vh;
+}
+
+.scen-settings .full {
+  position: absolute;
+  top: 1em;
+  left: 1em;
+  width: 100%;
+  height: 100%;
+  padding: 1em;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+
+  opacity: 0;
+  height: 0;
+  transform: translateY(2em);
+  transition: opacity 0.2s 0s, transform 0.2s 0s, height 0s 0.5s;
+}
+
+.scen-settings:hover .full {
+  transition: opacity 0.2s 0.5s, transform 0.2s 0.5s, height 0s 0.5s;
+  transform: translateY(0);
+  height: 100%;
+  opacity: 1;
+  pointer-events: all;
+}
+
+.scen-settings:hover .condense {
+  background-color: rgb(240, 240, 240);
+}
+
+.scen-settings .full-container {
+  display: flex;
+  gap: 1em;
+  justify-content: center;
+  align-items: self-start;
+  flex-wrap: wrap;
+  flex-shrink: 1;
+}
+
+.scen-settings .full-container > span {
+  width: 100%;
+  color: gray;
+  font-style: italic;
+  font-size: 1.2em;
+  text-align: center;
+  font-family: Georgia, "Times New Roman", Times, serif;
+}
+
+.scen-settings .full .full-card {
+  background-color: var(--dot-color-light, rgb(255, 189, 189));
+  display: flex;
+  flex-direction: column;
+  height: min-content;
+  align-items: center;
+  padding: 0.7em;
+  border-radius: 0.7em;
+  width: 15ch;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+}
+
+.scen-settings .full .full-card > span:nth-child(2) {
+  font-size: 2rem;
+}
+
+.scen-settings .full .sett-dot-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.2em;
+  border-radius: 0.5em;
+  padding: 0.2em 0.5em;
 }

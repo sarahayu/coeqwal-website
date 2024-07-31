@@ -340,6 +340,7 @@ export function useTutorialComparer() {
         setActiveMinidrop(d.key);
       },
     });
+
     setActiveMinidrop("expl0160");
     hideElems(`.large-drop.${COMP_OBJECTIVE}, .indicator-group`, container);
   }
@@ -409,6 +410,7 @@ export function useTutorialComparer() {
           )
           .scale(camCentersRef.current.midpoint.k)
       );
+
     showElems(`.large-drop.${COMP_OBJECTIVE}, .indicator-group`, container);
   }
 
@@ -442,138 +444,140 @@ export const DROP_VARIATIONS = [
   },
 ];
 
+function smallDropInit({ levs }) {
+  return (s) => {
+    s.append("rect").attr("class", "bbox").style("visibility", "hidden");
+
+    const randId = genUUID();
+
+    const stops = s
+      .append("defs")
+      .append("linearGradient")
+      .attr("id", `${randId}`)
+      .attr("x1", "0%")
+      .attr("x2", "0%")
+      .attr("y1", "0%")
+      .attr("y2", "100%");
+    stops.append("stop").attr("stop-color", "transparent");
+    stops.append("stop").attr("stop-color", "transparent");
+
+    levs.forEach((_, i) => {
+      for (let j = 0; j < 2; j++) {
+        stops
+          .append("stop")
+          .attr("stop-color", interpolateWatercolorBlue(i / LOD_1_LEVELS));
+      }
+    });
+
+    s.append("path")
+      .attr("d", DROPLET_SHAPE)
+      .attr("class", "outline")
+      .attr("transform", `scale(${LOD_1_RAD_PX * 0.95})`);
+
+    s.append("path")
+      .attr("class", "fill")
+      .attr("d", DROPLET_SHAPE)
+      .attr("fill", `url(#${randId})`)
+      .attr("transform", `scale(${LOD_1_RAD_PX})`);
+  };
+}
+
+function largeDropInit({ nodes, height, key }) {
+  return (s) => {
+    s.append("text")
+      .style("font-size", (height * SPREAD_1_2) / 15)
+      .attr("class", "fancy-font water-group-label")
+      .attr("text-anchor", "middle");
+
+    s.attr("class", "large-drop " + key)
+      .selectAll(".small-drop")
+      .data(nodes)
+      .enter()
+      .append("g")
+      .attr("class", "small-drop")
+      .each(function (node) {
+        d3.select(this).call(smallDropInit(node));
+      });
+  };
+}
+
+function smallDropUpdate({ levs, maxLev }) {
+  return (s) => {
+    s.selectAll("stop").each(function (_, i) {
+      let actI = Math.floor(i / 2);
+      const isEnd = i % 2;
+
+      if (isEnd === 0) actI -= 1;
+
+      if (actI === -1) {
+        d3.select(this).attr("offset", `${0}%`);
+      } else if (actI === levs.length) {
+        d3.select(this).attr("offset", `100%`);
+      } else {
+        d3.select(this).attr("offset", `${(1 - levs[actI] / maxLev) * 100}%`);
+      }
+    });
+
+    const dropBBox = s.select(".fill").node().getBBox();
+
+    s.select(".bbox")
+      .attr("x", dropBBox.x)
+      .attr("y", dropBBox.y)
+      .attr("width", dropBBox.width)
+      .attr("height", dropBBox.height);
+  };
+}
+
+function largeDropUpdate({ nodes, key, height }) {
+  return (s) => {
+    const t = s.select("text");
+
+    t.selectAll("*").remove();
+
+    const lines = wrap(
+      DESCRIPTIONS_DATA[key].display_name || DESCRIPTIONS_DATA[key].id
+    ).split("\n");
+
+    lines.forEach((line, i) => {
+      t.append("tspan")
+        .attr("x", 0)
+        .attr("y", (height / 2) * SPREAD_1_2)
+        .attr("dy", `${i}em`)
+        .text(line);
+    });
+
+    s.selectAll(".small-drop")
+      .data(nodes)
+      .attr("display", "initial")
+      .attr(
+        "transform",
+        ({ x, y }) => `translate(${x * SPREAD_1_2}, ${y * SPREAD_1_2})`
+      )
+      .each(function (node) {
+        d3.select(this).call(smallDropUpdate(node));
+      });
+  };
+}
+
 function updateDropsSVG(container, waterdropGroups, { onHover }) {
   container
     .selectAll(".large-drop")
     .data(waterdropGroups.groups)
     .join((enter) => {
-      return enter.append("g").each(function ({ nodes, height, key }) {
-        d3.select(this)
-          .call((s) => {
-            s.append("text")
-              .style("font-size", (height * SPREAD_1_2) / 15)
-              .attr("class", "fancy-font water-group-label")
-              .attr("text-anchor", "middle");
-          })
-          .attr("class", "large-drop " + key)
-          .selectAll(".small-drop")
-          .data(nodes)
-          .enter()
-          .append("g")
-          .attr("class", "small-drop")
-          .each(function ({ levs }) {
-            const s = d3.select(this);
-            s.append("rect")
-              .attr("class", "bbox")
-              .style("visibility", "hidden");
-
-            const randId = genUUID();
-
-            const stops = d3
-              .select(this)
-              .append("defs")
-              .append("linearGradient")
-              .attr("id", `${randId}`)
-              .attr("x1", "0%")
-              .attr("x2", "0%")
-              .attr("y1", "0%")
-              .attr("y2", "100%");
-            stops.append("stop").attr("stop-color", "transparent");
-            stops.append("stop").attr("stop-color", "transparent");
-
-            levs.forEach((_, i) => {
-              for (let j = 0; j < 2; j++) {
-                stops
-                  .append("stop")
-                  .attr(
-                    "stop-color",
-                    interpolateWatercolorBlue(i / LOD_1_LEVELS)
-                  );
-              }
-            });
-
-            s.append("path")
-              .attr("d", DROPLET_SHAPE)
-              .attr("class", "outline")
-              .attr("fill", "none")
-              .attr("stroke", "lightgray")
-              .attr("stroke-width", 0.05);
-
-            s.append("path")
-              .attr("class", "fill")
-              .attr("d", DROPLET_SHAPE)
-              .attr("fill", `url(#${randId})`);
-          });
+      return enter.append("g").each(function (group) {
+        d3.select(this).call(largeDropInit(group));
       });
     })
-    .attr("display", "initial")
-    .attr(
-      "transform",
-      (_, i) =>
-        `translate(${waterdropGroups.groupPositions[i][0]}, ${waterdropGroups.groupPositions[i][1]})`
-    )
-    .each(function ({ nodes, key, height }) {
+    .attr("transform", (_, i) => {
+      const groupPos = waterdropGroups.groupPositions[i];
+      return `translate(${groupPos[0]}, ${groupPos[1]})`;
+    })
+    .each(function (group) {
       d3.select(this)
-        .call((s) => {
-          const t = s.select("text");
-
-          t.selectAll("*").remove();
-          const lines = wrap(
-            DESCRIPTIONS_DATA[key].display_name || DESCRIPTIONS_DATA[key].id
-          ).split("\n");
-
-          lines.forEach((line, i) => {
-            t.append("tspan")
-              .attr("x", 0)
-              .attr("y", (height / 2) * SPREAD_1_2)
-              .attr("dy", `${i}em`)
-              .text(line);
-          });
-        })
+        .call(largeDropUpdate(group))
         .selectAll(".small-drop")
-        .data(nodes)
-        .attr("display", "initial")
-        .attr(
-          "transform",
-          ({ x, y }) => `translate(${x * SPREAD_1_2}, ${y * SPREAD_1_2})`
-        )
         .on("mouseenter", function (e, d) {
           onHover && onHover(d);
-        })
-        .each(function ({ levs, maxLev }, i) {
-          const s = d3.select(this);
-
-          s.select(".outline").attr(
-            "transform",
-            `scale(${LOD_1_RAD_PX * 0.95})`
-          );
-          s.select(".fill").attr("transform", `scale(${LOD_1_RAD_PX})`);
-
-          s.selectAll("stop").each(function (_, i) {
-            let actI = Math.floor(i / 2);
-            const isEnd = i % 2;
-
-            if (isEnd === 0) actI -= 1;
-
-            if (actI === -1) {
-              d3.select(this).attr("offset", `${0}%`);
-            } else if (actI === levs.length) {
-              d3.select(this).attr("offset", `100%`);
-            } else {
-              d3.select(this).attr(
-                "offset",
-                `${(1 - levs[actI] / maxLev) * 100}%`
-              );
-            }
-          });
-
-          const dropBBox = s.select(".fill").node().getBBox();
-
-          s.select(".bbox")
-            .attr("x", dropBBox.x)
-            .attr("y", dropBBox.y)
-            .attr("width", dropBBox.width)
-            .attr("height", dropBBox.height);
         });
     });
 }

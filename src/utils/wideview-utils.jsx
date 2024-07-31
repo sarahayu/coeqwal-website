@@ -22,15 +22,19 @@ function interactorsInit() {
     .attr("display", "none")
     .attr("r", 1);
 
-  const textGroup = s.append("g");
+  s.append("circle")
+    .attr("class", "hover-capture")
+    .attr("fill", "transparent")
+    .attr("stroke-width", 0)
+    .attr("r", 0.8);
+
+  const textGroup = s.append("g").attr("pointer-events", "none");
   textGroup
-    .append("g")
     .append("image")
     .attr("href", "glow.png")
     .attr("preserveAspectRatio", "none")
     .attr("opacity", 0.8);
   textGroup
-    .append("g")
     .append("text")
     .attr("class", "fancy-font")
     .attr("text-anchor", "middle")
@@ -85,17 +89,18 @@ export function updateLargeDropSVG(
     .each(interactorsUpdate)
     .style("display", "initial")
     .attr("transform", dropTransform)
+    .select(".hover-capture")
     .on("click", function (_, d) {
       onClick && onClick(d);
     })
     .on("mouseenter", function (_, d) {
-      if (!d3.select(this).select(".circlet").classed("active"))
-        d3.select(this).select("circle").attr("display", "initial");
+      if (!d3.select(this.parentNode).select(".circlet").classed("active"))
+        d3.select(this.parentNode).select("circle").attr("display", "initial");
       onHover && onHover(d);
     })
     .on("mouseleave", function (_, d) {
-      if (!d3.select(this).select(".circlet").classed("active"))
-        d3.select(this).select("circle").attr("display", "none");
+      if (!d3.select(this.parentNode).select(".circlet").classed("active"))
+        d3.select(this.parentNode).select("circle").attr("display", "none");
       onUnhover && onUnhover(d);
     });
 }

@@ -148,11 +148,16 @@ export default function DotHistogram({
       >
         <div>
           <span>
-            {circles.length - count} / {NUM_CIRCLES}{" "}
+            <u>
+              {circles.length - count} / {NUM_CIRCLES}
+            </u>{" "}
             {shortForm ? "" : "yrs WILL NOT meet demand"}
           </span>
           <span>
-            {count} / {NUM_CIRCLES} {shortForm ? "" : "yrs WILL meet demand"}
+            <u>
+              {count} / {NUM_CIRCLES}
+            </u>{" "}
+            {shortForm ? "" : "yrs WILL meet demand"}
           </span>
         </div>
       </div>

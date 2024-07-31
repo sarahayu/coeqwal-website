@@ -60,7 +60,6 @@ export default function TutorialView() {
 
         return function exitState() {
           hideElems(".tutorial-view");
-          showElems("#mosaic-webgl, #mosaic-svg");
         };
       }
     },
