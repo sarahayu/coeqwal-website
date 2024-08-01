@@ -102,6 +102,19 @@ function smallDropUpdate({ levs, maxLev, id }) {
   };
 }
 
+export function updateColorDrops(container, waterdropGroup, opacFn, color) {
+  container
+    .selectAll(".color-drop")
+    .data(waterdropGroup.nodes)
+    .join("circle")
+    .attr("class", "color-drop")
+    .attr("r", LOD_1_RAD_PX)
+    .attr("opacity", ({ key }) => opacFn(key))
+    .attr("fill", color)
+    .attr("cx", ({ x }) => waterdropGroup.x + x * SPREAD_1_2)
+    .attr("cy", ({ y }) => waterdropGroup.y + y * SPREAD_1_2);
+}
+
 export function updateSmallDropSVG(
   container,
   waterdropGroup,

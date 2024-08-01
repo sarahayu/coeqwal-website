@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 
-import { clamp } from "utils/math-utils";
+import { clamp, shuffle } from "utils/math-utils";
 import { mapBy } from "utils/misc-utils";
 
 const SCEN_DIVISOR = 1; // debugging purposes, don't render all scenarios to speed things up
@@ -13,12 +13,12 @@ export const OBJECTIVES_DATA = await (async function load() {
   const objs = await (await fetch("./objectives.json")).json();
 
   for (const obj of objs) {
-    obj[SCENARIO_KEY_STRING] = obj[SCENARIO_KEY_STRING];
-    for (const scen of obj[SCENARIO_KEY_STRING]) {
+    // shuffle so clusters of identical scenario results don't get processed deterministically
+    for (const scen of shuffle(obj[SCENARIO_KEY_STRING])) {
       // data cleanup, clamping
       const unord = scen[DELIV_KEY_STRING].map((v) => clamp(v, 0, MAX_DELIVS));
 
-      scen[DELIV_KEY_STRING] = Array.from(unord).sort((a, b) => b - a);
+      scen[DELIV_KEY_STRING] = unord.sort((a, b) => b - a);
     }
     obj[SCENARIO_KEY_STRING] = mapBy(
       obj[SCENARIO_KEY_STRING],

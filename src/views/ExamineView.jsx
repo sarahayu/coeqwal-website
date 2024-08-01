@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { AppContext } from "AppContext";
 import DotHistogram from "components/DotHistogram";
@@ -7,9 +7,9 @@ import { FLATTENED_DATA } from "data/objectives-data";
 import { SPREAD_1_2 } from "settings";
 
 import { DESCRIPTIONS_DATA } from "data/descriptions-data";
-import { updateSmallDropSVG } from "utils/examineview-utils";
+import { updateColorDrops, updateSmallDropSVG } from "utils/examineview-utils";
 import { arrRemove, isState } from "utils/misc-utils";
-import { removeElems } from "utils/render-utils";
+import { hideElems, removeElems, showElems } from "utils/render-utils";
 
 const NUM_OPTS = {
   demand: 5,
@@ -56,7 +56,10 @@ export default function ExamineView() {
 
   const activeMinidropsRef = useRef([]);
   const previewMinidropRef = useRef(null);
+  const curMinidropsRef = useRef([]);
+  const deserializedSettingsRef = useRef({});
   const [panels, setPanels] = useState([]);
+  const [colorSetting, setColorSetting] = useState(null);
 
   const [cameraChangeFlag, setCameraChangeFlag] = useState(false);
 
@@ -94,6 +97,17 @@ export default function ExamineView() {
 
       mouseDownInfo.current = {};
     });
+
+    const scens = waterdrops.groups[0].nodes;
+    const optArr = Object.values(NUM_OPTS);
+
+    for (let i = 0; i < scens.length; i++) {
+      const { key } = scens[i];
+
+      deserializedSettingsRef.current[key] = deserialize(key.slice(4)).map(
+        (v, i) => (v + 1) / optArr[i]
+      );
+    }
   }, []);
 
   useEffect(
@@ -101,15 +115,20 @@ export default function ExamineView() {
       if (isState(state, "ExamineView")) {
         const transitionDelay = state.transitionDuration;
         const container = d3.select("#examine-group");
-        const minidrops = waterdrops.groups.find(
+        curMinidropsRef.current = waterdrops.groups.find(
           (g) => g.key === activeWaterdrops[0]
         );
 
-        updateSmallDropSVG(container, minidrops, transitionDelay / 2, {
-          onClick: updateActiveMinidrops,
-          onHover: hoverDrop,
-          onUnhover: unhoverDrop,
-        });
+        updateSmallDropSVG(
+          container,
+          curMinidropsRef.current,
+          transitionDelay / 2,
+          {
+            onClick: updateActiveMinidrops,
+            onHover: hoverDrop,
+            onUnhover: unhoverDrop,
+          }
+        );
 
         setGoBack(() => () => {
           setState({ state: "WideView" });
@@ -123,11 +142,39 @@ export default function ExamineView() {
           setPanels([]);
           activeMinidropsRef.current = [];
           previewMinidropRef.current = null;
+          curMinidropsRef.current = [];
           setGoBack(null);
         };
       }
     },
     [state]
+  );
+
+  useEffect(
+    function highlightWithColor() {
+      const container = d3.select("#examine-group");
+      if (colorSetting === null) {
+        hideElems(".color-drop", container);
+        showElems(".small-drop", container);
+        return;
+      }
+
+      const getOpacity = (key) => {
+        return deserializedSettingsRef.current[key][colorSetting];
+      };
+
+      const colors = ["red", "orange", "blue", "green", "magenta"];
+
+      updateColorDrops(
+        container,
+        curMinidropsRef.current,
+        getOpacity,
+        colors[colorSetting]
+      );
+      showElems(".color-drop", container);
+      hideElems(".small-drop", container);
+    },
+    [colorSetting]
   );
 
   function addDetailPanel(dropId) {
@@ -235,7 +282,10 @@ export default function ExamineView() {
                 });
               }}
             />
-            <SceneSettings settings={deserialize(text)} />
+            <SceneSettings
+              settings={deserialize(text)}
+              setColorSetting={setColorSetting}
+            />
           </div>
         ))}
       </>
@@ -253,15 +303,19 @@ const VAL_STEPS = [
   [0, 0.4, 0.6, 0.7, 0.8], // minflow
 ];
 
-function SceneSettings({ settings }) {
+function SceneSettings({ settings, setColorSetting }) {
   return (
     <div className="scen-settings">
       <div className="condense">
         {settings.map((s, i) => (
           <div className="sett-dot-wrapper" key={i}>
             <span>{ABBREVS[i]}</span>
-            {d3.range(s + 1).map((i) => (
-              <span className="sett-dot" key={i}></span>
+            {d3.range(s + 1).map((j) => (
+              <span
+                className="sett-dot"
+                key={j}
+                style={{ opacity: (j + 1) / VAL_STEPS[i].length }}
+              ></span>
             ))}
           </div>
         ))}
@@ -270,12 +324,21 @@ function SceneSettings({ settings }) {
         <div className="full-container">
           <span>The settings for this scenario are:</span>
           {settings.map((v, i) => (
-            <div className="full-card" key={i}>
+            <div
+              className="full-card"
+              onMouseEnter={() => setColorSetting(i)}
+              onMouseLeave={() => setColorSetting(null)}
+              key={i}
+            >
               <span>{FULLS[i]}</span>
               <span>{VAL_STEPS[i][v]}</span>
               <div className="sett-dot-wrapper">
-                {d3.range(v + 1).map((i) => (
-                  <span className="sett-dot" key={i}></span>
+                {d3.range(v + 1).map((j) => (
+                  <span
+                    className="sett-dot"
+                    key={j}
+                    style={{ opacity: (j + 1) / VAL_STEPS[i].length }}
+                  ></span>
                 ))}
               </div>
             </div>
