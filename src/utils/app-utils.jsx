@@ -16,7 +16,7 @@ import {
 } from "data/objectives-data";
 
 import { calcDomLev, createInterpsFromDelivs } from "utils/data-utils";
-import { placeDropsUsingPhysics } from "utils/math-utils";
+import { placeDropsUsingPhysics, rotatePoint } from "utils/math-utils";
 import { mapBy } from "utils/misc-utils";
 
 // TODO optimize!!
@@ -43,6 +43,10 @@ export function initWaterdrops(grouping) {
       id: idx,
     }))
   );
+
+  for (let i = 0; i < largeNodesPhys.length; i++) {
+    largeNodesPhys[i].tilt = Math.random() * 50 - 25;
+  }
 
   const largeNodesPos = mapBy(largeNodesPhys, ({ id }) => id);
 
@@ -80,19 +84,26 @@ export function initWaterdrops(grouping) {
     const groupRank = DATA_GROUPINGS[grouping][groupID].rank;
     const memberRank = DATA_GROUPINGS[grouping][groupID][id];
 
+    const localTilt = Math.random() * 50 - 25;
+    const parentTilt = largeNodesPos[groupRank].tilt;
+
+    const { x, y } = smallNodesPos[memberRank];
+    const [rotatedX, rotatedY] = rotatePoint(x, y, parentTilt);
+
     const node = {
       id,
       levs,
       maxLev: LOD_1_RAD_PX,
       domLev: calcDomLev(levs),
-      tilt: Math.random() * 50 - 25,
+      tilt: localTilt,
       dur: Math.random() * 100 + 400,
-      x: smallNodesPos[memberRank].x,
-      y: smallNodesPos[memberRank].y,
+      x,
+      y,
       group: groupID,
       key: memberID,
-      globalX: largeNodesPos[groupRank].x + smallNodesPos[memberRank].x,
-      globalY: largeNodesPos[groupRank].y + smallNodesPos[memberRank].y,
+      globalX: largeNodesPos[groupRank].x + rotatedX,
+      globalY: largeNodesPos[groupRank].y + rotatedY,
+      globalTilt: parentTilt + localTilt,
     };
 
     nodes.push(node);
@@ -103,10 +114,12 @@ export function initWaterdrops(grouping) {
   }
 
   for (const groupKey of groupKeys) {
+    const { x, y, tilt } =
+      largeNodesPos[DATA_GROUPINGS[grouping][groupKey].rank];
     groupNodes.push({
-      x: largeNodesPos[DATA_GROUPINGS[grouping][groupKey].rank].x,
-      y: largeNodesPos[DATA_GROUPINGS[grouping][groupKey].rank].y,
-      tilt: Math.random() * 50 - 25,
+      x,
+      y,
+      tilt,
       key: groupKey,
       height: smallNodesPhys.height,
       nodes: groupToNodes[groupKey],

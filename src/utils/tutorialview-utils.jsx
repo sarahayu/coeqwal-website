@@ -84,7 +84,7 @@ export const DEFAULT_INTERPER = d3
 export const BAR_CHART_WIDTH = 800,
   BAR_CHART_HEIGHT = 400;
 
-export const BAR_CHART_MARGIN = { top: 30, right: 30, bottom: 30, left: 60 };
+export const BAR_CHART_MARGIN = { top: 40, right: 30, bottom: 40, left: 60 };
 
 export function serialize(demand, carryover, priority, regs, minflow) {
   let code = 0;
@@ -154,13 +154,13 @@ export function useTutorialGraph() {
       .map((val, placeFromLeft) => ({
         val,
         placeFromLeft,
-        year: placeFromLeft + DATE_START,
+        year: placeFromLeft + 1,
       }))
       .sort((a, b) => b.val - a.val);
 
     const x = d3
       .scaleBand()
-      .domain(dataDescending.map(({ year }) => year).sort())
+      .domain(dataDescending.map(({ year }) => year).sort((a, b) => a - b))
       .range([0, BAR_CHART_WIDTH])
       .padding(0.4);
     const y = d3
@@ -171,7 +171,8 @@ export function useTutorialGraph() {
     const xaxis = d3
       .axisBottom(x)
       .tickSize(0)
-      .tickValues(x.domain().filter((_, i) => i % 10 === 0));
+      .tickFormat((d) => `year ${d}`)
+      .tickValues(x.domain().filter((_, i) => i === 0 || (i + 1) % 10 === 0));
 
     svgGroup.append("g").attr("class", "anim-xaxis");
     svgGroup.append("g").attr("class", "axis-y");

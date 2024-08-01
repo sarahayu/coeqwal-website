@@ -69,13 +69,18 @@ export default function CompareView() {
 
         updateDropsSVG(container, groupsRef.current, transitionDuration / 5, {
           onHover: (d) => {
-            setActiveMinidrop(d.key);
+            setActiveMinidrop({ key: d.key });
           },
         });
 
+        hideElems(".water-group-label");
+
         setTimeout(() => {
-          setActiveMinidrop(groupsRef.current.groups[0].nodes[0].key);
-          showElems("#member-variable, #member-label", container);
+          setActiveMinidrop({ key: groupsRef.current.groups[0].nodes[0].key });
+          showElems(
+            "#member-variable, #member-label, .water-group-label",
+            container
+          );
         }, transitionDuration + 500);
 
         setGoBack(() => () => {
@@ -102,7 +107,7 @@ export default function CompareView() {
       if (activeMinidrop) {
         const [positions, lines, nodes] = calcLinesAndPositions(
           groupsRef.current,
-          activeMinidrop
+          activeMinidrop.key
         );
 
         setPanels(fromNodes(nodes));
@@ -192,7 +197,7 @@ export default function CompareView() {
     d3.select("#compare-group")
       .select("#member-variable")
       .attr("font-size", largeTextSize)
-      .text(activeMinidrop.slice(4))
+      .text(activeMinidrop.key.slice(4))
       .transition()
       .duration(100)
       .attr("x", textX)

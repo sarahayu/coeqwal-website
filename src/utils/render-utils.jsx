@@ -4,8 +4,8 @@ import * as THREE from "three";
 import { interpolateWatercolorBlue } from "bucket-lib/utils";
 import { LOD_1_RAD_PX } from "settings";
 import { LOD_1_LEVELS } from "settings";
-import { sortBy } from "./misc-utils";
-import { toRadians } from "./math-utils";
+import { copyCoords, sortBy } from "./misc-utils";
+import { rotatePoint, rotatePoints, toRadians } from "./math-utils";
 
 // path generated when WATERDROP_ICON size = 2
 export const DROPLET_SHAPE = "M0,-1L0.5,-0.5A0.707,0.707,0,1,1,-0.5,-0.5L0,-1Z";
@@ -178,7 +178,10 @@ class MeshGeometry {
 
   addMeshCoords(meshCoords, transform, color, z = 0) {
     for (let j = 0; j < meshCoords.length; j++) {
-      const [v1, v2, v3] = meshCoords[j];
+      const [v1, v2, v3] = rotatePoints(
+        copyCoords(meshCoords[j]),
+        transform.rotate
+      );
 
       this.positionAttribute.setXYZ(
         this.triangleIdx * 3 + 0,
@@ -275,7 +278,14 @@ export class WaterdropMesh {
     );
 
     for (let i = 0; i < waterdrops.nodes.length; i++) {
-      const { id, globalX: x, globalY: y, levs, maxLev } = waterdrops.nodes[i];
+      const {
+        id,
+        globalX: x,
+        globalY: y,
+        levs,
+        maxLev,
+        globalTilt: tilt,
+      } = waterdrops.nodes[i];
 
       for (let k = levs.length - 1; k >= 0; k--) {
         const l1 = k !== levs.length - 1 ? levs[k + 1] : 0;
@@ -292,16 +302,18 @@ export class WaterdropMesh {
 
         dropsGeometry.addMeshCoords(
           meshCoords,
-          { x: x, y: -y },
+          { x: x, y: -y, rotate: tilt },
           color,
           (i % 5) / 50 + 0.02
         );
       }
 
+      const rotOutline = rotatePoints(copyCoords(outlineMeshCoords), tilt);
+
       outlinePoints.push(
-        ...outlineMeshCoords.map(
-          ([dx, dy]) => new THREE.Vector3(x + dx, -y - dy, (i % 5) / 50 + 0.01)
-        )
+        ...rotOutline.map(([dx, dy]) => {
+          return new THREE.Vector3(x + dx, -y - dy, (i % 5) / 50 + 0.01);
+        })
       );
     }
 

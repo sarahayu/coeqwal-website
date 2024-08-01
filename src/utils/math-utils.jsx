@@ -1,5 +1,7 @@
 import * as d3 from "d3";
+import * as THREE from "three";
 import Matter from "matter-js";
+
 import { CIRC_RAD, DROP_HEIGHT } from "./render-utils";
 
 export function clamp(x, a, b) {
@@ -221,4 +223,21 @@ export function dropCenterCorrection({ rad, height }) {
 
 export function avgCoords(coords) {
   return [d3.mean(coords, (c) => c[0]), d3.mean(coords, (c) => c[1])];
+}
+
+export function rotatePoint(x, y, deg) {
+  const vec = new THREE.Vector3(x, y, 0).applyEuler(
+    new THREE.Euler(0, 0, toRadians(deg))
+  );
+  return [vec.x, vec.y];
+}
+
+// modifies arr!
+export function rotatePoints(arr, deg) {
+  for (const a of arr) {
+    const newPoint = rotatePoint(a[0], a[1], deg);
+    a[0] = newPoint[0];
+    a[1] = newPoint[1];
+  }
+  return arr;
 }

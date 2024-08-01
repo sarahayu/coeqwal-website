@@ -103,7 +103,7 @@ export default function ExamineView() {
         const container = d3.select("#examine-group");
         const minidrops = waterdrops.groups.find(
           (g) => g.key === activeWaterdrops[0]
-        ).nodes;
+        );
 
         updateSmallDropSVG(container, minidrops, transitionDelay / 2, {
           onClick: updateActiveMinidrops,

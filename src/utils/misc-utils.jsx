@@ -83,3 +83,7 @@ export function arrRemove(arr, item) {
   }
   return arr;
 }
+
+export function copyCoords(arr) {
+  return arr.map((a) => Array.from(a));
+}

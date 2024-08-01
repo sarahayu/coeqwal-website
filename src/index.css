@@ -909,6 +909,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 .water-group-label {
   fill: gray;
   opacity: 0.5;
+  line-height: 1.5;
 }
 
 #member-label {
@@ -951,6 +952,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   width: 100%;
   background-color: #efefef;
   isolation: isolate;
+  line-height: 1.5;
 }
 
 .scrollama {
@@ -995,7 +997,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   display: flex;
   max-width: 60vw;
   align-items: center;
-  margin: 10rem auto;
+  margin: 0 auto;
+  height: 100vh;
+  position: relative;
 }
 
 .card1 > p {
@@ -1004,6 +1008,23 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   padding: 2rem;
   background-color: rgba(255, 255, 255, 0.8);
   border-radius: 1em;
+}
+
+.skip-btn {
+  position: absolute;
+  bottom: 3rem;
+  right: 0;
+  background-color: none;
+  border: none;
+  padding: 1em;
+  color: gray;
+  font-style: italic;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.skip-btn:hover {
+  text-decoration: none;
 }
 
 .tut-drop-graphics-wrapper {
@@ -1057,7 +1078,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   bottom: 2rem;
 }
 
-.tutorial-view button {
+.tut-text-card button {
   display: block;
   margin: 1em auto;
   background-color: none;
@@ -1069,7 +1090,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   font-weight: bold;
 }
 
-.tutorial-view button:hover {
+.tut-text-card button:hover {
   background-color: lightgray;
 }
 

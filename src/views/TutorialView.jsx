@@ -164,6 +164,12 @@ export default function TutorialView() {
           src="./northdelta.png"
           alt="Map of California with northern delta area highlighted"
         />
+        <button
+          className="skip-btn"
+          onClick={() => setState({ state: "WideView" })}
+        >
+          Skip tutorial
+        </button>
       </div>
       <div className="scrollama scrollama-1">
         <div className="tut-graph-wrapper">
