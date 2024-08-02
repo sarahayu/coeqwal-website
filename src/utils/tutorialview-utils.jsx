@@ -17,6 +17,7 @@ import { LOD_1_RAD_PX } from "settings";
 import { avgCoords } from "./math-utils";
 import { calcLinesAndPositions, getWaterdropGroups } from "./compareview-utils";
 import { genUUID, wrap } from "./misc-utils";
+import { serialize } from "./data-utils";
 
 export const DATE_START = 1921;
 export const INTERP_COLOR = d3.interpolateRgbBasis([
@@ -27,16 +28,8 @@ export const INTERP_COLOR = d3.interpolateRgbBasis([
   "#112A57",
 ]);
 
-export const NUM_OPTS = {
-  demand: 5,
-  carryover: 3,
-  priority: 2,
-  regs: 4,
-  minflow: 5,
-};
-
 export const DEFAULT_OBJECTIVE = "DEL_CVP_PAG_N";
-export const DEFAULT_SCENARIO = [1, 1, 0, 0, 0]; // expl0160
+export const DEFAULT_SCENARIO = [3, 1, 0, 0, 0]; // expl0160
 export const DEFAULT_DELIVS =
   OBJECTIVES_DATA[DEFAULT_OBJECTIVE][SCENARIO_KEY_STRING][
     serialize(...DEFAULT_SCENARIO)
@@ -45,10 +38,10 @@ export const DEFAULT_DELIVS =
 export const COMP_OBJECTIVE = "DEL_CVP_PRF_S";
 
 export const VARIATIONS = [
-  [1, 1, 1, 0, 0], // expl0180
-  [1, 2, 0, 0, 0], // expl0200
-  [1, 1, 0, 0, 4], // expl0164
-  [1, 1, 0, 3, 0], // expl0175
+  [3, 1, 1, 0, 0], // expl0180
+  [3, 2, 0, 0, 0], // expl0200
+  [3, 1, 0, 0, 4], // expl0164
+  [3, 1, 0, 3, 0], // expl0175
 ];
 
 export const VARIATIONS_DELIVS = VARIATIONS.map(
@@ -85,24 +78,6 @@ export const BAR_CHART_WIDTH = 800,
   BAR_CHART_HEIGHT = 400;
 
 export const BAR_CHART_MARGIN = { top: 40, right: 30, bottom: 40, left: 60 };
-
-export function serialize(demand, carryover, priority, regs, minflow) {
-  let code = 0;
-  code += minflow;
-  code += NUM_OPTS.minflow * regs;
-  code += NUM_OPTS.regs * NUM_OPTS.minflow * priority;
-  code += NUM_OPTS.priority * NUM_OPTS.regs * NUM_OPTS.minflow * carryover;
-  code +=
-    NUM_OPTS.carryover *
-    NUM_OPTS.priority *
-    NUM_OPTS.regs *
-    NUM_OPTS.minflow *
-    demand;
-
-  const finalKey = `expl${d3.format("0>4")(code)}`;
-
-  return finalKey;
-}
 
 export function useTutorialState() {
   const [userGoal, setUserGoal] = useState(200);
@@ -287,7 +262,7 @@ export function useTutorialComparer() {
 
   function initComparer(waterdrops, camera) {
     groupsRef.current = getWaterdropGroups(
-      [COMP_OBJECTIVE, DEFAULT_OBJECTIVE],
+      [DEFAULT_OBJECTIVE, COMP_OBJECTIVE],
       waterdrops,
       [0, 0]
     );
@@ -304,8 +279,8 @@ export function useTutorialComparer() {
       k,
     };
 
-    x = -(groupsRef.current.groupPositions[1][0] * k) + camera.width / 2;
-    y = groupsRef.current.groupPositions[1][1] * k + camera.height / 2;
+    x = -(groupsRef.current.groupPositions[0][0] * k) + camera.width / 2;
+    y = groupsRef.current.groupPositions[0][1] * k + camera.height / 2;
 
     const camFirstDrop = {
       x,

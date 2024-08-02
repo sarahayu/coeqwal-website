@@ -1237,8 +1237,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   height: 1em;
   width: 1em;
   background-color: var(--dot-color, red);
+  border: 1px solid var(--dot-color, red);
   display: block;
   border-radius: 100vh;
+}
+
+.scen-settings .sett-dot.not-filled {
+  background-color: transparent;
 }
 
 .scen-settings .full {
