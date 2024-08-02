@@ -1204,32 +1204,37 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .scen-settings .condense .sett-dot-wrapper:nth-child(1),
-.scen-settings .full .full-card:nth-of-type(1) {
+.scen-settings .full-card:nth-of-type(1) {
   --dot-color: red;
+  --dot-color-medium: rgb(255, 216, 216);
   --dot-color-light: rgb(255, 233, 233);
 }
 
 .scen-settings .condense .sett-dot-wrapper:nth-child(2),
-.scen-settings .full .full-card:nth-of-type(2) {
+.scen-settings .full-card:nth-of-type(2) {
   --dot-color: orange;
+  --dot-color-medium: rgb(255, 239, 211);
   --dot-color-light: rgb(255, 246, 230);
 }
 
 .scen-settings .condense .sett-dot-wrapper:nth-child(3),
-.scen-settings .full .full-card:nth-of-type(3) {
+.scen-settings .full-card:nth-of-type(3) {
   --dot-color: blue;
+  --dot-color-medium: rgb(193, 193, 255);
   --dot-color-light: rgb(211, 211, 255);
 }
 
 .scen-settings .condense .sett-dot-wrapper:nth-child(4),
-.scen-settings .full .full-card:nth-of-type(4) {
+.scen-settings .full-card:nth-of-type(4) {
   --dot-color: green;
+  --dot-color-medium: rgb(216, 255, 216);
   --dot-color-light: rgb(234, 255, 234);
 }
 
 .scen-settings .condense .sett-dot-wrapper:nth-child(5),
-.scen-settings .full .full-card:nth-of-type(5) {
+.scen-settings .full-card:nth-of-type(5) {
   --dot-color: magenta;
+  --dot-color-medium: rgb(255, 215, 255);
   --dot-color-light: rgb(255, 225, 255);
 }
 
@@ -1297,7 +1302,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   font-family: Georgia, "Times New Roman", Times, serif;
 }
 
-.scen-settings .full .full-card {
+.scen-settings .full-card {
   background-color: var(--dot-color-light, rgb(255, 189, 189));
   display: flex;
   flex-direction: column;
@@ -1309,14 +1314,29 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
 }
 
-.scen-settings .full .full-card > span:nth-child(2) {
+.scen-settings .full-card:hover {
+  background-color: var(--dot-color-medium, rgb(252, 156, 156));
+}
+
+.scen-settings .full-card > span:nth-child(2) {
   font-size: 2rem;
 }
 
-.scen-settings .full .sett-dot-wrapper {
+.scen-settings .sett-dot-wrapper {
   display: flex;
   align-items: center;
   gap: 0.2em;
   border-radius: 0.5em;
   padding: 0.2em 0.5em;
+}
+
+.comp-settings {
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  font-size: 0.5rem;
 }

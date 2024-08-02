@@ -637,8 +637,8 @@ export function circlet(s) {
     .attr("vector-effect", "non-scaling-stroke");
 }
 
-export function showElems(elemStr, container) {
-  (container || d3).selectAll(elemStr).style("display", "block");
+export function showElems(elemStr, container, displayVal) {
+  (container || d3).selectAll(elemStr).style("display", displayVal || "block");
 }
 
 export function hideElems(elemStr, container) {

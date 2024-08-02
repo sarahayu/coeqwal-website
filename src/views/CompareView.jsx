@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 
 import { AppContext } from "AppContext";
 import DotHistogram from "components/DotHistogram";
-import { FLATTENED_DATA } from "data/objectives-data";
+import { FLATTENED_DATA, KEY_SETTINGS_MAP } from "data/objectives-data";
 import { LOD_1_RAD_PX, SPREAD_1_2 } from "settings";
 
 import { avgCoords } from "utils/math-utils";
@@ -13,8 +13,10 @@ import { circlet, hideElems, removeElems, showElems } from "utils/render-utils";
 import {
   calcLinesAndPositions,
   getWaterdropGroups,
+  updateColorDrops,
   updateDropsSVG,
 } from "utils/compareview-utils";
+import { SETT_NAME_FULL, SETT_VAL_STEPS, deserialize } from "utils/data-utils";
 
 export default function CompareView() {
   const {
@@ -32,6 +34,7 @@ export default function CompareView() {
 
   const [activeMinidrop, setActiveMinidrop] = useState();
   const [panels, setPanels] = useState([]);
+  const [colorSetting, setColorSetting] = useState(null);
   const groupsRef = useRef();
   const centerRef = useRef();
   const mouseDownInfo = useRef({});
@@ -81,6 +84,7 @@ export default function CompareView() {
             "#member-variable, #member-label, .water-group-label",
             container
           );
+          showElems(".comp-settings", d3, "flex");
         }, transitionDuration + 500);
 
         setGoBack(() => () => {
@@ -93,6 +97,7 @@ export default function CompareView() {
           removeElems(".large-drop, .circlet, .comp-line", container);
 
           hideElems("#member-variable, #member-label", container);
+          hideElems(".comp-settings");
 
           setPanels([]);
           setGoBack(null);
@@ -116,6 +121,33 @@ export default function CompareView() {
       }
     },
     [activeMinidrop]
+  );
+
+  useEffect(
+    function highlightWithColor() {
+      const container = d3.select("#compare-group");
+      if (colorSetting === null) {
+        hideElems(".color-drop-group", container);
+        showElems(".large-drop", container);
+        return;
+      }
+
+      const getOpacity = (key) => {
+        return KEY_SETTINGS_MAP[key][colorSetting];
+      };
+
+      const colors = ["red", "orange", "blue", "green", "magenta"];
+
+      updateColorDrops(
+        container,
+        groupsRef.current,
+        getOpacity,
+        colors[colorSetting]
+      );
+      showElems(".color-drop-group", container);
+      hideElems(".large-drop", container);
+    },
+    [colorSetting]
   );
 
   function registerEventListeners() {
@@ -264,6 +296,12 @@ export default function CompareView() {
 
   return (
     <>
+      {activeMinidrop && (
+        <SceneSettings
+          settings={deserialize(activeMinidrop.key.slice(4))}
+          setColorSetting={setColorSetting}
+        />
+      )}
       {panels.map(({ x, y, id, isLeft, offsetX, offsetY, nodeID }, i) => (
         <div
           className={"panel compare-panel" + (isLeft ? " left" : "")}
@@ -286,5 +324,32 @@ export default function CompareView() {
         </div>
       ))}
     </>
+  );
+}
+
+function SceneSettings({ settings, setColorSetting }) {
+  return (
+    <div className="scen-settings comp-settings">
+      {settings.map((v, i) => (
+        <div
+          className="full-card"
+          onMouseEnter={() => setColorSetting(i)}
+          onMouseLeave={() => setColorSetting(null)}
+          key={i}
+        >
+          <span>{SETT_NAME_FULL[i]}</span>
+          <span>{SETT_VAL_STEPS[i][v]}</span>
+          <div className="sett-dot-wrapper">
+            {d3.range(SETT_VAL_STEPS[i].length).map((j) => (
+              <span
+                className={`sett-dot ${j <= v ? "filled" : "not-filled"}`}
+                key={j}
+                style={{ opacity: (j + 1) / SETT_VAL_STEPS[i].length }}
+              ></span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

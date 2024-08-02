@@ -3,14 +3,19 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { AppContext } from "AppContext";
 import DotHistogram from "components/DotHistogram";
-import { FLATTENED_DATA } from "data/objectives-data";
+import { FLATTENED_DATA, KEY_SETTINGS_MAP } from "data/objectives-data";
 import { SPREAD_1_2 } from "settings";
 
 import { DESCRIPTIONS_DATA } from "data/descriptions-data";
 import { updateColorDrops, updateSmallDropSVG } from "utils/examineview-utils";
 import { arrRemove, isState } from "utils/misc-utils";
 import { hideElems, removeElems, showElems } from "utils/render-utils";
-import { NUM_OPTS, deserialize } from "utils/data-utils";
+import {
+  SETT_NAME_SHORT,
+  SETT_NAME_FULL,
+  SETT_VAL_STEPS,
+  deserialize,
+} from "utils/data-utils";
 
 export default function ExamineView() {
   const {
@@ -29,7 +34,6 @@ export default function ExamineView() {
   const activeMinidropsRef = useRef([]);
   const previewMinidropRef = useRef(null);
   const curMinidropsRef = useRef([]);
-  const deserializedSettingsRef = useRef({});
   const [panels, setPanels] = useState([]);
   const [colorSetting, setColorSetting] = useState(null);
 
@@ -69,17 +73,6 @@ export default function ExamineView() {
 
       mouseDownInfo.current = {};
     });
-
-    const scens = waterdrops.groups[0].nodes;
-    const optArr = Object.values(NUM_OPTS);
-
-    for (let i = 0; i < scens.length; i++) {
-      const { key } = scens[i];
-
-      deserializedSettingsRef.current[key] = deserialize(key.slice(4)).map(
-        (v, i) => (v + 1) / optArr[i]
-      );
-    }
   }, []);
 
   useEffect(
@@ -132,7 +125,7 @@ export default function ExamineView() {
       }
 
       const getOpacity = (key) => {
-        return deserializedSettingsRef.current[key][colorSetting];
+        return KEY_SETTINGS_MAP[key][colorSetting];
       };
 
       const colors = ["red", "orange", "blue", "green", "magenta"];
@@ -265,28 +258,18 @@ export default function ExamineView() {
   }
 }
 
-const ABBREVS = ["D", "C", "P", "R", "M"];
-const FULLS = ["Demand", "Carryover", "Priority", "Regs.", "Min. Flow"];
-const VAL_STEPS = [
-  [1, 0.9, 0.8, 0.7, 0.6].reverse(), // demand
-  [1.0, 1.2, 1.3], // carryover
-  [0, 1], // priority
-  [1, 2, 3, 4], // regs
-  [0, 0.4, 0.6, 0.7, 0.8], // minflow
-];
-
 function SceneSettings({ settings, setColorSetting }) {
   return (
     <div className="scen-settings">
       <div className="condense">
         {settings.map((v, i) => (
           <div className="sett-dot-wrapper" key={i}>
-            <span>{ABBREVS[i]}</span>
+            <span>{SETT_NAME_SHORT[i]}</span>
             {d3.range(v + 1).map((j) => (
               <span
                 className="sett-dot"
                 key={j}
-                style={{ opacity: (j + 1) / VAL_STEPS[i].length }}
+                style={{ opacity: (j + 1) / SETT_VAL_STEPS[i].length }}
               ></span>
             ))}
           </div>
@@ -302,14 +285,14 @@ function SceneSettings({ settings, setColorSetting }) {
               onMouseLeave={() => setColorSetting(null)}
               key={i}
             >
-              <span>{FULLS[i]}</span>
-              <span>{VAL_STEPS[i][v]}</span>
+              <span>{SETT_NAME_FULL[i]}</span>
+              <span>{SETT_VAL_STEPS[i][v]}</span>
               <div className="sett-dot-wrapper">
-                {d3.range(VAL_STEPS[i].length).map((j) => (
+                {d3.range(SETT_VAL_STEPS[i].length).map((j) => (
                   <span
                     className={`sett-dot ${j <= v ? "filled" : "not-filled"}`}
                     key={j}
-                    style={{ opacity: (j + 1) / VAL_STEPS[i].length }}
+                    style={{ opacity: (j + 1) / SETT_VAL_STEPS[i].length }}
                   ></span>
                 ))}
               </div>

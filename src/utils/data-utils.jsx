@@ -35,49 +35,69 @@ export function calcDomLev(levs) {
   return mean;
 }
 
-export const NUM_OPTS = {
-  demand: 5,
-  carryover: 3,
-  priority: 2,
-  regs: 4,
-  minflow: 5,
+export const SETT_NAME_SHORT = ["D", "C", "P", "R", "M"];
+export const SETT_NAME_FULL = [
+  "Demand",
+  "Carryover",
+  "Priority",
+  "Regs.",
+  "Min. Flow",
+];
+export const SETT_VAL_STEPS = [
+  [1, 0.9, 0.8, 0.7, 0.6].reverse(), // demand
+  [1.0, 1.2, 1.3], // carryover
+  [0, 1], // priority
+  [1, 2, 3, 4], // regs
+  [0, 0.4, 0.6, 0.7, 0.8], // minflow
+];
+
+export const SETT_NUM_OPTS = {
+  demand: SETT_VAL_STEPS[0].length,
+  carryover: SETT_VAL_STEPS[1].length,
+  priority: SETT_VAL_STEPS[2].length,
+  regs: SETT_VAL_STEPS[3].length,
+  minflow: SETT_VAL_STEPS[4].length,
 };
 
 export function deserialize(scenStr) {
   let scenNum = parseInt(scenStr);
 
-  const minflow = scenNum % NUM_OPTS.minflow;
-  scenNum = (scenNum - minflow) / NUM_OPTS.minflow;
+  const minflow = scenNum % SETT_NUM_OPTS.minflow;
+  scenNum = (scenNum - minflow) / SETT_NUM_OPTS.minflow;
 
-  const regs = scenNum % NUM_OPTS.regs;
-  scenNum = (scenNum - regs) / NUM_OPTS.regs;
+  const regs = scenNum % SETT_NUM_OPTS.regs;
+  scenNum = (scenNum - regs) / SETT_NUM_OPTS.regs;
 
-  const priority = scenNum % NUM_OPTS.priority;
-  scenNum = (scenNum - priority) / NUM_OPTS.priority;
+  const priority = scenNum % SETT_NUM_OPTS.priority;
+  scenNum = (scenNum - priority) / SETT_NUM_OPTS.priority;
 
-  const carryover = scenNum % NUM_OPTS.carryover;
-  scenNum = (scenNum - carryover) / NUM_OPTS.carryover;
+  const carryover = scenNum % SETT_NUM_OPTS.carryover;
+  scenNum = (scenNum - carryover) / SETT_NUM_OPTS.carryover;
 
   // reverse demand values so that 0 is low demand and 4 is high demand
-  const demand = scenNum % NUM_OPTS.demand;
-  const demandReverse = NUM_OPTS.demand - 1 - demand;
+  const demand = scenNum % SETT_NUM_OPTS.demand;
+  const demandReverse = SETT_NUM_OPTS.demand - 1 - demand;
 
   return [demandReverse, carryover, priority, regs, minflow];
 }
 
 export function serialize(demand, carryover, priority, regs, minflow) {
   // reverse demand values so that 0 is low demand and 4 is high demand
-  const demandReverse = NUM_OPTS.demand - 1 - demand;
+  const demandReverse = SETT_NUM_OPTS.demand - 1 - demand;
   let code = 0;
   code += minflow;
-  code += NUM_OPTS.minflow * regs;
-  code += NUM_OPTS.regs * NUM_OPTS.minflow * priority;
-  code += NUM_OPTS.priority * NUM_OPTS.regs * NUM_OPTS.minflow * carryover;
+  code += SETT_NUM_OPTS.minflow * regs;
+  code += SETT_NUM_OPTS.regs * SETT_NUM_OPTS.minflow * priority;
   code +=
-    NUM_OPTS.carryover *
-    NUM_OPTS.priority *
-    NUM_OPTS.regs *
-    NUM_OPTS.minflow *
+    SETT_NUM_OPTS.priority *
+    SETT_NUM_OPTS.regs *
+    SETT_NUM_OPTS.minflow *
+    carryover;
+  code +=
+    SETT_NUM_OPTS.carryover *
+    SETT_NUM_OPTS.priority *
+    SETT_NUM_OPTS.regs *
+    SETT_NUM_OPTS.minflow *
     demandReverse;
 
   const finalKey = `expl${d3.format("0>4")(code)}`;

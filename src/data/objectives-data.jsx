@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { SETT_NUM_OPTS, deserialize } from "utils/data-utils";
 
 import { clamp, shuffle } from "utils/math-utils";
 import { mapBy } from "utils/misc-utils";
@@ -40,6 +41,19 @@ const _SCENARIO_IDS = Object.keys(
 export const SCENARIO_IDS = _SCENARIO_IDS.filter(
   (_, i) => i % SCEN_DIVISOR === 0
 );
+
+export const KEY_SETTINGS_MAP = (function preprocessData() {
+  const map = {};
+  const optArr = Object.values(SETT_NUM_OPTS);
+
+  for (let i = 0; i < SCENARIO_IDS.length; i++) {
+    const key = SCENARIO_IDS[i];
+
+    map[key] = deserialize(key.slice(4)).map((v, i) => (v + 1) / optArr[i]);
+  }
+
+  return map;
+})();
 
 // Flattening hierarchical data makes it more flexible for classifying
 // (from experience). id conveniently corresponds to index.

@@ -153,6 +153,38 @@ function largeDropUpdate({ nodes, key, height }) {
   };
 }
 
+export function updateColorDrops(container, waterdropGroups, opacFn, color) {
+  container
+    .selectAll(".color-drop-group")
+    .data(waterdropGroups.groups)
+    .join((enter) => {
+      return enter.append("g").each(function ({ nodes }) {
+        d3.select(this).call((s) => {
+          s.attr("class", "color-drop-group")
+            .selectAll(".color-drop")
+            .data(nodes)
+            .join("circle")
+            .attr("class", "color-drop")
+            .attr("r", LOD_1_RAD_PX);
+        });
+      });
+    })
+    .attr(
+      "transform",
+      (_, i) =>
+        `translate(${waterdropGroups.groupPositions[i][0]}, ${waterdropGroups.groupPositions[i][1]})`
+    )
+    .each(function (node) {
+      d3.select(this)
+        .selectAll(".color-drop")
+        .call((s) => {
+          s.attr("opacity", ({ key }) => opacFn(key)).attr("fill", color);
+        })
+        .attr("cx", ({ x }) => x * SPREAD_1_2)
+        .attr("cy", ({ y }) => y * SPREAD_1_2);
+    });
+}
+
 export function updateDropsSVG(
   container,
   waterdropGroups,
