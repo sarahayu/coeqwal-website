@@ -1,5 +1,11 @@
 import * as d3 from "d3";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 
 import { AppContext } from "AppContext";
 import DotHistogram from "components/DotHistogram";
@@ -17,6 +23,7 @@ import {
   updateDropsSVG,
 } from "utils/compareview-utils";
 import { SETT_NAME_FULL, SETT_VAL_STEPS, deserialize } from "utils/data-utils";
+import { useDragPanels } from "utils/drag-panels";
 
 export default function CompareView() {
   const {
@@ -33,14 +40,15 @@ export default function CompareView() {
   } = useContext(AppContext);
 
   const [activeMinidrop, setActiveMinidrop] = useState();
-  const [panels, setPanels] = useState([]);
+  const [camTransform, setCamTransform] = useState(d3.zoomIdentity);
+  const { panels, setPanels, onPanelDragStart, getPanelStyle } =
+    useDragPanels(camTransform);
   const [colorSetting, setColorSetting] = useState(null);
   const groupsRef = useRef();
   const centerRef = useRef();
-  const mouseDownInfo = useRef({});
 
-  // TODO trigger rerender another way?
-  const [cameraChangeFlag, setCameraChangeFlag] = useState(false);
+  const getScreenDropHeight = () =>
+    groupsRef.current.groups[0].height * SPREAD_1_2;
 
   useEffect(function initialize() {
     const container = d3
@@ -52,7 +60,9 @@ export default function CompareView() {
     container.append("text").attr("id", "member-variable");
     container.append("text").attr("id", "member-label");
 
-    registerEventListeners();
+    addZoomHandler(function (transform) {
+      setCamTransform(transform);
+    });
   }, []);
 
   useEffect(
@@ -93,6 +103,8 @@ export default function CompareView() {
           resetCamera();
         });
 
+        setCamTransform(camera.curTransform);
+
         return function exitState() {
           removeElems(".large-drop, .circlet, .comp-line", container);
 
@@ -115,9 +127,13 @@ export default function CompareView() {
           activeMinidrop.key
         );
 
-        setPanels(fromNodes(nodes));
-        updateLabel(avgCoords(positions));
-        updateScenIndicators(positions, lines);
+        setPanels(makePanelsFromNodes(nodes));
+        updateLabelSVG(
+          avgCoords(positions),
+          activeMinidrop.key.slice(4),
+          getScreenDropHeight()
+        );
+        updateScenIndicatorsSVG(positions, lines);
       }
     },
     [activeMinidrop]
@@ -150,36 +166,7 @@ export default function CompareView() {
     [colorSetting]
   );
 
-  function registerEventListeners() {
-    addZoomHandler(function () {
-      setCameraChangeFlag((f) => !f);
-    });
-
-    window.addEventListener("mousemove", (e) => {
-      if (mouseDownInfo.current.startX === undefined) return;
-
-      mouseDownInfo.current.deltaX = e.x - mouseDownInfo.current.startX;
-      mouseDownInfo.current.deltaY = e.y - mouseDownInfo.current.startY;
-
-      setPanels((p) => {
-        if (mouseDownInfo.current.startX === undefined) return p;
-
-        const f = p.find((v) => v.id === mouseDownInfo.current.id);
-        f.offsetX = f.oldOffsetX + mouseDownInfo.current.deltaX;
-        f.offsetY = f.oldOffsetY + mouseDownInfo.current.deltaY;
-
-        return [...p];
-      });
-    });
-
-    window.addEventListener("mouseup", (e) => {
-      if (mouseDownInfo.current.startX !== undefined) {
-        mouseDownInfo.current = {};
-      }
-    });
-  }
-
-  function fromNodes(nodes) {
+  function makePanelsFromNodes(nodes) {
     return (p) => {
       return nodes.map((n, i) => {
         let ox = 0,
@@ -209,57 +196,6 @@ export default function CompareView() {
     };
   }
 
-  function updateLabel(pos) {
-    const [textX, textY] = pos;
-
-    const smallTextSize =
-      (groupsRef.current.groups[0].height * SPREAD_1_2) / 15;
-    const largeTextSize =
-      (groupsRef.current.groups[0].height * SPREAD_1_2) / 10;
-
-    d3.select("#compare-group")
-      .select("#member-label")
-      .text("scenario")
-      .attr("font-size", smallTextSize)
-      .transition()
-      .duration(100)
-      .attr("x", textX)
-      .attr("y", textY - smallTextSize * 1.5);
-
-    d3.select("#compare-group")
-      .select("#member-variable")
-      .attr("font-size", largeTextSize)
-      .text(activeMinidrop.key.slice(4))
-      .transition()
-      .duration(100)
-      .attr("x", textX)
-      .attr("y", textY);
-  }
-
-  function updateScenIndicators(positions, lines) {
-    d3.select("#compare-group")
-      .selectAll(".circlet")
-      .data(positions)
-      .join("circle")
-      .attr("class", "circlet")
-      .call(circlet)
-      .attr("display", "initial")
-      .attr("r", LOD_1_RAD_PX * 1.5)
-      .transition()
-      .duration(100)
-      .attr("cx", (d) => d[0])
-      .attr("cy", (d) => d[1]);
-
-    d3.select("#compare-group")
-      .selectAll(".comp-line")
-      .data(lines)
-      .join("path")
-      .attr("class", "comp-line")
-      .transition()
-      .duration(100)
-      .attr("d", (d) => d3.line()(d));
-  }
-
   function getIdealGroupPos([x, y], [centerX, centerY]) {
     let newX = x,
       newY = y;
@@ -270,28 +206,6 @@ export default function CompareView() {
     else newX += correctionX;
 
     return [newX, newY, newX < centerX];
-  }
-
-  function onPanelDragStart(e, id) {
-    if (e.target.className === "") return; // we're clicking the razor, disregard
-
-    mouseDownInfo.current = { startX: e.clientX, startY: e.clientY, id };
-
-    setPanels((p) => {
-      const f = p.find((v) => v.id === id);
-
-      f.oldOffsetX = f.offsetX;
-      f.oldOffsetY = f.offsetY;
-
-      return [...p];
-    });
-  }
-
-  function getStyle(x, y, offsetX, offsetY) {
-    return {
-      left: `${x * camera.curTransform.k + camera.curTransform.x + offsetX}px`,
-      top: `${y * camera.curTransform.k + camera.curTransform.y + offsetY}px`,
-    };
   }
 
   return (
@@ -306,8 +220,8 @@ export default function CompareView() {
         <div
           className={"panel compare-panel" + (isLeft ? " left" : "")}
           key={i}
-          style={getStyle(x, y, offsetX, offsetY)}
-          onMouseDown={(e) => onPanelDragStart(e, id)}
+          style={getPanelStyle({ x, y, offsetX, offsetY })}
+          onMouseDown={(e) => onPanelDragStart(e, { id })}
         >
           <DotHistogram
             width={300}
@@ -352,4 +266,53 @@ function SceneSettings({ settings, setColorSetting }) {
       ))}
     </div>
   );
+}
+
+function updateLabelSVG(pos, labelText, normedTextSize) {
+  const [textX, textY] = pos;
+
+  const smallTextSize = normedTextSize / 15;
+  const largeTextSize = normedTextSize / 10;
+
+  d3.select("#compare-group")
+    .select("#member-label")
+    .text("scenario")
+    .attr("font-size", smallTextSize)
+    .transition()
+    .duration(100)
+    .attr("x", textX)
+    .attr("y", textY - smallTextSize * 1.5);
+
+  d3.select("#compare-group")
+    .select("#member-variable")
+    .attr("font-size", largeTextSize)
+    .text(labelText)
+    .transition()
+    .duration(100)
+    .attr("x", textX)
+    .attr("y", textY);
+}
+
+function updateScenIndicatorsSVG(positions, lines) {
+  d3.select("#compare-group")
+    .selectAll(".circlet")
+    .data(positions)
+    .join("circle")
+    .attr("class", "circlet")
+    .call(circlet)
+    .attr("display", "initial")
+    .attr("r", LOD_1_RAD_PX * 1.5)
+    .transition()
+    .duration(100)
+    .attr("cx", (d) => d[0])
+    .attr("cy", (d) => d[1]);
+
+  d3.select("#compare-group")
+    .selectAll(".comp-line")
+    .data(lines)
+    .join("path")
+    .attr("class", "comp-line")
+    .transition()
+    .duration(100)
+    .attr("d", (d) => d3.line()(d));
 }
