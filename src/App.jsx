@@ -1,10 +1,9 @@
 import * as d3 from "d3";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { AppContext } from "AppContext";
 
-import { useStateRef } from "utils/misc-utils";
 import { initWaterdrops } from "utils/app-utils";
 
 import WideView from "views/WideView";
@@ -12,14 +11,8 @@ import ExamineView from "views/ExamineView";
 import TutorialView from "views/TutorialView";
 import CompareView from "views/CompareView";
 
-import {
-  scene,
-  camera,
-  renderer,
-  dropsMesh,
-  pointsMesh,
-} from "three-resources";
-import { OBJECTIVE_IDS } from "data/objectives-data";
+import { scene, camera, renderer, dropsMesh } from "three-resources";
+import { OBJECTIVE_GOALS_MAP } from "data/objectives-data";
 
 // pre-calculate these so we don't lag later
 const waterdrops = initWaterdrops("objective");
@@ -33,24 +26,14 @@ console.time("drops mesh creating");
 dropsMesh.createMesh(waterdrops);
 console.timeEnd("drops mesh creating");
 
-// pointsMesh.createMesh(waterdrops);
-
 export default function App() {
-  const [state, setState, stateRef] = useStateRef({});
-  const [zoomCallbacks, setZoomCallbacks, zoomCallbacksRef] = useStateRef([]);
+  const [state, setState] = useState({});
   const [activeWaterdrops, setActiveWaterdrops] = useState([]);
   const [goBack, setGoBack] = useState(null);
-  const [
-    disableCamAdjustments,
-    setDisableCamAdjustments,
-    disableCamAdjustmentsRef,
-  ] = useStateRef(false);
-  const [goals, setGoals] = useState(() => {
-    const goalMap = {};
-    for (let i = 0; i < OBJECTIVE_IDS.length; i++)
-      goalMap[OBJECTIVE_IDS[i]] = 200;
-    return goalMap;
-  });
+  const [goals, setGoals] = useState(OBJECTIVE_GOALS_MAP);
+
+  const zoomCallbacksRef = useRef([]);
+  const disableCamAdjustmentsRef = useRef(false);
 
   const getOutlineOpacity = useCallback(
     d3
@@ -130,8 +113,12 @@ export default function App() {
   }, []);
 
   const addZoomHandler = useCallback(function (cb) {
-    setZoomCallbacks((cbs) => [...cbs, cb]);
+    zoomCallbacksRef.current.push(cb);
   }, []);
+
+  const setDisableCamAdjustments = useCallback(function (disable) {
+    disableCamAdjustmentsRef.current = disable;
+  });
 
   return (
     <AppContext.Provider
@@ -147,7 +134,6 @@ export default function App() {
         scene,
         camera,
         renderer,
-        pointsMesh,
         dropsMesh,
         setGoBack,
         zoomTo,

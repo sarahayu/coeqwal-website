@@ -1,11 +1,5 @@
 import * as d3 from "d3";
-import React, {
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from "react";
+import React, { useContext, useLayoutEffect, useMemo, useRef } from "react";
 import { Scrollama, Step } from "react-scrollama";
 
 import { AppContext } from "AppContext";

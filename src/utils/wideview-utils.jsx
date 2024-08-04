@@ -12,6 +12,133 @@ import { dist, dropCenterCorrection, getCenterDomRect } from "utils/math-utils";
 import { wrap } from "utils/misc-utils";
 import { circlet } from "utils/render-utils";
 
+export function drawMinimapSVG() {
+  const width = 200,
+    height = 250;
+
+  const minimap = d3
+    .select("#minimap")
+    .attr("width", width)
+    .attr("height", height);
+
+  const proj = d3
+    .geoMercator()
+    .scale(1000)
+    .center(CALIFORNIA_CENTER)
+    .translate([width / 2, height / 2]);
+
+  const lineGeom = [
+    ...SPATIAL_DATA.features.filter((f) => f.geometry.type === "MultiPolygon"),
+    CALIFORNIA_OUTLINE,
+  ];
+  const pointGeom = SPATIAL_DATA.features.filter(
+    (f) => f.geometry.type === "MultiPoint"
+  );
+
+  minimap
+    .selectAll("path")
+    .data(lineGeom)
+    .join("path")
+    .attr("d", (d) => d3.geoPath().projection(proj)(d))
+    .attr("class", (d) => "outline " + d.properties.CalLiteID)
+    .attr("stroke", (d) =>
+      d.properties.CalLiteID ? "transparent" : "lightgray"
+    )
+    .attr("stroke-width", 1)
+    .attr("fill", "transparent");
+
+  minimap
+    .selectAll("circle")
+    .data(pointGeom)
+    .join("circle")
+    .each(function (d) {
+      const s = d3.select(this);
+
+      const [x, y] = proj(d.geometry.coordinates[0]);
+
+      s.attr("cx", x);
+      s.attr("cy", y);
+    })
+    .attr("r", 2)
+    .attr("class", (d) => "outline " + d.properties.CalLiteID)
+    .attr("fill", "transparent");
+}
+
+export function updateLargeDropSVG(
+  container,
+  waterdrops,
+  { onClick, onHover, onUnhover }
+) {
+  container
+    .selectAll(".large-drop")
+    .data(waterdrops.groups)
+    .join((enter) => {
+      return enter
+        .append("g")
+        .attr("class", "large-drop")
+        .each(interactorsInit);
+    })
+    .each(interactorsUpdate)
+    .style("display", "initial")
+    .attr("transform", dropTransform)
+    .select(".hover-capture")
+    .on("click", function (_, d) {
+      onClick && onClick(d);
+    })
+    .on("mouseenter", function (_, d) {
+      if (!d3.select(this.parentNode).select(".circlet").classed("active"))
+        d3.select(this.parentNode).select("circle").attr("display", "initial");
+      onHover && onHover(d);
+    })
+    .on("mouseleave", function (_, d) {
+      if (!d3.select(this.parentNode).select(".circlet").classed("active"))
+        d3.select(this.parentNode).select("circle").attr("display", "none");
+      onUnhover && onUnhover(d);
+    });
+}
+
+export function fontSizer(transformInfo, camera, waterdropsHeight) {
+  return function () {
+    const tNode = d3.select(this).node();
+
+    const [posx, posy] = getCenterDomRect(tNode.getBoundingClientRect());
+
+    const width = ((tNode.getBBox().width * camera.height) / camera.far) * 8,
+      height = ((tNode.getBBox().height * camera.height) / camera.far) * 10;
+
+    const dis = dist(
+      [posx, posy],
+      [transformInfo.mouseX, transformInfo.mouseY]
+    );
+
+    d3.select(this).attr(
+      "font-size",
+      getFontSize(dis, transformInfo.zoom, camera.height, waterdropsHeight)
+    );
+
+    d3.select(this.parentNode.parentNode)
+      .select("image")
+      .attr("x", -width / 2)
+      .attr("y", -height / 2)
+      .attr("width", width)
+      .attr("height", height);
+  };
+}
+
+export function fadeOutDrops(dropsMesh, scene, startOpac, duration) {
+  const t = d3.timer((elapsed) => {
+    const et = Math.min(1, elapsed / duration);
+
+    dropsMesh.updateVisibility(1 - et);
+    dropsMesh.updateOutlineVisibility(startOpac * (1 - et));
+
+    if (et >= 1) {
+      t.stop();
+      dropsMesh.remove(scene);
+    }
+  });
+}
+
 function interactorsInit() {
   const s = d3.select(this);
 
@@ -72,92 +199,7 @@ function dropTransform({ x, y, height }) {
   })`;
 }
 
-export function updateLargeDropSVG(
-  container,
-  waterdrops,
-  { onClick, onHover, onUnhover }
-) {
-  container
-    .selectAll(".large-drop")
-    .data(waterdrops.groups)
-    .join((enter) => {
-      return enter
-        .append("g")
-        .attr("class", "large-drop")
-        .each(interactorsInit);
-    })
-    .each(interactorsUpdate)
-    .style("display", "initial")
-    .attr("transform", dropTransform)
-    .select(".hover-capture")
-    .on("click", function (_, d) {
-      onClick && onClick(d);
-    })
-    .on("mouseenter", function (_, d) {
-      if (!d3.select(this.parentNode).select(".circlet").classed("active"))
-        d3.select(this.parentNode).select("circle").attr("display", "initial");
-      onHover && onHover(d);
-    })
-    .on("mouseleave", function (_, d) {
-      if (!d3.select(this.parentNode).select(".circlet").classed("active"))
-        d3.select(this.parentNode).select("circle").attr("display", "none");
-      onUnhover && onUnhover(d);
-    });
-}
-
-export function drawMinimapSVG() {
-  const width = 200,
-    height = 250;
-
-  const minimap = d3
-    .select("#minimap")
-    .attr("width", width)
-    .attr("height", height);
-
-  const proj = d3
-    .geoMercator()
-    .scale(1000)
-    .center(CALIFORNIA_CENTER)
-    .translate([width / 2, height / 2]);
-
-  const lineGeom = [
-    ...SPATIAL_DATA.features.filter((f) => f.geometry.type === "MultiPolygon"),
-    CALIFORNIA_OUTLINE,
-  ];
-  const pointGeom = SPATIAL_DATA.features.filter(
-    (f) => f.geometry.type === "MultiPoint"
-  );
-
-  minimap
-    .selectAll("path")
-    .data(lineGeom)
-    .join("path")
-    .attr("d", (d) => d3.geoPath().projection(proj)(d))
-    .attr("class", (d) => "outline " + d.properties.CalLiteID)
-    .attr("stroke", (d) =>
-      d.properties.CalLiteID ? "transparent" : "lightgray"
-    )
-    .attr("stroke-width", 1)
-    .attr("fill", "transparent");
-
-  minimap
-    .selectAll("circle")
-    .data(pointGeom)
-    .join("circle")
-    .each(function (d) {
-      const s = d3.select(this);
-
-      const [x, y] = proj(d.geometry.coordinates[0]);
-
-      s.attr("cx", x);
-      s.attr("cy", y);
-    })
-    .attr("r", 2)
-    .attr("class", (d) => "outline " + d.properties.CalLiteID)
-    .attr("fill", "transparent");
-}
-
-export function getFontSize(d, transformZoom, cameraHeight, waterdropsHeight) {
+function getFontSize(d, transformZoom, cameraHeight, waterdropsHeight) {
   const MAX_RAD = window.innerHeight / 9;
 
   const zoomRel = cameraHeight / waterdropsHeight / transformZoom;
@@ -168,46 +210,4 @@ export function getFontSize(d, transformZoom, cameraHeight, waterdropsHeight) {
       : d3.scaleLinear().domain([0, MAX_RAD]).range([1, 0.4]).clamp(true)(_d);
 
   return absFontSize(d * zoomRel) * Math.min(zoomRel, 0.4);
-}
-
-export function fontSizer(transformInfo, camera, waterdropsHeight) {
-  return function () {
-    const tNode = d3.select(this).node();
-
-    const [posx, posy] = getCenterDomRect(tNode.getBoundingClientRect());
-
-    const width = ((tNode.getBBox().width * camera.height) / camera.far) * 8,
-      height = ((tNode.getBBox().height * camera.height) / camera.far) * 10;
-
-    const dis = dist(
-      [posx, posy],
-      [transformInfo.mouseX, transformInfo.mouseY]
-    );
-
-    d3.select(this).attr(
-      "font-size",
-      getFontSize(dis, transformInfo.zoom, camera.height, waterdropsHeight)
-    );
-
-    d3.select(this.parentNode.parentNode)
-      .select("image")
-      .attr("x", -width / 2)
-      .attr("y", -height / 2)
-      .attr("width", width)
-      .attr("height", height);
-  };
-}
-
-export function fadeOutDrops(dropsMesh, scene, startOpac, duration) {
-  const t = d3.timer((elapsed) => {
-    const et = Math.min(1, elapsed / duration);
-
-    dropsMesh.updateVisibility(1 - et);
-    dropsMesh.updateOutlineVisibility(startOpac * (1 - et));
-
-    if (et >= 1) {
-      t.stop();
-      dropsMesh.remove(scene);
-    }
-  });
 }

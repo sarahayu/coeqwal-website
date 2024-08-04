@@ -6,12 +6,10 @@ import {
   usePrevious,
 } from "bucket-lib/utils";
 import {
-  CIRC_RAD,
   DROP_HEIGHT,
   DROP_RAD,
   waterdropDeltaOutline,
 } from "utils/render-utils";
-import { dropRadToDropHeight } from "utils/math-utils";
 
 const DEGREE_SWAY = 40;
 const LEVELS = 10;

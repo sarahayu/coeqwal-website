@@ -1,15 +1,9 @@
 import * as d3 from "d3";
-import React, {
-  useContext,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 import { AppContext } from "AppContext";
 import DotHistogram from "components/DotHistogram";
+import SceneSettingSubcard from "components/SceneSettingSubcard";
 import { FLATTENED_DATA, KEY_SETTINGS_MAP } from "data/objectives-data";
 import { SPREAD_1_2 } from "settings";
 
@@ -17,12 +11,7 @@ import { DESCRIPTIONS_DATA } from "data/descriptions-data";
 import { updateColorDrops, updateSmallDropSVG } from "utils/examineview-utils";
 import { arrRemove, isState } from "utils/misc-utils";
 import { hideElems, removeElems, showElems } from "utils/render-utils";
-import {
-  SETT_NAME_SHORT,
-  SETT_NAME_FULL,
-  SETT_VAL_STEPS,
-  deserialize,
-} from "utils/data-utils";
+import { deserialize } from "utils/data-utils";
 import { useDragPanels } from "utils/drag-panels";
 
 export default function ExamineView() {
@@ -42,10 +31,11 @@ export default function ExamineView() {
   const activeMinidropsRef = useRef([]);
   const previewMinidropRef = useRef(null);
   const curMinidropsRef = useRef([]);
+
+  const [colorSetting, setColorSetting] = useState(null);
   const [camTransform, setCamTransform] = useState(d3.zoomIdentity);
   const { panels, setPanels, onPanelDragStart, getPanelStyle } =
     useDragPanels(camTransform);
-  const [colorSetting, setColorSetting] = useState(null);
 
   useEffect(function initialize() {
     d3.select("#mosaic-svg")
@@ -212,7 +202,7 @@ export default function ExamineView() {
                 });
               }}
             />
-            <SceneSettings
+            <SceneSettingSubcard
               settings={deserialize(text)}
               setColorSetting={setColorSetting}
             />
@@ -221,50 +211,4 @@ export default function ExamineView() {
       </>
     );
   }
-}
-
-function SceneSettings({ settings, setColorSetting }) {
-  return (
-    <div className="scen-settings">
-      <div className="condense">
-        {settings.map((v, i) => (
-          <div className="sett-dot-wrapper" key={i}>
-            <span>{SETT_NAME_SHORT[i]}</span>
-            {d3.range(v + 1).map((j) => (
-              <span
-                className="sett-dot"
-                key={j}
-                style={{ opacity: (j + 1) / SETT_VAL_STEPS[i].length }}
-              ></span>
-            ))}
-          </div>
-        ))}
-      </div>
-      <div className="full">
-        <div className="full-container">
-          <span>The settings for this scenario are:</span>
-          {settings.map((v, i) => (
-            <div
-              className="full-card"
-              onMouseEnter={() => setColorSetting(i)}
-              onMouseLeave={() => setColorSetting(null)}
-              key={i}
-            >
-              <span>{SETT_NAME_FULL[i]}</span>
-              <span>{SETT_VAL_STEPS[i][v]}</span>
-              <div className="sett-dot-wrapper">
-                {d3.range(SETT_VAL_STEPS[i].length).map((j) => (
-                  <span
-                    className={`sett-dot ${j <= v ? "filled" : "not-filled"}`}
-                    key={j}
-                    style={{ opacity: (j + 1) / SETT_VAL_STEPS[i].length }}
-                  ></span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
 }

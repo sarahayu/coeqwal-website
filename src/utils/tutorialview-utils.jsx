@@ -18,6 +18,8 @@ import { avgCoords } from "./math-utils";
 import { calcLinesAndPositions, getWaterdropGroups } from "./compareview-utils";
 import { genUUID, wrap } from "./misc-utils";
 import { serialize } from "./data-utils";
+import { gradientUpdate } from "./render-utils";
+import { gradientInit } from "./render-utils";
 
 export const DATE_START = 1921;
 export const INTERP_COLOR = d3.interpolateRgbBasis([
@@ -420,42 +422,27 @@ export const DROP_VARIATIONS = [
   },
 ];
 
-function smallDropInit({ levs }) {
-  return (s) => {
-    s.append("rect").attr("class", "bbox").style("visibility", "hidden");
-
-    const randId = genUUID();
-
-    const stops = s
-      .append("defs")
-      .append("linearGradient")
-      .attr("id", `${randId}`)
-      .attr("x1", "0%")
-      .attr("x2", "0%")
-      .attr("y1", "0%")
-      .attr("y2", "100%");
-    stops.append("stop").attr("stop-color", "transparent");
-    stops.append("stop").attr("stop-color", "transparent");
-
-    levs.forEach((_, i) => {
-      for (let j = 0; j < 2; j++) {
-        stops
-          .append("stop")
-          .attr("stop-color", interpolateWatercolorBlue(i / LOD_1_LEVELS));
-      }
+function updateDropsSVG(container, waterdropGroups, { onHover }) {
+  container
+    .selectAll(".large-drop")
+    .data(waterdropGroups.groups)
+    .join((enter) => {
+      return enter.append("g").each(function (group) {
+        d3.select(this).call(largeDropInit(group));
+      });
+    })
+    .attr("transform", (_, i) => {
+      const groupPos = waterdropGroups.groupPositions[i];
+      return `translate(${groupPos[0]}, ${groupPos[1]})`;
+    })
+    .each(function (group) {
+      d3.select(this)
+        .call(largeDropUpdate(group))
+        .selectAll(".small-drop")
+        .on("mouseenter", function (e, d) {
+          onHover && onHover(d);
+        });
     });
-
-    s.append("path")
-      .attr("d", DROPLET_SHAPE)
-      .attr("class", "outline")
-      .attr("transform", `scale(${LOD_1_RAD_PX * 0.95})`);
-
-    s.append("path")
-      .attr("class", "fill")
-      .attr("d", DROPLET_SHAPE)
-      .attr("fill", `url(#${randId})`)
-      .attr("transform", `scale(${LOD_1_RAD_PX})`);
-  };
 }
 
 function largeDropInit({ nodes, height, key }) {
@@ -477,30 +464,24 @@ function largeDropInit({ nodes, height, key }) {
   };
 }
 
-function smallDropUpdate({ levs, maxLev }) {
+function smallDropInit({ levs }) {
   return (s) => {
-    s.selectAll("stop").each(function (_, i) {
-      let actI = Math.floor(i / 2);
-      const isEnd = i % 2;
+    s.append("rect").attr("class", "bbox").style("visibility", "hidden");
 
-      if (isEnd === 0) actI -= 1;
+    const randId = `tut-grad-${genUUID()}`;
 
-      if (actI === -1) {
-        d3.select(this).attr("offset", `${0}%`);
-      } else if (actI === levs.length) {
-        d3.select(this).attr("offset", `100%`);
-      } else {
-        d3.select(this).attr("offset", `${(1 - levs[actI] / maxLev) * 100}%`);
-      }
-    });
+    s.call(gradientInit(levs, randId));
 
-    const dropBBox = s.select(".fill").node().getBBox();
+    s.append("path")
+      .attr("d", DROPLET_SHAPE)
+      .attr("class", "outline")
+      .attr("transform", `scale(${LOD_1_RAD_PX * 0.95})`);
 
-    s.select(".bbox")
-      .attr("x", dropBBox.x)
-      .attr("y", dropBBox.y)
-      .attr("width", dropBBox.width)
-      .attr("height", dropBBox.height);
+    s.append("path")
+      .attr("class", "fill")
+      .attr("d", DROPLET_SHAPE)
+      .attr("fill", `url(#${randId})`)
+      .attr("transform", `scale(${LOD_1_RAD_PX})`);
   };
 }
 
@@ -535,25 +516,16 @@ function largeDropUpdate({ nodes, key, height }) {
   };
 }
 
-function updateDropsSVG(container, waterdropGroups, { onHover }) {
-  container
-    .selectAll(".large-drop")
-    .data(waterdropGroups.groups)
-    .join((enter) => {
-      return enter.append("g").each(function (group) {
-        d3.select(this).call(largeDropInit(group));
-      });
-    })
-    .attr("transform", (_, i) => {
-      const groupPos = waterdropGroups.groupPositions[i];
-      return `translate(${groupPos[0]}, ${groupPos[1]})`;
-    })
-    .each(function (group) {
-      d3.select(this)
-        .call(largeDropUpdate(group))
-        .selectAll(".small-drop")
-        .on("mouseenter", function (e, d) {
-          onHover && onHover(d);
-        });
-    });
+function smallDropUpdate({ levs, maxLev }) {
+  return (s) => {
+    s.call(gradientUpdate(levs, maxLev));
+
+    const dropBBox = s.select(".fill").node().getBBox();
+
+    s.select(".bbox")
+      .attr("x", dropBBox.x)
+      .attr("y", dropBBox.y)
+      .attr("width", dropBBox.width)
+      .attr("height", dropBBox.height);
+  };
 }

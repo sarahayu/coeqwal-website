@@ -34,6 +34,13 @@ export const OBJECTIVES_DATA = await (async function load() {
 
 export const OBJECTIVE_IDS = Object.keys(OBJECTIVES_DATA);
 
+export const OBJECTIVE_GOALS_MAP = (function initDefaults() {
+  const goalMap = {};
+  for (let i = 0; i < OBJECTIVE_IDS.length; i++)
+    goalMap[OBJECTIVE_IDS[i]] = 200;
+  return goalMap;
+})();
+
 const _SCENARIO_IDS = Object.keys(
   Object.values(OBJECTIVES_DATA)[0][SCENARIO_KEY_STRING]
 );

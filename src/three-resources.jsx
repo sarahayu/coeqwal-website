@@ -1,11 +1,6 @@
 import * as THREE from "three";
-import * as d3 from "d3";
 
-import {
-  WaterdropMesh,
-  WaterdropSimplifiedMesh,
-  Camera,
-} from "utils/render-utils";
+import { WaterdropMesh, Camera } from "utils/three-utils";
 
 const scene = (function getScene() {
   const s = new THREE.Scene();
@@ -14,7 +9,6 @@ const scene = (function getScene() {
 })();
 
 const dropsMesh = new WaterdropMesh();
-const pointsMesh = new WaterdropSimplifiedMesh();
 
 const camera = new Camera({
   fov: 45,
@@ -24,4 +18,4 @@ const camera = new Camera({
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 
-export { scene, camera, renderer, dropsMesh, pointsMesh };
+export { scene, camera, renderer, dropsMesh };

@@ -1,28 +1,25 @@
 import * as d3 from "d3";
-import React, {
-  useContext,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 import { AppContext } from "AppContext";
 import DotHistogram from "components/DotHistogram";
+import SceneSettingStickers from "components/SceneSettingStickers";
 import { FLATTENED_DATA, KEY_SETTINGS_MAP } from "data/objectives-data";
-import { LOD_1_RAD_PX, SPREAD_1_2 } from "settings";
+import { SPREAD_1_2 } from "settings";
 
 import { avgCoords } from "utils/math-utils";
 import { isState } from "utils/misc-utils";
-import { circlet, hideElems, removeElems, showElems } from "utils/render-utils";
+import { hideElems, removeElems, showElems } from "utils/render-utils";
 
 import {
   calcLinesAndPositions,
   getWaterdropGroups,
   updateColorDrops,
   updateDropsSVG,
+  updateLabelSVG,
+  updateScenIndicatorsSVG,
 } from "utils/compareview-utils";
-import { SETT_NAME_FULL, SETT_VAL_STEPS, deserialize } from "utils/data-utils";
+import { deserialize } from "utils/data-utils";
 import { useDragPanels } from "utils/drag-panels";
 
 export default function CompareView() {
@@ -40,10 +37,11 @@ export default function CompareView() {
   } = useContext(AppContext);
 
   const [activeMinidrop, setActiveMinidrop] = useState();
+  const [colorSetting, setColorSetting] = useState(null);
   const [camTransform, setCamTransform] = useState(d3.zoomIdentity);
   const { panels, setPanels, onPanelDragStart, getPanelStyle } =
     useDragPanels(camTransform);
-  const [colorSetting, setColorSetting] = useState(null);
+
   const groupsRef = useRef();
   const centerRef = useRef();
 
@@ -211,7 +209,7 @@ export default function CompareView() {
   return (
     <>
       {activeMinidrop && (
-        <SceneSettings
+        <SceneSettingStickers
           settings={deserialize(activeMinidrop.key.slice(4))}
           setColorSetting={setColorSetting}
         />
@@ -239,80 +237,4 @@ export default function CompareView() {
       ))}
     </>
   );
-}
-
-function SceneSettings({ settings, setColorSetting }) {
-  return (
-    <div className="scen-settings comp-settings">
-      {settings.map((v, i) => (
-        <div
-          className="full-card"
-          onMouseEnter={() => setColorSetting(i)}
-          onMouseLeave={() => setColorSetting(null)}
-          key={i}
-        >
-          <span>{SETT_NAME_FULL[i]}</span>
-          <span>{SETT_VAL_STEPS[i][v]}</span>
-          <div className="sett-dot-wrapper">
-            {d3.range(SETT_VAL_STEPS[i].length).map((j) => (
-              <span
-                className={`sett-dot ${j <= v ? "filled" : "not-filled"}`}
-                key={j}
-                style={{ opacity: (j + 1) / SETT_VAL_STEPS[i].length }}
-              ></span>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function updateLabelSVG(pos, labelText, normedTextSize) {
-  const [textX, textY] = pos;
-
-  const smallTextSize = normedTextSize / 15;
-  const largeTextSize = normedTextSize / 10;
-
-  d3.select("#compare-group")
-    .select("#member-label")
-    .text("scenario")
-    .attr("font-size", smallTextSize)
-    .transition()
-    .duration(100)
-    .attr("x", textX)
-    .attr("y", textY - smallTextSize * 1.5);
-
-  d3.select("#compare-group")
-    .select("#member-variable")
-    .attr("font-size", largeTextSize)
-    .text(labelText)
-    .transition()
-    .duration(100)
-    .attr("x", textX)
-    .attr("y", textY);
-}
-
-function updateScenIndicatorsSVG(positions, lines) {
-  d3.select("#compare-group")
-    .selectAll(".circlet")
-    .data(positions)
-    .join("circle")
-    .attr("class", "circlet")
-    .call(circlet)
-    .attr("display", "initial")
-    .attr("r", LOD_1_RAD_PX * 1.5)
-    .transition()
-    .duration(100)
-    .attr("cx", (d) => d[0])
-    .attr("cy", (d) => d[1]);
-
-  d3.select("#compare-group")
-    .selectAll(".comp-line")
-    .data(lines)
-    .join("path")
-    .attr("class", "comp-line")
-    .transition()
-    .duration(100)
-    .attr("d", (d) => d3.line()(d));
 }
