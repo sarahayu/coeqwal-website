@@ -30,7 +30,7 @@ export default function ExamineView() {
 
   const activeMinidropsRef = useRef([]);
   const previewMinidropRef = useRef(null);
-  const curMinidropsRef = useRef([]);
+  const curMinidropsRef = useRef(null);
 
   const [colorSetting, setColorSetting] = useState(null);
   const [camTransform, setCamTransform] = useState(d3.zoomIdentity);
@@ -41,7 +41,9 @@ export default function ExamineView() {
     d3.select("#mosaic-svg")
       .select(".svg-trans")
       .append("g")
-      .attr("id", "examine-group");
+      .attr("id", "examine-group")
+      .append("circle")
+      .attr("class", "highlight-circle");
 
     addZoomHandler(function (transform) {
       setCamTransform(transform);
@@ -75,14 +77,16 @@ export default function ExamineView() {
         });
 
         setCamTransform(camera.curTransform);
+        showElems("#examine-group");
 
         return function exitState() {
           removeElems(".small-drop, .circlet", container);
+          hideElems("#examine-group");
 
           setPanels([]);
           activeMinidropsRef.current = [];
           previewMinidropRef.current = null;
-          curMinidropsRef.current = [];
+          curMinidropsRef.current = null;
           setGoBack(null);
         };
       }
@@ -118,13 +122,14 @@ export default function ExamineView() {
   );
 
   function addDetailPanel(dropId) {
-    const { globalX, globalY, x, y, id, key } = waterdrops.nodes[dropId];
+    const { x: groupX, y: groupY } = curMinidropsRef.current;
+    const { x, y, id, key } = waterdrops.nodes[dropId];
     setPanels((p) => {
       if (p.findIndex(({ id: pid }) => id === pid) !== -1) return p;
       const newPanel = {
         text: key.slice(4),
-        x: globalX + x * (SPREAD_1_2 - 1),
-        y: globalY + y * (SPREAD_1_2 - 1),
+        x: groupX + x * SPREAD_1_2,
+        y: groupY + y * SPREAD_1_2,
         offsetX: 20,
         offsetY: 40,
         id,

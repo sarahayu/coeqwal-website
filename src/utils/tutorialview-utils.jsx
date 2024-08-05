@@ -14,10 +14,10 @@ import { LOD_1_LEVELS } from "settings";
 import { SPREAD_1_2 } from "settings";
 import { DROPLET_SHAPE, circlet, hideElems, showElems } from "./render-utils";
 import { LOD_1_RAD_PX } from "settings";
-import { avgCoords } from "./math-utils";
+import { avgCoords, dropCenterCorrection } from "./math-utils";
 import { calcLinesAndPositions, getWaterdropGroups } from "./compareview-utils";
 import { genUUID, wrap } from "./misc-utils";
-import { serialize } from "./data-utils";
+import { deserialize, serialize } from "./data-utils";
 import { gradientUpdate } from "./render-utils";
 import { gradientInit } from "./render-utils";
 
@@ -31,7 +31,7 @@ export const INTERP_COLOR = d3.interpolateRgbBasis([
 ]);
 
 export const DEFAULT_OBJECTIVE = "DEL_CVP_PAG_N";
-export const DEFAULT_SCENARIO = [3, 1, 0, 0, 0]; // expl0160
+export const DEFAULT_SCENARIO = deserialize("0000");
 export const DEFAULT_DELIVS =
   OBJECTIVES_DATA[DEFAULT_OBJECTIVE][SCENARIO_KEY_STRING][
     serialize(...DEFAULT_SCENARIO)
@@ -40,10 +40,10 @@ export const DEFAULT_DELIVS =
 export const COMP_OBJECTIVE = "DEL_CVP_PRF_S";
 
 export const VARIATIONS = [
-  [3, 1, 1, 0, 0], // expl0180
-  [3, 2, 0, 0, 0], // expl0200
-  [3, 1, 0, 0, 4], // expl0164
-  [3, 1, 0, 3, 0], // expl0175
+  deserialize("0020"), // change priority
+  deserialize("0080"), // increase carryover
+  deserialize("0480"), // decrease demand
+  deserialize("0004"), // increase minflow
 ];
 
 export const VARIATIONS_DELIVS = VARIATIONS.map(
@@ -127,13 +127,13 @@ export function useTutorialGraph() {
         `translate(${BAR_CHART_MARGIN.left},${BAR_CHART_MARGIN.top})`
       );
 
-    const dataDescending = yearlyData
-      .map((val, placeFromLeft) => ({
+    const dataDescending = yearlyData[DEFAULT_OBJECTIVE].map(
+      (val, placeFromLeft) => ({
         val,
         placeFromLeft,
         year: placeFromLeft + 1,
-      }))
-      .sort((a, b) => b.val - a.val);
+      })
+    ).sort((a, b) => b.val - a.val);
 
     const x = d3
       .scaleBand()
@@ -173,7 +173,7 @@ export function useTutorialGraph() {
       .domain([0, MAX_DELIVS])
       .range([BAR_CHART_HEIGHT, 0]);
 
-    d3.select(".svg-group")
+    d3.select("#tut-bar-graph .svg-group")
       .selectAll(".bars")
       .data(dataDescending, (d) => d.placeFromLeft)
       .join("rect")
@@ -194,7 +194,7 @@ export function useTutorialGraph() {
   async function condenseBars() {
     const { x, xaxis, dataDescending } = d3Refs.current;
     const newWidth = BAR_CHART_WIDTH / 8;
-    const svgGroup = d3.select(".svg-group");
+    const svgGroup = d3.select("#tut-bar-graph .svg-group");
 
     svgGroup.select(".anim-xaxis").call(xaxis.tickFormat(""));
 
@@ -319,7 +319,7 @@ export function useTutorialComparer() {
       },
     });
 
-    setActiveMinidrop("expl0160");
+    setActiveMinidrop("expl0000");
     hideElems(`.large-drop.${COMP_OBJECTIVE}, .indicator-group`, container);
   }
 
@@ -398,27 +398,27 @@ export function useTutorialComparer() {
 export const DROP_VARIATIONS = [
   {
     idx: 0,
-    scen: "0180",
+    scen: "0020",
     clas: "drop1",
-    desc: "increase priority",
+    desc: "change priority",
   },
   {
     idx: 1,
-    scen: "0200",
+    scen: "0080",
     clas: "drop2",
     desc: "increase carryover",
   },
   {
     idx: 2,
-    scen: "0164",
+    scen: "0480",
     clas: "drop3",
-    desc: "increase min. flow",
+    desc: "decrease demand",
   },
   {
     idx: 3,
-    scen: "0175",
+    scen: "0004",
     clas: "drop4",
-    desc: "increase regs.",
+    desc: "increase minimum flow",
   },
 ];
 
@@ -427,8 +427,10 @@ function updateDropsSVG(container, waterdropGroups, { onHover }) {
     .selectAll(".large-drop")
     .data(waterdropGroups.groups)
     .join((enter) => {
-      return enter.append("g").each(function (group) {
-        d3.select(this).call(largeDropInit(group));
+      return enter.append("g").each(function (group, i) {
+        d3.select(this).call(
+          largeDropInit(group, waterdropGroups.groupPositions[i])
+        );
       });
     })
     .attr("transform", (_, i) => {
@@ -447,13 +449,20 @@ function updateDropsSVG(container, waterdropGroups, { onHover }) {
 
 function largeDropInit({ nodes, height, key }) {
   return (s) => {
+    s.attr("class", "large-drop " + key);
+
+    s.append("circle")
+      .attr("class", "highlight-circle")
+      .attr("stroke", "none")
+      .attr("fill", "yellow")
+      .attr("r", LOD_1_RAD_PX * 2);
+
     s.append("text")
       .style("font-size", (height * SPREAD_1_2) / 15)
       .attr("class", "fancy-font water-group-label")
       .attr("text-anchor", "middle");
 
-    s.attr("class", "large-drop " + key)
-      .selectAll(".small-drop")
+    s.selectAll(".small-drop")
       .data(nodes)
       .enter()
       .append("g")
@@ -464,13 +473,23 @@ function largeDropInit({ nodes, height, key }) {
   };
 }
 
-function smallDropInit({ levs }) {
+function smallDropInit({ key, levs, x, y }) {
   return (s) => {
     s.append("rect").attr("class", "bbox").style("visibility", "hidden");
 
     const randId = `tut-grad-${genUUID()}`;
 
     s.call(gradientInit(levs, randId));
+
+    if (key === "expl0000") {
+      d3.select(s.node().parentNode)
+        .select(".highlight-circle")
+        .attr("cx", x * SPREAD_1_2)
+        .attr(
+          "cy",
+          y * SPREAD_1_2 - dropCenterCorrection({ rad: LOD_1_RAD_PX })
+        );
+    }
 
     s.append("path")
       .attr("d", DROPLET_SHAPE)

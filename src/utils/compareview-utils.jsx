@@ -185,13 +185,20 @@ export function updateScenIndicatorsSVG(positions, lines) {
 
 function largeDropInit({ nodes, height }) {
   return (s) => {
+    s.attr("class", "large-drop");
+
+    s.append("circle")
+      .attr("class", "highlight-circle")
+      .attr("stroke", "none")
+      .attr("fill", "yellow")
+      .attr("r", LOD_1_RAD_PX * 2);
+
     s.append("text")
       .style("font-size", (height * SPREAD_1_2) / 15)
       .attr("class", "fancy-font water-group-label")
       .attr("text-anchor", "middle");
 
-    s.attr("class", "large-drop")
-      .selectAll(".small-drop")
+    s.selectAll(".small-drop")
       .data(nodes)
       .enter()
       .append("g")
@@ -209,18 +216,37 @@ function largeDropUpdate({ nodes, key, height }, transitionDelay) {
     const getEndDropLoc = ({ x, y, tilt }) =>
       `translate(${x * SPREAD_1_2}, ${y * SPREAD_1_2}) rotate(${tilt})`;
 
+    const baselinePos = {};
+
     s.call(textUpdate(key, height))
       .selectAll(".small-drop")
       .data(nodes)
       .attr("display", "initial")
       .attr("transform", getStartDropLoc)
       .each(function (node) {
-        d3.select(this).call(smallDropUpdate(node));
+        d3.select(this).call(smallDropUpdate(node, baselinePos));
       })
       .transition()
       .delay(transitionDelay)
       .duration(1000)
       .attr("transform", getEndDropLoc);
+
+    s.select(".highlight-circle")
+      .attr("cx", baselinePos.x)
+      .attr(
+        "cy",
+
+        baselinePos.y - dropCenterCorrection({ rad: LOD_1_RAD_PX })
+      )
+      .transition()
+      .delay(transitionDelay)
+      .duration(1000)
+      .attr("cx", baselinePos.x * SPREAD_1_2)
+      .attr(
+        "cy",
+
+        baselinePos.y * SPREAD_1_2 - dropCenterCorrection({ rad: LOD_1_RAD_PX })
+      );
   };
 }
 
@@ -241,8 +267,13 @@ function smallDropInit({ levs }) {
   };
 }
 
-function smallDropUpdate({ levs, maxLev }) {
+function smallDropUpdate({ key, levs, maxLev, x, y }, baselinePos) {
   return (s) => {
+    if (key === "expl0000") {
+      baselinePos.x = x;
+      baselinePos.y = y;
+    }
+
     s.call(gradientUpdate(levs, maxLev));
     s.select(".outline").attr("transform", `scale(${LOD_1_RAD_PX * 0.95})`);
     s.select(".fill").attr("transform", `scale(${LOD_1_RAD_PX})`);

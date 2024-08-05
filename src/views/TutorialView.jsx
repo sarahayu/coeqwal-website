@@ -292,7 +292,7 @@ export default function TutorialView() {
           </Step>
           <Step data={11}>
             <div className="tut-text-card">
-              At a glance, we can easily see that scenario 0180 appears to be
+              At a glance, we can easily see that scenario 0020 appears to be
               the best scenario since the darker water levels reach higher than
               those of the other scenarios. To more concretely compare these
               scenarios, however, we'll use a different view.

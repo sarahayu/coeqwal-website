@@ -21,6 +21,8 @@ export function updateSmallDropSVG(
       waterdropGroup.y + y * SPREAD_1_2
     }) rotate(${tilt})`;
 
+  const baselinePos = {};
+
   container
     .selectAll(".small-drop")
     .data(waterdropGroup.nodes)
@@ -31,25 +33,48 @@ export function updateSmallDropSVG(
     })
     .attr("transform", getStartLoc)
     .each(function (node) {
-      d3.select(this).call(smallDropUpdate(node));
+      d3.select(this).call(smallDropUpdate(node, baselinePos));
     })
     .on("click", function (_, d) {
       onClick && onClick(d);
     })
     .on("mouseenter", function (_, d) {
       if (!d3.select(this).select(".circlet").classed("active"))
-        d3.select(this).select("circle").attr("display", "initial");
+        d3.select(this).select(".circlet").attr("display", "initial");
       onHover && onHover(d);
     })
     .on("mouseleave", function (_, d) {
       if (!d3.select(this).select(".circlet").classed("active"))
-        d3.select(this).select("circle").attr("display", "none");
+        d3.select(this).select(".circlet").attr("display", "none");
       onUnhover && onUnhover(d);
     })
     .transition()
     .delay(transitionDelay)
     .duration(1000)
     .attr("transform", getEndLoc);
+
+  container
+    .select(".highlight-circle")
+    .attr("stroke", "none")
+    .attr("fill", "yellow")
+    .attr("r", LOD_1_RAD_PX * 2)
+    .attr("cx", waterdropGroup.x + baselinePos.x)
+    .attr(
+      "cy",
+      waterdropGroup.y +
+        baselinePos.y -
+        dropCenterCorrection({ rad: LOD_1_RAD_PX })
+    )
+    .transition()
+    .delay(transitionDelay)
+    .duration(1000)
+    .attr("cx", waterdropGroup.x + baselinePos.x * SPREAD_1_2)
+    .attr(
+      "cy",
+      waterdropGroup.y +
+        baselinePos.y * SPREAD_1_2 -
+        dropCenterCorrection({ rad: LOD_1_RAD_PX })
+    );
 }
 
 export function updateColorDrops(container, waterdropGroup, opacFn, color) {
@@ -78,9 +103,8 @@ function smallDropInit({ levs }, i) {
       .attr("d", DROPLET_SHAPE)
       .attr("fill", `url(#drop-fill-${i})`);
 
-    s.append("g")
+    s.append("circle")
       .attr("class", "circlet")
-      .append("circle")
       .call(circlet)
       .attr("display", "none")
       .attr("cy", -dropCenterCorrection({ rad: 1 }))
@@ -90,8 +114,13 @@ function smallDropInit({ levs }, i) {
   };
 }
 
-function smallDropUpdate({ levs, maxLev, id }) {
+function smallDropUpdate({ key, levs, maxLev, id, x, y }, baselinePos) {
   return (s) => {
+    if (key === "expl0000") {
+      baselinePos.x = x;
+      baselinePos.y = y;
+    }
+
     s.call(gradientUpdate(levs, maxLev));
     s.select(".outline").attr("transform", `scale(${LOD_1_RAD_PX * 0.95})`);
     s.select(".fill").attr("transform", `scale(${LOD_1_RAD_PX})`);
