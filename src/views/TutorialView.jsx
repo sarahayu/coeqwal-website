@@ -110,6 +110,10 @@ export default function TutorialView() {
         d3.select(".main-waterdrop")
           .transition()
           .style("transform", "translateY(-100px) scale(0.5)");
+        // undo scaling of label due to shrinking div
+        d3.select(".main-waterdrop .vardroplabel")
+          .transition()
+          .style("transform", "scale(2)");
         d3.selectAll(".drop1 .waterdrop-wrapper, .drop3 .waterdrop-wrapper")
           .transition()
           .style("transform", "translate(-50px, 15px) scale(0.5)");
@@ -214,6 +218,9 @@ export default function TutorialView() {
               height={BAR_CHART_HEIGHT}
               colorInterp={INTERP_COLOR}
             />
+            <p className="vardroplabel">
+              scenario <span className="scen-number">{"0000"}</span>
+            </p>
           </div>
           <div className="main-histogram">
             <DotHistogram
@@ -287,7 +294,8 @@ export default function TutorialView() {
           <Step data={10}>
             <div className="tut-text-card">
               These variations are called <em>scenarios</em> and are labelled
-              with unique numbers.
+              with unique numbers. Our reality is a scenario with no variables
+              changed, labelled scenario 0000.
             </div>
           </Step>
           <Step data={11}>
