@@ -209,3 +209,17 @@ export function gradientUpdate(levs, maxLev) {
     });
   };
 }
+
+export function worldToScreen(x, y, camTransform) {
+  return [
+    x * camTransform.k + camTransform.x,
+    y * camTransform.k + camTransform.y,
+  ];
+}
+
+export function screenToWorld(x, y, camTransform) {
+  return [
+    (x - camTransform.x) / camTransform.k,
+    (y - camTransform.y) / camTransform.k,
+  ];
+}

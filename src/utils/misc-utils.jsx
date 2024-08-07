@@ -76,11 +76,13 @@ export function genUUID() {
 }
 
 export function arrRemove(arr, item) {
+  let idx;
   if (typeof item === "function") {
-    arr.splice(arr.findIndex(item), 1);
+    idx = arr.findIndex(item);
   } else {
-    arr.splice(arr.indexOf(item), 1);
+    idx = arr.indexOf(item);
   }
+  if (idx !== -1) arr.splice(idx, 1);
   return arr;
 }
 

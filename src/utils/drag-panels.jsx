@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { worldToScreen } from "./render-utils";
+import { useStateRef } from "./misc-utils";
 
 export function useDragPanels(viewTransform) {
-  const [panels, setPanels] = useState([]);
+  const [panels, setPanels, panelsRef] = useStateRef([]);
   const mouseDownInfo = useRef({});
 
   useEffect(function initialize() {
@@ -32,6 +34,8 @@ export function useDragPanels(viewTransform) {
   const onPanelDragStart = useCallback(function (e, { id }) {
     if (e.target.className === "") return; // we're clicking the razor, disregard
 
+    e.preventDefault();
+
     mouseDownInfo.current = { startX: e.clientX, startY: e.clientY, id };
 
     setPanels((p) => {
@@ -45,14 +49,16 @@ export function useDragPanels(viewTransform) {
   }, []);
 
   function getPanelStyle({ x, y, offsetX, offsetY }) {
+    const [screenX, screenY] = worldToScreen(x, y, viewTransform);
     return {
-      left: `${x * viewTransform.k + viewTransform.x + offsetX}px`,
-      top: `${y * viewTransform.k + viewTransform.y + offsetY}px`,
+      left: `${screenX + offsetX}px`,
+      top: `${screenY + offsetY}px`,
     };
   }
 
   return {
     panels,
+    panelsRef,
     setPanels,
     onPanelDragStart,
     getPanelStyle,

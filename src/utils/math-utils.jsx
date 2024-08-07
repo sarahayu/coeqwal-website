@@ -200,14 +200,16 @@ export function getCenterDomRect(domRect) {
   return [domRect.left + domRect.width / 2, domRect.top + domRect.height / 2];
 }
 
-export function clipEnds([from, to], shortenBy) {
+export function clipEnds([from, to], shortenByStart, shortenByEnd) {
   const len = Math.sqrt((from[0] - to[0]) ** 2 + (from[1] - to[1]) ** 2);
   const normed = [(to[0] - from[0]) / len, (to[1] - from[1]) / len];
 
-  from[0] += normed[0] * shortenBy;
-  from[1] += normed[1] * shortenBy;
-  to[0] -= normed[0] * shortenBy;
-  to[1] -= normed[1] * shortenBy;
+  if (shortenByEnd === undefined) shortenByEnd = shortenByStart;
+
+  from[0] += normed[0] * shortenByStart;
+  from[1] += normed[1] * shortenByStart;
+  to[0] -= normed[0] * shortenByEnd;
+  to[1] -= normed[1] * shortenByEnd;
 
   return [from, to];
 }
