@@ -11,18 +11,21 @@ import DotHistogram from "components/DotHistogram";
 import WaterdropGlyph from "components/WaterdropGlyph";
 import { hideElems, showElems } from "utils/render-utils";
 import {
-  BAR_CHART_HEIGHT,
   PAG_DELIVS,
   PAG_INTERPER,
   INTERP_COLOR,
   VARIATIONS_DELIVS,
   VARIATIONS_INTERPERS,
-  useTutorialGraph,
-  useTutorialState,
-  useTutorialComparer,
   DROP_VARIATIONS,
   PRF_INTERPER,
+  BAR_CHART_HEIGHT,
+  DEFAULT_OBJECTIVE,
+  COMP_OBJECTIVE,
 } from "utils/tutorialview-utils";
+import { useTutorialState } from "hooks/useTutorialState";
+import { useTutorialComparer } from "hooks/useTutorialComparer";
+import { useTutorialGraph } from "hooks/useTutorialGraph";
+import { DESCRIPTIONS_DATA } from "data/descriptions-data";
 
 export default function TutorialView() {
   const { state, setState, waterdrops, camera } = useContext(AppContext);
@@ -49,7 +52,7 @@ export default function TutorialView() {
     function enterState() {
       if (isState(state, "TutorialView")) {
         hideElems(
-          ".bucket-wrapper, .vardrop, .vardroplabel, .vardrop .dot-histogram-wrapper, .main-histogram, .tut-comparer-graphics-wrapper"
+          ".bucket-wrapper, .vardrop, .var-scen-label, .vardrop .dot-histogram-wrapper, .main-histogram, .tut-comparer-graphics-wrapper"
         );
 
         initGraphArea();
@@ -85,41 +88,43 @@ export default function TutorialView() {
         setBucketInterperPRF(() => PRF_INTERPER);
       },
 
-      6: () => {
+      9: () => {
         setDropInterper(() => PAG_INTERPER);
       },
 
-      8: () => {
+      11: () => {
         d3.selectAll(".vardrop")
           .style("display", "initial")
           .classed("hasarrow", true);
+
+        hideElems(".main-waterdrop .objective-label");
       },
 
-      9: () => {
+      12: () => {
         d3.selectAll(".vardrop path").style("stroke-dasharray", "none");
         setVariationInterpers(VARIATIONS_INTERPERS);
       },
 
-      10: () => {
-        d3.selectAll(".vardroplabel").style("display", "block");
+      13: () => {
+        d3.selectAll(".var-scen-label").style("display", "block");
       },
 
-      11: () => {
+      14: () => {
         d3.select(".drop1").classed("highlighted", true);
       },
 
-      12: () => {
+      15: () => {
         d3.select(".drop1").classed("highlighted", false);
         d3.selectAll(".vardrop").classed("hasarrow", false);
 
-        d3.selectAll(".vardroplabel").style("opacity", "0.5");
-        d3.selectAll(".vardroplabel, .scen-number").style("color", "gray");
+        d3.selectAll(".var-scen-label").style("opacity", "0.5");
+        d3.selectAll(".var-scen-label, .scen-number").style("color", "gray");
 
         d3.select(".main-waterdrop")
           .transition()
           .style("transform", "translateY(-100px) scale(0.5)");
         // undo scaling of label due to shrinking div
-        d3.select(".main-waterdrop .vardroplabel")
+        d3.select(".main-waterdrop .var-scen-label")
           .transition()
           .style("transform", "scale(2)");
         d3.selectAll(".drop1 .waterdrop-wrapper, .drop3 .waterdrop-wrapper")
@@ -136,12 +141,12 @@ export default function TutorialView() {
         );
       },
 
-      13: () => {
+      16: () => {
         hideElems(".scrollama-2 .tut-drop-graphics-wrapper");
         showElems(".scrollama-2 .tut-comparer-graphics-wrapper");
       },
 
-      15: () => {
+      18: () => {
         introDrop2();
       },
     }),
@@ -164,8 +169,8 @@ export default function TutorialView() {
       <div className="card1">
         <p>
           <em>How much water do the people of California get?</em> Let's focus
-          on two groups of people: the agriculture group north of the delta, and
-          the refuge group south of the delta.
+          on two groups of people: the agriculture group in the north, and the
+          refuge group in the south.
         </p>
         <img
           src="./northdelta.png"
@@ -188,6 +193,9 @@ export default function TutorialView() {
               height={BAR_CHART_HEIGHT}
               colorInterp={INTERP_COLOR}
             />
+            <p className="fancy-font objective-label">
+              {DESCRIPTIONS_DATA[DEFAULT_OBJECTIVE].display_name}
+            </p>
           </div>
           <div className="tut-graph">
             <svg id="prf-bar-graph"></svg>
@@ -197,6 +205,9 @@ export default function TutorialView() {
               height={BAR_CHART_HEIGHT}
               colorInterp={INTERP_COLOR}
             />
+            <p className="fancy-font objective-label">
+              {DESCRIPTIONS_DATA[COMP_OBJECTIVE].display_name}
+            </p>
           </div>
         </div>
         <Scrollama offset={0.5} onStepEnter={onStepEnter}>
@@ -221,10 +232,34 @@ export default function TutorialView() {
             </div>
           </Step>
           <Step data={5}>
-            <div className="tut-text-card" style={{ marginBottom: "80vh" }}>
+            <div className="tut-text-card">
               What we get are buckets of water showing which water levels are
               most likely, with the darker areas being the most likely water
               levels.
+            </div>
+          </Step>
+          <Step data={6}>
+            <div className="tut-text-card">
+              Comparing the two, we see that the maximum water level for the
+              refuge group is more than the agriculture group. Additionally, the
+              refuge group's water level is more consistent than that of the
+              agriculture group, with 1/3 maximum capacity being the most likely
+              water level.
+            </div>
+          </Step>
+          <Step data={7}>
+            <div className="tut-text-card">
+              But the agriculture group has some chances of reaching higher than
+              the refuge group's most likely water level, judging from the light
+              blue levels that are situated above the 1/3 mark.
+            </div>
+          </Step>
+          <Step data={8}>
+            <div className="tut-text-card" style={{ marginBottom: "80vh" }}>
+              Overall, if we want a reliable supply we would want the refuge
+              group's deliveries, but if we want a chance at higher supplies of
+              water albeit with more inconsistent results, we would want the
+              agriculture group's deliveries.
             </div>
           </Step>
         </Scrollama>
@@ -238,8 +273,11 @@ export default function TutorialView() {
               height={BAR_CHART_HEIGHT}
               colorInterp={INTERP_COLOR}
             />
-            <p className="vardroplabel">
+            <p className="var-scen-label">
               scenario <span className="scen-number">{"0000"}</span>
+            </p>
+            <p className="fancy-font objective-label">
+              {DESCRIPTIONS_DATA[DEFAULT_OBJECTIVE].display_name}
             </p>
           </div>
           <div className="main-histogram">
@@ -261,7 +299,7 @@ export default function TutorialView() {
                 height={(BAR_CHART_HEIGHT * 2) / 3}
                 colorInterp={INTERP_COLOR}
               />
-              <p className="vardroplabel">
+              <p className="var-scen-label">
                 scenario <span className="scen-number">{scen}</span>
               </p>
               <DotHistogram
@@ -281,15 +319,15 @@ export default function TutorialView() {
           <svg id="comparer-graphics"></svg>
         </div>
         <Scrollama offset={0.5} onStepEnter={onStepEnter}>
-          <Step data={6}>
+          <Step data={9}>
             <div className="tut-text-card">
-              Let's focus on the agriculture group. Here it is as a drop of
-              water. We see here that the lightest color reaches the midpoint of
-              the maximum water possible, meaning that there is a chance 600 TAF
-              of water will be delivered to this group.
+              For now, let's focus on the agriculture group. Here it is as a
+              drop of water. We see here that the lightest color reaches the
+              midpoint of the maximum water possible, meaning that there is a
+              chance 600 TAF of water will be delivered to this group.
             </div>
           </Step>
-          <Step data={7}>
+          <Step data={10}>
             <div className="tut-text-card">
               The darker colors, however, indicate that it's more likely that
               less than a quarter of the maximum, or around 300 TAF, will be
@@ -297,28 +335,28 @@ export default function TutorialView() {
               areas of California.
             </div>
           </Step>
-          <Step data={8}>
+          <Step data={11}>
             <div className="tut-text-card">
               But what if we could <em>change reality</em>? What if we could
               increase the likelihood of delivering as much water as possible by
               changing the way we manage it?
             </div>
           </Step>
-          <Step data={9}>
+          <Step data={12}>
             <div className="tut-text-card">
               Fortunately, we can explore those possibilities with the help of a
               simulator called
               <b> CalSim</b>.
             </div>
           </Step>
-          <Step data={10}>
+          <Step data={13}>
             <div className="tut-text-card">
               These variations are called <em>scenarios</em> and are labelled
               with unique numbers. Our reality is a scenario with no variables
               changed, labelled scenario 0000.
             </div>
           </Step>
-          <Step data={11}>
+          <Step data={14}>
             <div className="tut-text-card">
               At a glance, we can easily see that scenario 0020 appears to be
               the best scenario since the darker water levels reach higher than
@@ -326,19 +364,19 @@ export default function TutorialView() {
               scenarios, however, we'll use a different view.
             </div>
           </Step>
-          <Step data={12}>
+          <Step data={15}>
             <div className="tut-text-card" style={{ marginBottom: "120vh" }}>
               Try moving the red line to change the minimum demand and see how
               well each of these scenarios meet those demands.
             </div>
           </Step>
-          <Step data={13}>
+          <Step data={16}>
             <div className="tut-text-card">
               We'll collect all the possible scenarios and sort them by their
               average deliveries.
             </div>
           </Step>
-          <Step data={14}>
+          <Step data={17}>
             <div className="tut-text-card">
               So why don't we just choose the best scenario? Well, it's because
               it's not just this group that wants water. Other groups, which we
@@ -346,7 +384,7 @@ export default function TutorialView() {
               <em>them.</em>
             </div>
           </Step>
-          <Step data={15}>
+          <Step data={18}>
             <div className="tut-text-card" style={{ marginBottom: "120vh" }}>
               Let's bring back the refuge group. The scenarios that benefit the
               agriculture group do not always benefit the refuge group, and vice

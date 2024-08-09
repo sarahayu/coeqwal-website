@@ -20,7 +20,7 @@ import {
   updateScenIndicatorsSVG,
 } from "utils/compareview-utils";
 import { deserialize } from "utils/data-utils";
-import { useDragPanels } from "utils/drag-panels";
+import { useDragPanels } from "hooks/useDragPanels";
 
 export default function CompareView() {
   const {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { worldToScreen } from "./render-utils";
-import { useStateRef } from "./misc-utils";
+import { worldToScreen } from "utils/render-utils";
+import { useStateRef } from "utils/misc-utils";
 
 export function useDragPanels(viewTransform) {
   const [panels, setPanels, panelsRef] = useStateRef([]);

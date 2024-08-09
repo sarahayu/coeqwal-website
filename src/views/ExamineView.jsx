@@ -18,9 +18,9 @@ import {
   worldToScreen,
 } from "utils/render-utils";
 import { deserialize } from "utils/data-utils";
-import { useDragPanels } from "utils/drag-panels";
 import { clipEnds, dist } from "utils/math-utils";
 import { radToDeg } from "three/src/math/MathUtils";
+import { useDragPanels } from "hooks/useDragPanels";
 import { LOD_1_RAD_PX } from "settings";
 
 export default function ExamineView() {

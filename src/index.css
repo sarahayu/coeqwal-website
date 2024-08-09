@@ -991,6 +991,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   grid-area: area;
 }
 
+.objective-label {
+  text-align: center;
+  color: gray;
+  font-size: 1.1rem;
+}
+
+.tut-graph > p {
+  position: absolute;
+  bottom: calc(50% - 260px);
+}
+
 .tut-text-card {
   padding: 2rem;
   max-width: 30vw;
@@ -1110,13 +1121,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   background-color: lightgray;
 }
 
-.vardroplabel {
+.main-waterdrop p:nth-of-type(1),
+.vardrop p:nth-of-type(1) {
   display: block;
   text-align: center;
   margin-top: 1em;
 }
 
-.vardroplabel .scen-number {
+.main-waterdrop p:nth-of-type(2) {
+  margin-top: 1em;
+}
+
+.tut-drop-graphics-wrapper .scen-number {
   color: orange;
   font-weight: bold;
 }

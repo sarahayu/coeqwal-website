@@ -258,12 +258,16 @@ function smallDropInit({ levs }) {
 
     s.call(gradientInit(levs, randId));
 
-    s.append("path").attr("d", DROPLET_SHAPE).attr("class", "outline");
+    s.append("path")
+      .attr("d", DROPLET_SHAPE)
+      .attr("class", "outline")
+      .attr("transform", `scale(${LOD_1_RAD_PX * 0.95})`);
 
     s.append("path")
       .attr("class", "fill")
       .attr("d", DROPLET_SHAPE)
-      .attr("fill", `url(#${randId})`);
+      .attr("fill", `url(#${randId})`)
+      .attr("transform", `scale(${LOD_1_RAD_PX})`);
   };
 }
 
@@ -275,8 +279,6 @@ function smallDropUpdate({ key, levs, maxLev, x, y }, baselinePos) {
     }
 
     s.call(gradientUpdate(levs, maxLev));
-    s.select(".outline").attr("transform", `scale(${LOD_1_RAD_PX * 0.95})`);
-    s.select(".fill").attr("transform", `scale(${LOD_1_RAD_PX})`);
 
     const dropBBox = s.select(".fill").node().getBBox();
 
