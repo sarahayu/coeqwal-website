@@ -23,7 +23,7 @@ export function updateSmallDropSVG(
 
   const baselinePos = {};
 
-  container
+  const drops = container
     .selectAll(".small-drop")
     .data(waterdropGroup.nodes)
     .join((enter) => {
@@ -34,20 +34,27 @@ export function updateSmallDropSVG(
     .attr("transform", getStartLoc)
     .each(function (node) {
       d3.select(this).call(smallDropUpdate(node, baselinePos));
-    })
-    .on("click", function (_, d) {
-      onClick && onClick(d);
-    })
-    .on("mouseenter", function (_, d) {
-      if (!d3.select(this).select(".circlet").classed("active"))
-        d3.select(this).select(".circlet").attr("display", "initial");
-      onHover && onHover(d);
-    })
-    .on("mouseleave", function (_, d) {
-      if (!d3.select(this).select(".circlet").classed("active"))
-        d3.select(this).select(".circlet").attr("display", "none");
-      onUnhover && onUnhover(d);
-    })
+    });
+
+  if (onClick) {
+    drops.on("click", function (_, d) {
+      onClick(d);
+    });
+  }
+
+  if (onHover) {
+    drops.on("mouseenter", function (_, d) {
+      onHover(d);
+    });
+  }
+
+  if (onUnhover) {
+    drops.on("mouseleave", function (_, d) {
+      onUnhover(d);
+    });
+  }
+
+  drops
     .transition()
     .delay(transitionDelay)
     .duration(1000)
@@ -92,7 +99,7 @@ export function updateColorDrops(container, waterdropGroup, opacFn, color) {
 
 function smallDropInit({ levs }, i) {
   return (s) => {
-    s.attr("class", "small-drop");
+    s.attr("class", "small-drop hover-capture");
 
     s.call(gradientInit(levs, `drop-fill-${i}`));
 
@@ -104,9 +111,8 @@ function smallDropInit({ levs }, i) {
       .attr("fill", `url(#drop-fill-${i})`);
 
     s.append("circle")
-      .attr("class", "circlet")
+      .attr("class", "circlet interactive")
       .call(circlet)
-      .attr("display", "none")
       .attr("cy", -dropCenterCorrection({ rad: 1 }))
       .attr("r", 1.5);
 
@@ -127,7 +133,8 @@ function smallDropUpdate({ key, levs, maxLev, id, x, y }, baselinePos) {
 
     s.select(".circlet")
       .attr("class", null)
-      .attr("class", "circlet i" + id);
+      // TODO find better way to toggle i1234, prob with id
+      .attr("class", "circlet interactive i" + id);
 
     const dropBBox = s.select(".fill").node().getBBox();
 

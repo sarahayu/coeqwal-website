@@ -90,15 +90,69 @@ export default function WideView() {
     [curScreenTransform]
   );
 
-  const handleClick = useCallback(function () {
-    const willExamineDrop = activeDropsRef.current.length === 1;
-    const willCompareDrops = activeDropsRef.current.length > 1;
+  const handleClickExamine = useCallback(function () {
+    setDisableCamAdjustments(true);
 
-    if (willExamineDrop) {
-      changeToExamineView();
-    } else if (willCompareDrops) {
-      changeToCompareView();
-    }
+    const { x, y, height } = activeDropsRef.current[0];
+
+    const newCamPos = [
+      x,
+      y - dropCenterCorrection({ height }),
+      camera.getZFromFarHeight(height * SPREAD_1_2 * 1.5),
+    ];
+
+    const [startZoom, transitionDuration] = zoomTo(
+      newCamPos,
+      function onFinish() {
+        setDisableCamAdjustments(false);
+      }
+    );
+
+    startZoom();
+
+    setState({ state: "ExamineView", transitionDuration });
+
+    const startOpacity = getOutlineOpacity(camera.curTransform.k);
+    fadeOutDrops(dropsMesh, scene, startOpacity, transitionDuration / 2);
+  }, []);
+
+  const handleClickCompare = useCallback(function () {
+    setDisableCamAdjustments(true);
+
+    const dropsMidpoint = avgCoords(
+      activeDropsRef.current.map((w) => [w.x, w.y])
+    );
+
+    const newCamPos = [
+      ...dropsMidpoint,
+      camera.getZFromFarHeight(
+        waterdrops.groups[0].height * 2 * SPREAD_1_2 * 0.75 * 2
+      ),
+    ];
+
+    const [startZoom, transitionDuration] = zoomTo(
+      newCamPos,
+      function onFinish() {
+        setDisableCamAdjustments(false);
+      }
+    );
+
+    startZoom();
+
+    setState({
+      state: "CompareView",
+      transitionDuration,
+      viewCenter: dropsMidpoint,
+    });
+
+    const startOpacity = getOutlineOpacity(camera.curTransform.k);
+    fadeOutDrops(dropsMesh, scene, startOpacity, transitionDuration / 5);
+  }, []);
+
+  const handleClickDeselectAll = useCallback(function () {
+    setActiveWaterdrops([]);
+    activeDropsRef.current = [];
+    d3.selectAll("#wide-group .circlet").classed("active", false);
   }, []);
 
   function initSVGGraphics() {
@@ -195,72 +249,13 @@ export default function WideView() {
       .attr("fill", "transparent");
   }
 
-  function changeToExamineView() {
-    setDisableCamAdjustments(true);
-
-    const { x, y, height } = activeDropsRef.current[0];
-
-    const newCamPos = [
-      x,
-      y - dropCenterCorrection({ height }),
-      camera.getZFromFarHeight(height * SPREAD_1_2 * 1.5),
-    ];
-
-    const [startZoom, transitionDuration] = zoomTo(
-      newCamPos,
-      function onFinish() {
-        setDisableCamAdjustments(false);
-      }
-    );
-
-    startZoom();
-
-    setState({ state: "ExamineView", transitionDuration });
-
-    const startOpacity = getOutlineOpacity(camera.curTransform.k);
-    fadeOutDrops(dropsMesh, scene, startOpacity, transitionDuration / 2);
-  }
-
-  function changeToCompareView() {
-    setDisableCamAdjustments(true);
-
-    const dropsMidpoint = avgCoords(
-      activeDropsRef.current.map((w) => [w.x, w.y])
-    );
-
-    const newCamPos = [
-      ...dropsMidpoint,
-      camera.getZFromFarHeight(
-        waterdrops.groups[0].height * 2 * SPREAD_1_2 * 0.75 * 2
-      ),
-    ];
-
-    const [startZoom, transitionDuration] = zoomTo(
-      newCamPos,
-      function onFinish() {
-        setDisableCamAdjustments(false);
-      }
-    );
-
-    startZoom();
-
-    setState({
-      state: "CompareView",
-      transitionDuration,
-      viewCenter: dropsMidpoint,
-    });
-
-    const startOpacity = getOutlineOpacity(camera.curTransform.k);
-    fadeOutDrops(dropsMesh, scene, startOpacity, transitionDuration / 5);
-  }
-
   let examineBtn, compareBtn;
 
   if (isState(state, "WideView") && activeWaterdrops.length) {
     if (activeWaterdrops.length === 1) {
       examineBtn = (
         <button
-          onClick={handleClick}
+          onClick={handleClickExamine}
           className="wide-view-action-btn fancy-font"
         >
           <BiCross />
@@ -269,13 +264,21 @@ export default function WideView() {
       );
     } else {
       compareBtn = (
-        <button
-          onClick={handleClick}
-          className="wide-view-action-btn fancy-font"
-        >
-          <BiNetworkChart />
-          <span>compare</span>
-        </button>
+        <>
+          <button
+            onClick={handleClickDeselectAll}
+            className="fancy-font supplement-btn"
+          >
+            <span>deselect all</span>
+          </button>
+          <button
+            onClick={handleClickCompare}
+            className="wide-view-action-btn fancy-font"
+          >
+            <BiNetworkChart />
+            <span>compare</span>
+          </button>
+        </>
       );
     }
   }
@@ -296,8 +299,10 @@ export default function WideView() {
           </div>
         )}
       </div>
-      {examineBtn}
-      {compareBtn}
+      <div className="action-btn-wrapper">
+        {examineBtn}
+        {compareBtn}
+      </div>
     </>
   );
 }

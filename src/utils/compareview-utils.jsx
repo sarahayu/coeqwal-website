@@ -31,18 +31,29 @@ export function updateDropsSVG(
     })
     .attr("transform", getStartGroupLoc)
     .each(function (node) {
-      d3.select(this)
+      const drops = d3
+        .select(this)
         .call(largeDropUpdate(node, transitionDelay))
-        .selectAll(".small-drop")
-        .on("click", function (_, d) {
-          onClick && onClick(d);
-        })
-        .on("mouseenter", function (_, d) {
-          onHover && onHover(d);
-        })
-        .on("mouseleave", function (_, d) {
-          onUnhover && onUnhover(d);
+        .selectAll(".small-drop");
+
+      if (onClick) {
+        drops.on("click", function (_, d) {
+          onClick(d);
         });
+      }
+
+      if (onHover) {
+        drops.on("mouseenter", function (_, d) {
+          d3.select(this.parentNode).raise();
+          onHover(d);
+        });
+      }
+
+      if (onUnhover) {
+        drops.on("mouseleave", function (_, d) {
+          onUnhover(d);
+        });
+      }
     })
     .transition()
     .delay(transitionDelay)

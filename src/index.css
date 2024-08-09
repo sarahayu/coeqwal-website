@@ -764,11 +764,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   transform-origin: center;
 }
 
-.circlet.active circle {
-  stroke: "orange";
+.circlet.interactive {
+  display: none;
+}
+
+.hover-capture:hover + .circlet,
+.hover-capture:hover .circlet {
+  display: initial;
 }
 
 .circlet.active {
+  display: initial;
   animation: rotating 30s linear infinite;
 }
 
@@ -781,10 +787,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   }
 }
 
-.wide-view-action-btn {
+.action-btn-wrapper {
   position: absolute;
-  bottom: 1em;
-  right: 1em;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  gap: 1em;
+  align-items: end;
+}
+
+.wide-view-action-btn {
   font-size: 2rem;
   background: #efefef;
   opacity: 0.8;
@@ -797,11 +809,30 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   gap: 0.3em;
   align-items: center;
   transition: background-color 0.1s;
-
   animation: enterView 0.1s;
 }
 
 .wide-view-action-btn:hover {
+  background-color: white;
+}
+
+.supplement-btn {
+  font-size: 1rem;
+  opacity: 0.8;
+  background-color: #efefef;
+  border: 2px solid gray;
+  color: gray;
+  cursor: pointer;
+  padding: 0.5em 1em;
+  border-radius: 100vh;
+  display: flex;
+  gap: 0.3em;
+  align-items: center;
+  transition: background-color 0.1s;
+  animation: enterView 0.1s;
+}
+
+.supplement-btn:hover {
   background-color: white;
 }
 

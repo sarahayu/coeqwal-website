@@ -69,9 +69,9 @@ export function updateLargeDropSVG(
   waterdrops,
   { onClick, onHover, onUnhover }
 ) {
-  container
+  const drops = container
     .selectAll(".large-drop")
-    .data(waterdrops.groups)
+    .data(waterdrops.groups, ({ key }) => key)
     .join((enter) => {
       return enter
         .append("g")
@@ -81,21 +81,26 @@ export function updateLargeDropSVG(
     .each(interactorsUpdate)
     .style("display", "initial")
     .attr("transform", dropTransform)
-    .select(".hover-capture")
-    .on("click", function (_, d) {
-      onClick && onClick(d);
-    })
-    .on("mouseenter", function (_, d) {
-      if (!d3.select(this.parentNode).select(".circlet").classed("active"))
-        d3.select(this.parentNode).select("circle").attr("display", "initial");
-      d3.select(this.parentNode).raise();
-      onHover && onHover(d);
-    })
-    .on("mouseleave", function (_, d) {
-      if (!d3.select(this.parentNode).select(".circlet").classed("active"))
-        d3.select(this.parentNode).select("circle").attr("display", "none");
-      onUnhover && onUnhover(d);
+    .select(".hover-capture");
+
+  if (onClick) {
+    drops.on("click", function (_, d) {
+      onClick(d);
     });
+  }
+
+  if (onHover) {
+    drops.on("mouseenter", function (_, d) {
+      d3.select(this.parentNode).raise();
+      onHover(d);
+    });
+  }
+
+  if (onUnhover) {
+    drops.on("mouseleave", function (_, d) {
+      onUnhover(d);
+    });
+  }
 }
 
 export function fontSizer(transformInfo, camera, waterdropsHeight) {
@@ -143,18 +148,16 @@ export function fadeOutDrops(dropsMesh, scene, startOpac, duration) {
 function interactorsInit() {
   const s = d3.select(this);
 
-  s.append("g")
-    .attr("class", "circlet")
-    .append("circle")
-    .call(circlet)
-    .attr("display", "none")
-    .attr("r", 1);
-
   s.append("circle")
     .attr("class", "hover-capture")
     .attr("fill", "transparent")
     .attr("stroke-width", 0)
     .attr("r", 0.8);
+
+  s.append("circle")
+    .attr("class", "circlet interactive")
+    .call(circlet)
+    .attr("r", 1);
 
   const textGroup = s.append("g").attr("pointer-events", "none");
   textGroup
@@ -173,7 +176,8 @@ function interactorsUpdate(d) {
   d3.select(this)
     .select(".circlet")
     .attr("class", null)
-    .attr("class", "circlet " + d.key);
+    // TODO find better way than disabling class
+    .attr("class", "circlet interactive " + d.key);
   d3.select(this).select("text").call(textUpdate(d));
 }
 
