@@ -12,8 +12,8 @@ import WaterdropGlyph from "components/WaterdropGlyph";
 import { hideElems, showElems } from "utils/render-utils";
 import {
   BAR_CHART_HEIGHT,
-  DEFAULT_DELIVS,
-  DEFAULT_INTERPER,
+  PAG_DELIVS,
+  PAG_INTERPER,
   INTERP_COLOR,
   VARIATIONS_DELIVS,
   VARIATIONS_INTERPERS,
@@ -21,6 +21,7 @@ import {
   useTutorialState,
   useTutorialComparer,
   DROP_VARIATIONS,
+  PRF_INTERPER,
 } from "utils/tutorialview-utils";
 
 export default function TutorialView() {
@@ -29,8 +30,10 @@ export default function TutorialView() {
   const {
     userGoal,
     setUserGoal,
-    bucketInterper,
-    setBucketInterper,
+    bucketInterperPAG,
+    setBucketInterperPAG,
+    bucketInterperPRF,
+    setBucketInterperPRF,
     dropInterper,
     setDropInterper,
     variationInterpers,
@@ -71,14 +74,19 @@ export default function TutorialView() {
       },
 
       5: () => {
-        d3.select(".bucket-wrapper").style("display", "initial");
-        d3.select("#tut-bar-graph").attr("opacity", 0);
+        d3.selectAll(".tut-graph-wrapper .bucket-wrapper").style(
+          "display",
+          "initial"
+        );
+        d3.select("#pag-bar-graph").attr("opacity", 0);
+        d3.select("#prf-bar-graph").attr("opacity", 0);
 
-        setBucketInterper(() => DEFAULT_INTERPER);
+        setBucketInterperPAG(() => PAG_INTERPER);
+        setBucketInterperPRF(() => PRF_INTERPER);
       },
 
       6: () => {
-        setDropInterper(() => DEFAULT_INTERPER);
+        setDropInterper(() => PAG_INTERPER);
       },
 
       8: () => {
@@ -155,8 +163,9 @@ export default function TutorialView() {
     <div className="tutorial-view">
       <div className="card1">
         <p>
-          <em>How much water do the people of California get?</em> For starters,
-          let's focus on the agriculture sector north of the delta.
+          <em>How much water do the people of California get?</em> Let's focus
+          on two groups of people: the agriculture group north of the delta, and
+          the refuge group south of the delta.
         </p>
         <img
           src="./northdelta.png"
@@ -166,43 +175,54 @@ export default function TutorialView() {
           className="skip-btn"
           onClick={() => setState({ state: "WideView" })}
         >
-          Skip tutorial
+          Skip intro
         </button>
       </div>
       <div className="scrollama scrollama-1">
         <div className="tut-graph-wrapper">
-          <svg id="tut-bar-graph"></svg>
-          <BucketGlyph
-            levelInterp={bucketInterper}
-            width={300}
-            height={BAR_CHART_HEIGHT}
-            colorInterp={INTERP_COLOR}
-          />
+          <div className="tut-graph">
+            <svg id="pag-bar-graph"></svg>
+            <BucketGlyph
+              levelInterp={bucketInterperPAG}
+              width={300}
+              height={BAR_CHART_HEIGHT}
+              colorInterp={INTERP_COLOR}
+            />
+          </div>
+          <div className="tut-graph">
+            <svg id="prf-bar-graph"></svg>
+            <BucketGlyph
+              levelInterp={bucketInterperPRF}
+              width={300}
+              height={BAR_CHART_HEIGHT}
+              colorInterp={INTERP_COLOR}
+            />
+          </div>
         </div>
         <Scrollama offset={0.5} onStepEnter={onStepEnter}>
           <Step data={2}>
             <div className="tut-text-card">
-              This is the average yearly amount of water this group receives,
+              This is the average yearly amount of water each group receives,
               specifically from the <b>Central Valley Project</b>, one of two
               water municipalities in California.
             </div>
           </Step>
           <Step data={3}>
             <div className="tut-text-card">
-              Here, it is presented as a bar graph, with the bottom axis
+              Here, it is presented as bar graphs, with the bottom axis
               representing the year and the side axis representing the amount of
               water delivered in thousand acre-feet (TAF).
             </div>
           </Step>
           <Step data={4}>
             <div className="tut-text-card">
-              We'll condense this bar graph into a single bar with a filled
+              We'll condense each bar graph into a single bar with a filled
               gradient.
             </div>
           </Step>
           <Step data={5}>
             <div className="tut-text-card" style={{ marginBottom: "80vh" }}>
-              What we get is a bucket of water showing which water levels are
+              What we get are buckets of water showing which water levels are
               most likely, with the darker areas being the most likely water
               levels.
             </div>
@@ -226,7 +246,7 @@ export default function TutorialView() {
             <DotHistogram
               width={210}
               height={140}
-              data={DEFAULT_DELIVS}
+              data={PAG_DELIVS}
               goal={userGoal}
               setGoal={(newGoal) => {
                 setUserGoal(newGoal);
@@ -263,10 +283,10 @@ export default function TutorialView() {
         <Scrollama offset={0.5} onStepEnter={onStepEnter}>
           <Step data={6}>
             <div className="tut-text-card">
-              Here it is as a drop of water. We see here that the lightest color
-              reaches the midpoint of the maximum water possible, meaning that
-              there is a chance 600 TAF of water will be delivered to this
-              group.
+              Let's focus on the agriculture group. Here it is as a drop of
+              water. We see here that the lightest color reaches the midpoint of
+              the maximum water possible, meaning that there is a chance 600 TAF
+              of water will be delivered to this group.
             </div>
           </Step>
           <Step data={7}>
@@ -328,11 +348,11 @@ export default function TutorialView() {
           </Step>
           <Step data={15}>
             <div className="tut-text-card" style={{ marginBottom: "120vh" }}>
-              For example, the refuge group south of the delta. The scenarios
-              that benefit the agriculture group do not always benefit the
-              refuge group, and vice versa. Hover over the waterdrops to see how
-              the same scenarios place for each objective. (Can you find a
-              scenario that benefits both?)
+              Let's bring back the refuge group. The scenarios that benefit the
+              agriculture group do not always benefit the refuge group, and vice
+              versa. Hover over the waterdrops to see how the same scenarios
+              place for each objective. (Can you find a scenario that benefits
+              both?)
             </div>
           </Step>
         </Scrollama>

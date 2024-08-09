@@ -978,11 +978,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   width: min-content;
   margin-inline: auto;
   z-index: -1;
+  display: flex;
+}
+
+.tut-graph {
   display: grid;
   grid-template-areas: "area";
 }
 
-.tut-graph-wrapper > * {
+.tut-graph > * {
   place-self: center;
   grid-area: area;
 }
@@ -1378,4 +1382,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   left: 100%;
   top: 50%;
   transform: translate(-50%, -50%);
+}
+
+.connect-line-container::before {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: rgb(164, 106, 0);
+  border-radius: 100vh;
+  right: 100%;
+  top: 50%;
+  transform: translate(50%, -50%);
 }

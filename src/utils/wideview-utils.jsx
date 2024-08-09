@@ -88,6 +88,7 @@ export function updateLargeDropSVG(
     .on("mouseenter", function (_, d) {
       if (!d3.select(this.parentNode).select(".circlet").classed("active"))
         d3.select(this.parentNode).select("circle").attr("display", "initial");
+      d3.select(this.parentNode).raise();
       onHover && onHover(d);
     })
     .on("mouseleave", function (_, d) {
