@@ -52,18 +52,19 @@ export default function App() {
 
     d3.select("#mosaic-svg").attr("width", appWidth).attr("height", appHeight);
 
-    camera.mount(
-      d3.select(".bubbles-wrapper").node(),
-      d3.select("#mosaic-svg").select(".svg-trans").node()
-    );
-    camera.setZoomFn((transform) => {
-      if (!disableCamAdjustmentsRef.current) {
-        dropsMesh.updateOutlineVisibility(getOutlineOpacity(transform.k));
-      }
+    camera.create({
+      width: appWidth,
+      height: appHeight,
+      webglElement: d3.select(".bubbles-wrapper").node(),
+      svgElement: d3.select("#mosaic-svg").select(".svg-trans").node(),
+      zoomFn: (transform) => {
+        if (!disableCamAdjustmentsRef.current) {
+          dropsMesh.updateOutlineVisibility(getOutlineOpacity(transform.k));
+        }
 
-      for (const cb of zoomCallbacksRef.current) cb(transform);
+        for (const cb of zoomCallbacksRef.current) cb(transform);
+      },
     });
-    camera.setSize(appWidth, appHeight);
 
     renderer.setAnimationLoop(() => {
       renderer.render(scene, camera.camera);
@@ -79,8 +80,13 @@ export default function App() {
       -waterdrops.height * 0.08,
       camera.getZFromFarHeight(waterdrops.height),
     ];
+
+    let transitionDuration = 0;
+
     if (animated) {
-      const [start] = zoomTo(pos, callback);
+      const [start, dur] = zoomTo(pos, callback);
+      transitionDuration = dur;
+
       start();
     } else {
       camera.callZoomFromWorldViewport({
@@ -90,6 +96,8 @@ export default function App() {
       });
       callback && callback();
     }
+
+    return transitionDuration;
   }, []);
 
   const zoomTo = useCallback(function (xyz, callback) {

@@ -5,7 +5,12 @@ import { LOD_1_RAD_PX } from "settings";
 import { LOD_1_LEVELS } from "settings";
 import { copyCoords, sortBy } from "./misc-utils";
 import { rotatePoints, toRadians } from "./math-utils";
-import { waterdropDeltaOutline, waterdropDelta } from "./render-utils";
+import {
+  waterdropDeltaOutline,
+  waterdropDelta,
+  worldToScreen,
+  screenToWorld,
+} from "./render-utils";
 
 export function mouseToThree(mouseX, mouseY, width, height) {
   return {
@@ -258,12 +263,12 @@ export class Camera {
   height;
   camera;
   zoom;
-  view;
+  webglView;
   curTransform;
 
   raycaster = new THREE.Raycaster();
 
-  _svgElement;
+  svgView;
 
   constructor({ fov, near, far }) {
     this.fov = fov;
@@ -271,20 +276,28 @@ export class Camera {
     this.far = far;
   }
 
-  setZoomFn(zoomFn) {
+  create({ width, height, webglElement, svgElement, zoomFn }) {
+    this.width = width;
+    this.height = height;
+
+    this.webglView = d3.select(webglElement);
+    this.svgView = d3.select(svgElement);
+
     this.zoom = d3.zoom().on("zoom", (e) => {
       this.curTransform = e.transform;
 
-      this._THREEZoomHandler(e.transform);
-      d3.select(this._svgElement).attr("transform", e.transform);
+      this.#THREEHandleZoom(e.transform);
+      this.svgView.attr("transform", e.transform);
 
       zoomFn && zoomFn(e.transform);
     });
+
+    this.#finishCreate();
   }
 
   callZoom(transform) {
     this.zoom.transform(
-      this.view,
+      this.webglView,
       d3.zoomIdentity.translate(transform.x, transform.y).scale(transform.k)
     );
   }
@@ -300,14 +313,6 @@ export class Camera {
       y,
       k,
     });
-  }
-
-  getZFromFarHeight(farHeight) {
-    return (Math.tan(toRadians(90 - this.fov / 2)) * farHeight) / 2;
-  }
-
-  getFarHeightFromZ(z) {
-    return Math.tan(toRadians(this.fov) / 2) * z * 2;
   }
 
   interpolateZoomCamera([endx, endy, endz]) {
@@ -340,61 +345,24 @@ export class Camera {
     return interper;
   }
 
-  mount(webglElement, svgElement) {
-    this.view = d3.select(webglElement);
-    this._svgElement = svgElement;
+  getZFromFarHeight(farHeight) {
+    return (Math.tan(toRadians(90 - this.fov / 2)) * farHeight) / 2;
   }
 
-  setSize(width, height) {
-    this.width = width;
-    this.height = height;
-
-    this.zoom = this.zoom.scaleExtent([
-      this.getScaleFromZ(this.far),
-      this.getScaleFromZ(this.near),
-    ]);
-
-    this.camera = new THREE.PerspectiveCamera(
-      this.fov,
-      width / height,
-      this.near,
-      this.far + 1
-    );
-
-    this.camera.position.set(0, 0, this.far);
-
-    this.view.call(this.zoom);
-    this.zoom.transform(
-      this.view,
-      d3.zoomIdentity
-        .translate(this.width / 2, this.height / 2)
-        .scale(this.getScaleFromZ(this.far))
-    );
+  getFarHeightFromZ(z) {
+    return Math.tan(toRadians(this.fov) / 2) * z * 2;
   }
 
-  _THREEZoomHandler(transform) {
-    const scale = transform.k;
-    const x = -(transform.x - this.width / 2) / scale;
-    const y = (transform.y - this.height / 2) / scale;
-    const z = this.getZFromScale(scale);
-    this.camera.position.set(x, y, z);
-  }
-
-  getScaleFromZ(camera_z_position) {
-    const half_fov = this.fov / 2;
-    const half_fov_radians = toRadians(half_fov);
-    const half_fov_height = Math.tan(half_fov_radians) * camera_z_position;
-    const fov_height = half_fov_height * 2;
-    const scale = this.height / fov_height;
+  getScaleFromZ(z) {
+    const farHeight = this.getFarHeightFromZ(z);
+    const scale = this.height / farHeight;
     return scale;
   }
 
   getZFromScale(scale) {
-    const half_fov = this.fov / 2;
-    const half_fov_radians = toRadians(half_fov);
-    const scale_height = this.height / scale;
-    const camera_z_position = scale_height / (2 * Math.tan(half_fov_radians));
-    return camera_z_position;
+    const scaleHeight = this.height / scale;
+    const z = this.getZFromFarHeight(scaleHeight);
+    return z;
   }
 
   intersectObject(mouseX, mouseY, mesh) {
@@ -407,6 +375,46 @@ export class Camera {
     );
 
     return this.raycaster.intersectObject(mesh);
+  }
+
+  worldToScreen(x, y) {
+    return worldToScreen(x, y, this.curTransform);
+  }
+
+  screenToWorld(x, y) {
+    return screenToWorld(x, y, this.curTransform);
+  }
+
+  #finishCreate() {
+    this.zoom = this.zoom.scaleExtent([
+      this.getScaleFromZ(this.far),
+      this.getScaleFromZ(this.near),
+    ]);
+
+    this.camera = new THREE.PerspectiveCamera(
+      this.fov,
+      this.width / this.height,
+      this.near,
+      this.far + 1
+    );
+
+    this.camera.position.set(0, 0, this.far);
+
+    this.webglView.call(this.zoom);
+    this.zoom.transform(
+      this.webglView,
+      d3.zoomIdentity
+        .translate(this.width / 2, this.height / 2)
+        .scale(this.getScaleFromZ(this.far))
+    );
+  }
+
+  #THREEHandleZoom(transform) {
+    const scale = transform.k;
+    const x = -(transform.x - this.width / 2) / scale;
+    const y = (transform.y - this.height / 2) / scale;
+    const z = this.getZFromScale(scale);
+    this.camera.position.set(x, y, z);
   }
 }
 

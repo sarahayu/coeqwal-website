@@ -9,7 +9,7 @@ import {
 } from "data/objectives-data";
 import { DESCRIPTIONS_DATA } from "data/descriptions-data";
 import { SPREAD_1_2 } from "settings";
-import { DROPLET_SHAPE } from "./render-utils";
+import { DROPLET_SHAPE, generateTSpan } from "./render-utils";
 import { LOD_1_RAD_PX } from "settings";
 import { dropCenterCorrection } from "./math-utils";
 import { genUUID, wrap } from "./misc-utils";
@@ -150,7 +150,7 @@ function largeDropInit({ nodes, height, key }) {
 
     s.append("text")
       .style("font-size", (height * SPREAD_1_2) / 15)
-      .attr("class", "fancy-font water-group-label")
+      .attr("class", "fancy-font large-gray-text")
       .attr("text-anchor", "middle");
 
     s.selectAll(".small-drop")
@@ -197,21 +197,14 @@ function smallDropInit({ key, levs, x, y }) {
 
 function largeDropUpdate({ nodes, key, height }) {
   return (s) => {
-    const t = s.select("text");
-
-    t.selectAll("*").remove();
-
-    const lines = wrap(
-      DESCRIPTIONS_DATA[key].display_name || DESCRIPTIONS_DATA[key].id
-    ).split("\n");
-
-    lines.forEach((line, i) => {
-      t.append("tspan")
-        .attr("x", 0)
-        .attr("y", (height / 2) * SPREAD_1_2)
-        .attr("dy", `${i}em`)
-        .text(line);
-    });
+    s.select("text")
+      .attr("x", 0)
+      .attr("y", (height / 2) * SPREAD_1_2 * 0.8)
+      .call(
+        generateTSpan(
+          DESCRIPTIONS_DATA[key].display_name || DESCRIPTIONS_DATA[key].id
+        )
+      );
 
     s.selectAll(".small-drop")
       .data(nodes)

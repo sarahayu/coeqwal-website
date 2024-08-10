@@ -1,6 +1,7 @@
 import { interpolateWatercolorBlue } from "bucket-lib/utils";
 import * as d3 from "d3";
 import { LOD_1_LEVELS } from "settings";
+import { wrap } from "./misc-utils";
 
 // path generated when WATERDROP_ICON size = 2
 export const DROPLET_SHAPE = "M0,-1L0.5,-0.5A0.707,0.707,0,1,1,-0.5,-0.5L0,-1Z";
@@ -222,4 +223,17 @@ export function screenToWorld(x, y, camTransform) {
     (x - camTransform.x) / camTransform.k,
     (y - camTransform.y) / camTransform.k,
   ];
+}
+
+export function generateTSpan(text, lineHeight = 1.2) {
+  return (s) => {
+    s.selectAll("*").remove();
+    const lines = typeof text === "string" ? wrap(text).split("\n") : text;
+
+    const x = s.attr("x");
+
+    lines.forEach((line) => {
+      s.append("tspan").attr("x", x).attr("dy", `${lineHeight}em`).text(line);
+    });
+  };
 }

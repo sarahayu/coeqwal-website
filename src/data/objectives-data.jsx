@@ -46,7 +46,7 @@ const _SCENARIO_IDS = Object.keys(
 );
 
 export const SCENARIO_IDS = _SCENARIO_IDS.filter(
-  (_, i) => i % SCEN_DIVISOR === 0
+  (s, i) => i % SCEN_DIVISOR === 0 || s === "expl0000"
 );
 
 export const KEY_SETTINGS_MAP = (function preprocessData() {

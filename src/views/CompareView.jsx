@@ -68,7 +68,7 @@ export default function CompareView() {
       if (isState(state, "CompareView")) {
         const container = d3.select("#compare-group");
 
-        const { viewCenter, transitionDuration } = state;
+        const { viewCenter, transitionDuration = 0 } = state;
 
         centerRef.current = viewCenter;
 
@@ -84,21 +84,21 @@ export default function CompareView() {
           },
         });
 
-        hideElems(".water-group-label");
+        hideElems(".large-gray-text", container);
 
         setTimeout(() => {
           setActiveMinidrop({ key: groupsRef.current.groups[0].nodes[0].key });
           showElems(
-            "#member-variable, #member-label, .water-group-label",
+            "#member-variable, #member-label, .large-gray-text",
             container
           );
           showElems(".comp-settings", d3, "flex");
         }, transitionDuration + 500);
 
         setGoBack(() => () => {
-          setState({ state: "WideView" });
+          const transitionDuration = resetCamera();
 
-          resetCamera();
+          setState({ state: "WideView", transitionDuration });
         });
 
         setCamTransform(camera.curTransform);

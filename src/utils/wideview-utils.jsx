@@ -10,7 +10,7 @@ import { GROUP_HOVER_AREA_FACTOR } from "settings";
 
 import { dist, dropCenterCorrection, getCenterDomRect } from "utils/math-utils";
 import { wrap } from "utils/misc-utils";
-import { circlet } from "utils/render-utils";
+import { circlet, generateTSpan } from "utils/render-utils";
 
 export function drawMinimapSVG() {
   const width = 200,
@@ -79,7 +79,6 @@ export function updateLargeDropSVG(
         .each(interactorsInit);
     })
     .each(interactorsUpdate)
-    .style("display", "initial")
     .attr("transform", dropTransform)
     .select(".hover-capture");
 
@@ -167,7 +166,7 @@ function interactorsInit() {
     .attr("opacity", 0.8);
   textGroup
     .append("text")
-    .attr("class", "fancy-font")
+    .attr("class", "fancy-font cloud-text")
     .attr("text-anchor", "middle")
     .attr("font-size", 0);
 }

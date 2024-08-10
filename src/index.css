@@ -949,9 +949,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   opacity: 0.5;
 }
 
-.water-group-label {
-  fill: gray;
-  opacity: 0.5;
+.large-gray-text {
+  fill: #bababa;
   line-height: 1.5;
 }
 

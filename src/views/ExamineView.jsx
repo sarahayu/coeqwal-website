@@ -11,6 +11,7 @@ import { DESCRIPTIONS_DATA } from "data/descriptions-data";
 import { updateColorDrops, updateSmallDropSVG } from "utils/examineview-utils";
 import { arrRemove, isState, useStateRef } from "utils/misc-utils";
 import {
+  generateTSpan,
   hideElems,
   removeElems,
   screenToWorld,
@@ -50,15 +51,18 @@ export default function ExamineView() {
   const removePreviewRef = useRef(null);
 
   useEffect(function initialize() {
-    const svgArea = d3
+    const svgGroup = d3
       .select("#mosaic-svg")
       .select(".svg-trans")
       .append("g")
       .attr("id", "examine-group");
 
-    svgArea.append("circle").attr("class", "highlight-circle");
+    svgGroup.append("circle").attr("class", "highlight-circle");
 
-    svgArea.append("path").attr("class", "connect-line");
+    svgGroup.append("path").attr("class", "connect-line");
+
+    svgGroup.append("text").attr("class", "instruction-text large-gray-text");
+    svgGroup.append("text").attr("class", "large-drop-label large-gray-text");
 
     addZoomHandler(function (transform) {
       setCamTransform(transform);
@@ -68,7 +72,7 @@ export default function ExamineView() {
   useEffect(
     function enterState() {
       if (isState(state, "ExamineView")) {
-        const transitionDelay = state.transitionDuration;
+        const { transitionDuration = 0 } = state;
         const container = d3.select("#examine-group");
         curMinidropsRef.current = waterdrops.groups.find(
           (g) => g.key === activeWaterdrops[0]
@@ -77,7 +81,7 @@ export default function ExamineView() {
         updateSmallDropSVG(
           container,
           curMinidropsRef.current,
-          transitionDelay / 2,
+          transitionDuration / 2,
           {
             onClick: updateActiveMinidrops,
             onHover: hoverDrop,
@@ -85,10 +89,12 @@ export default function ExamineView() {
           }
         );
 
-        setGoBack(() => () => {
-          setState({ state: "WideView" });
+        setTimeout(positionTexts, transitionDuration * 1.2);
 
-          resetCamera();
+        setGoBack(() => () => {
+          const transitionDuration = resetCamera();
+
+          setState({ state: "WideView", transitionDuration });
         });
 
         setCamTransform(camera.curTransform);
@@ -97,6 +103,9 @@ export default function ExamineView() {
         return function exitState() {
           removeElems(".small-drop, .circlet", container);
           hideElems("#examine-group");
+          d3.selectAll(
+            "#examine-group .instruction-text, #examine-group .large-drop-label"
+          ).attr("opacity", 0);
 
           setPanels([]);
           activeMinidropsRef.current = [];
@@ -134,6 +143,60 @@ export default function ExamineView() {
     },
     [colorSetting]
   );
+
+  function positionTexts() {
+    const instrFontSize =
+      (16 / camera.height) *
+      camera.getZFromFarHeight(
+        curMinidropsRef.current.height * SPREAD_1_2 * 1.5
+      );
+
+    d3.select("#examine-group .instruction-text")
+      .attr(
+        "x",
+        curMinidropsRef.current.x -
+          curMinidropsRef.current.height * SPREAD_1_2 * 0.8
+      )
+      .attr("y", curMinidropsRef.current.y - instrFontSize)
+      .attr("opacity", 0)
+      .attr("text-anchor", "end")
+      .attr("font-size", instrFontSize)
+      .call(
+        generateTSpan(["click to show panels.", "you can drag panels."], 1.6)
+      )
+      .call((s) => {
+        s.transition().attr("opacity", 1);
+      })
+      .selectAll("tspan")
+      .each(function (_, i) {
+        d3.select(this).attr("dx", i * 3);
+      });
+
+    const labelFontSize =
+      (20 / camera.height) *
+      camera.getZFromFarHeight(
+        curMinidropsRef.current.height * SPREAD_1_2 * 1.5
+      );
+    const margin = labelFontSize;
+
+    const [worldX, worldY] = camera.screenToWorld(0, 0);
+
+    d3.select("#examine-group .large-drop-label")
+      .attr("x", worldX + margin)
+      .attr("y", worldY + margin)
+      .attr("opacity", 0)
+      .attr("text-anchor", "start")
+      .attr("font-size", labelFontSize)
+      .call(
+        generateTSpan(
+          DESCRIPTIONS_DATA[activeWaterdrops[0]].display_name ||
+            DESCRIPTIONS_DATA[activeWaterdrops[0]].id,
+          1.2
+        )
+      )
+      .transition()
+      .attr("opacity", 1);
+  }
 
   function addDetailPanel(dropId, preview = false, forceReplace = false) {
     const { x: groupX, y: groupY } = curMinidropsRef.current;
@@ -223,7 +286,7 @@ export default function ExamineView() {
       (p) => p.id === id
     );
 
-    const [cx, cy] = worldToScreen(circleX, circleY, camTransformRef.current);
+    const [cx, cy] = camera.worldToScreen(circleX, circleY);
 
     const panelBox = d3
       .select(`.examine-panel.p${id}`)
@@ -263,10 +326,6 @@ export default function ExamineView() {
   if (isState(state, "ExamineView")) {
     return (
       <>
-        <h1 className="examine-large-label">
-          {DESCRIPTIONS_DATA[activeWaterdrops[0]].display_name ||
-            DESCRIPTIONS_DATA[activeWaterdrops[0]].id}
-        </h1>
         {panels.map(
           ({ text, x, y, id, offsetX, offsetY, panelKey, preview }) => (
             <div

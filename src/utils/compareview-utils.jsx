@@ -7,7 +7,7 @@ import { LOD_1_LEVELS, LOD_1_RAD_PX, SPREAD_1_2 } from "settings";
 import { DESCRIPTIONS_DATA } from "data/descriptions-data";
 import { clipEnds, dropCenterCorrection } from "utils/math-utils";
 import { genUUID, wrap } from "utils/misc-utils";
-import { DROPLET_SHAPE } from "utils/render-utils";
+import { DROPLET_SHAPE, generateTSpan } from "utils/render-utils";
 import { circlet, gradientInit, gradientUpdate } from "./render-utils";
 
 export function updateDropsSVG(
@@ -206,7 +206,7 @@ function largeDropInit({ nodes, height }) {
 
     s.append("text")
       .style("font-size", (height * SPREAD_1_2) / 15)
-      .attr("class", "fancy-font water-group-label")
+      .attr("class", "fancy-font large-gray-text")
       .attr("text-anchor", "middle");
 
     s.selectAll(".small-drop")
@@ -303,19 +303,13 @@ function smallDropUpdate({ key, levs, maxLev, x, y }, baselinePos) {
 
 function textUpdate(key, height) {
   return (s) => {
-    const t = s.select("text");
-
-    t.selectAll("*").remove();
-    const lines = wrap(
-      DESCRIPTIONS_DATA[key].display_name || DESCRIPTIONS_DATA[key].id
-    ).split("\n");
-
-    lines.forEach((line, i) => {
-      t.append("tspan")
-        .attr("x", 0)
-        .attr("y", (height / 2) * SPREAD_1_2)
-        .attr("dy", `${i * 1.2}em`)
-        .text(line);
-    });
+    s.select("text")
+      .attr("x", 0)
+      .attr("y", (height / 2) * SPREAD_1_2 * 0.9)
+      .call(
+        generateTSpan(
+          DESCRIPTIONS_DATA[key].display_name || DESCRIPTIONS_DATA[key].id
+        )
+      );
   };
 }

@@ -16,7 +16,7 @@ import {
   fontSizer,
   updateLargeDropSVG,
 } from "utils/wideview-utils";
-import { hideElems, showElems } from "utils/render-utils";
+import { generateTSpan, hideElems, showElems } from "utils/render-utils";
 
 export default function WideView() {
   const {
@@ -56,6 +56,7 @@ export default function WideView() {
   useEffect(
     function enterState() {
       if (isState(state, "WideView")) {
+        const { transitionDuration = 0 } = state;
         d3.select("body").style("overflow", "hidden");
 
         enableZoomRef.current = true;
@@ -67,10 +68,10 @@ export default function WideView() {
         drawTHREEGraphics();
         drawSVGGraphics();
 
-        showElems("#infobox, #mosaic-webgl, #mosaic-svg");
+        showElems("#infobox, #mosaic-webgl, #mosaic-svg, #wide-group");
 
         return function exitState() {
-          hideElems("#infobox, #wide-group .large-drop");
+          hideElems("#infobox, #wide-group");
 
           enableZoomRef.current = false;
         };
@@ -83,7 +84,7 @@ export default function WideView() {
     function updateFontSizes() {
       if (enableZoomRef.current) {
         d3.select("#wide-group")
-          .selectAll("text")
+          .selectAll(".cloud-text")
           .each(fontSizer(curScreenTransform, camera, waterdrops.height));
       }
     },
@@ -158,10 +159,16 @@ export default function WideView() {
   function initSVGGraphics() {
     hideElems("#infobox, #mosaic-webgl, #mosaic-svg");
 
-    d3.select("#mosaic-svg")
+    const svgGroup = d3
+      .select("#mosaic-svg")
       .select(".svg-trans")
       .append("g")
       .attr("id", "wide-group");
+
+    svgGroup
+      .append("text")
+      .attr("class", "instruction-text large-gray-text")
+      .attr("x", 0 - waterdrops.height * 0.6);
   }
 
   function registerEventListeners() {
@@ -209,6 +216,24 @@ export default function WideView() {
     for (const wd of activeDropsRef.current) {
       container.select(".circlet." + wd.key).classed("active", true);
     }
+
+    const fontSize =
+      (20 / camera.height) * camera.getZFromFarHeight(waterdrops.height);
+    container
+      .select(".instruction-text")
+      .attr("y", -fontSize * 5)
+      .attr("text-anchor", "end")
+      .attr("font-size", fontSize)
+      .call(
+        generateTSpan(
+          ["click to interact.", "scroll to zoom.", "drag to pan."],
+          2
+        )
+      )
+      .selectAll("tspan")
+      .each(function (_, i) {
+        d3.select(this).attr("dx", i * 5);
+      });
   }
 
   function updateActiveDrops(d) {
