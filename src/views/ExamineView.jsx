@@ -61,8 +61,12 @@ export default function ExamineView() {
 
     svgGroup.append("path").attr("class", "connect-line");
 
-    svgGroup.append("text").attr("class", "instruction-text large-gray-text");
-    svgGroup.append("text").attr("class", "large-drop-label large-gray-text");
+    svgGroup
+      .append("text")
+      .attr("class", "instruction-text large-gray-text fancy-font");
+    svgGroup
+      .append("text")
+      .attr("class", "large-drop-label large-gray-text fancy-font");
 
     addZoomHandler(function (transform) {
       setCamTransform(transform);
@@ -242,13 +246,13 @@ export default function ExamineView() {
     const container = d3.select("#examine-group");
     if (activeMinidropsRef.current.includes(d.id)) {
       arrRemove(activeMinidropsRef.current, d.id);
-      container.select(".circlet.i" + d.id).classed("active", false);
+      container.select(`.circlet#i${d.id}`).classed("active", false);
       removeDetailPanel(d.id);
       setHoveredCard(null);
     } else {
       removeDetailPanel(d.id);
       activeMinidropsRef.current.push(d.id);
-      container.select(".circlet.i" + d.id).classed("active", true);
+      container.select(`.circlet#i${d.id}`).classed("active", true);
       addDetailPanel(d.id);
       setHoveredCard(d.id);
     }
@@ -256,7 +260,7 @@ export default function ExamineView() {
 
   function hoverDrop(d) {
     if (activeMinidropsRef.current.includes(d.id)) {
-      d3.select(`.examine-panel.p${d.id}`).style("z-index", 100);
+      d3.select(`.examine-panel#p${d.id}`).style("z-index", 100);
       setHoveredCard(d.id);
     } else {
       if (removePreviewRef.current) {
@@ -276,7 +280,7 @@ export default function ExamineView() {
     }
 
     setHoveredCard((hc) => (hc === d.id ? null : hc));
-    d3.select(`.examine-panel.p${d.id}`).style("z-index", 0);
+    d3.select(`.examine-panel#p${d.id}`).style("z-index", 0);
   }
 
   function drawLineConnect(id) {
@@ -289,7 +293,7 @@ export default function ExamineView() {
     const [cx, cy] = camera.worldToScreen(circleX, circleY);
 
     const panelBox = d3
-      .select(`.examine-panel.p${id}`)
+      .select(`.examine-panel#p${id}`)
       .node()
       .getBoundingClientRect();
     const [px, py] = [
@@ -329,9 +333,8 @@ export default function ExamineView() {
         {panels.map(
           ({ text, x, y, id, offsetX, offsetY, panelKey, preview }) => (
             <div
-              className={`panel examine-panel p${id} ${
-                preview ? "preview" : ""
-              }`}
+              className={`panel examine-panel ${preview ? "preview" : ""}`}
+              id={`p${id}`}
               key={preview ? -1 : id}
               style={getPanelStyle({ x, y, offsetX, offsetY })}
               onMouseDown={(e) => !preview && onPanelDragStart(e, { id })}

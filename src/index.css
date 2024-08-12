@@ -1029,7 +1029,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .tut-graph > p {
   position: absolute;
-  bottom: calc(50% - 260px);
+  top: calc(50% - 260px);
 }
 
 .tut-text-card {

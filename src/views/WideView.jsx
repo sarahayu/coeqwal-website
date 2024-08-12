@@ -167,7 +167,7 @@ export default function WideView() {
 
     svgGroup
       .append("text")
-      .attr("class", "instruction-text large-gray-text")
+      .attr("class", "instruction-text large-gray-text fancy-font")
       .attr("x", 0 - waterdrops.height * 0.6);
   }
 
@@ -214,7 +214,7 @@ export default function WideView() {
     });
 
     for (const wd of activeDropsRef.current) {
-      container.select(".circlet." + wd.key).classed("active", true);
+      container.select(`.circlet#b${wd.key}`).classed("active", true);
     }
 
     const fontSize =
@@ -244,12 +244,12 @@ export default function WideView() {
         aw = arrRemove(aw, d.key);
         activeDropsRef.current = arrRemove(activeDropsRef.current, d);
 
-        container.select(".circlet." + d.key).classed("active", false);
+        container.select(`.circlet#b${d.key}`).classed("active", false);
       } else {
         aw.push(d.key);
         activeDropsRef.current.push(d);
 
-        container.select(".circlet." + d.key).classed("active", true);
+        container.select(`.circlet#b${d.key}`).classed("active", true);
       }
       return [...aw];
     });

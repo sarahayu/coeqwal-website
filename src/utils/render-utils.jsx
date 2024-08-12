@@ -163,12 +163,12 @@ export function removeElems(elemStr, container) {
   (container || d3).selectAll(elemStr).remove();
 }
 
-export function gradientInit(levs, id) {
+export function gradientInit(levs, gradId) {
   return (s) => {
     const stops = s
       .append("defs")
       .append("linearGradient")
-      .attr("id", id)
+      .attr("id", gradId)
       .attr("x1", "0%")
       .attr("x2", "0%")
       .attr("y1", "0%")

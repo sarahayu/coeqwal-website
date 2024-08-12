@@ -261,13 +261,13 @@ function largeDropUpdate({ nodes, key, height }, transitionDelay) {
   };
 }
 
-function smallDropInit({ levs }) {
+function smallDropInit({ levs, id }) {
   return (s) => {
     s.append("rect").attr("class", "bbox").style("visibility", "hidden");
 
-    const randId = `compare-grad-${genUUID()}`;
+    const idStr = `compare-grad-${id}`;
 
-    s.call(gradientInit(levs, randId));
+    s.call(gradientInit(levs, idStr));
 
     s.append("path")
       .attr("d", DROPLET_SHAPE)
@@ -277,7 +277,7 @@ function smallDropInit({ levs }) {
     s.append("path")
       .attr("class", "fill")
       .attr("d", DROPLET_SHAPE)
-      .attr("fill", `url(#${randId})`)
+      .attr("fill", `url(#${idStr})`)
       .attr("transform", `scale(${LOD_1_RAD_PX})`);
   };
 }

@@ -10,7 +10,7 @@ import { GROUP_HOVER_AREA_FACTOR } from "settings";
 
 import { dist, dropCenterCorrection, getCenterDomRect } from "utils/math-utils";
 import { wrap } from "utils/misc-utils";
-import { circlet, generateTSpan } from "utils/render-utils";
+import { circlet } from "utils/render-utils";
 
 export function drawMinimapSVG() {
   const width = 200,
@@ -172,11 +172,7 @@ function interactorsInit() {
 }
 
 function interactorsUpdate(d) {
-  d3.select(this)
-    .select(".circlet")
-    .attr("class", null)
-    // TODO find better way than disabling class
-    .attr("class", "circlet interactive " + d.key);
+  d3.select(this).select(".circlet").attr("id", `b${d.key}`);
   d3.select(this).select("text").call(textUpdate(d));
 }
 

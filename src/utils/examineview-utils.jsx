@@ -1,8 +1,6 @@
 import * as d3 from "d3";
 
-import { interpolateWatercolorBlue } from "bucket-lib/utils";
-
-import { LOD_1_LEVELS, LOD_1_RAD_PX, SPREAD_1_2 } from "settings";
+import { LOD_1_RAD_PX, SPREAD_1_2 } from "settings";
 
 import { dropCenterCorrection } from "utils/math-utils";
 import { DROPLET_SHAPE, circlet } from "utils/render-utils";
@@ -27,8 +25,8 @@ export function updateSmallDropSVG(
     .selectAll(".small-drop")
     .data(waterdropGroup.nodes)
     .join((enter) => {
-      return enter.append("g").each(function (node, i) {
-        d3.select(this).call(smallDropInit(node, i));
+      return enter.append("g").each(function (node) {
+        d3.select(this).call(smallDropInit(node));
       });
     })
     .attr("transform", getStartLoc)
@@ -72,9 +70,6 @@ export function updateSmallDropSVG(
         baselinePos.y -
         dropCenterCorrection({ rad: LOD_1_RAD_PX })
     )
-    .transition()
-    .delay(transitionDelay)
-    .duration(1000)
     .attr("cx", waterdropGroup.x + baselinePos.x * SPREAD_1_2)
     .attr(
       "cy",
@@ -97,18 +92,20 @@ export function updateColorDrops(container, waterdropGroup, opacFn, color) {
     .attr("cy", ({ y }) => waterdropGroup.y + y * SPREAD_1_2);
 }
 
-function smallDropInit({ levs }, i) {
+function smallDropInit({ levs, id }) {
   return (s) => {
     s.attr("class", "small-drop hover-capture");
 
-    s.call(gradientInit(levs, `drop-fill-${i}`));
+    const idStr = `drop-fill-${id}`;
+
+    s.call(gradientInit(levs, idStr));
 
     s.append("path").attr("d", DROPLET_SHAPE).attr("class", "outline");
 
     s.append("path")
       .attr("class", "fill")
       .attr("d", DROPLET_SHAPE)
-      .attr("fill", `url(#drop-fill-${i})`);
+      .attr("fill", `url(#${idStr})`);
 
     s.append("circle")
       .attr("class", "circlet interactive")
@@ -131,10 +128,7 @@ function smallDropUpdate({ key, levs, maxLev, id, x, y }, baselinePos) {
     s.select(".outline").attr("transform", `scale(${LOD_1_RAD_PX * 0.95})`);
     s.select(".fill").attr("transform", `scale(${LOD_1_RAD_PX})`);
 
-    s.select(".circlet")
-      .attr("class", null)
-      // TODO find better way to toggle i1234, prob with id
-      .attr("class", "circlet interactive i" + id);
+    s.select(".circlet").attr("id", `i${id}`);
 
     const dropBBox = s.select(".fill").node().getBBox();
 
