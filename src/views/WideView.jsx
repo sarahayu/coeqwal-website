@@ -1,6 +1,14 @@
 import * as d3 from "d3";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { BiCross, BiNetworkChart } from "react-icons/bi";
+import fuzzysort from "fuzzysort";
 
 import { AppContext } from "AppContext";
 import { DESCRIPTIONS_DATA } from "data/descriptions-data";
@@ -17,6 +25,7 @@ import {
   updateLargeDropSVG,
 } from "utils/wideview-utils";
 import { generateTSpan, hideElems, showElems } from "utils/render-utils";
+import { OBJECTIVE_IDS } from "data/objectives-data";
 
 export default function WideView() {
   const {
@@ -39,6 +48,7 @@ export default function WideView() {
   });
 
   const [currentHoveredDrop, setCurrentHoveredDrop] = useState(null);
+  const [searchPrompt, setSearchPrompt] = useState(null);
 
   const enableZoomRef = useRef(false);
   const activeDropsRef = useRef([]);
@@ -238,6 +248,7 @@ export default function WideView() {
 
   function updateActiveDrops(d) {
     const container = d3.select("#wide-group");
+    console.log(d);
 
     setActiveWaterdrops((aw) => {
       if (aw.includes(d.key)) {
@@ -308,6 +319,20 @@ export default function WideView() {
     }
   }
 
+  const searchResults = useMemo(() => {
+    if (searchPrompt === null) return [];
+
+    return fuzzysort.go(searchPrompt, waterdrops.groups, {
+      keys: [
+        (obj) => DESCRIPTIONS_DATA[obj.key].id,
+        (obj) => DESCRIPTIONS_DATA[obj.key].display_name,
+        (obj) => DESCRIPTIONS_DATA[obj.key].desc,
+      ],
+      limit: 10,
+      all: true,
+    });
+  }, [searchPrompt, waterdrops]);
+
   return (
     <>
       <div id="infobox">
@@ -321,6 +346,34 @@ export default function WideView() {
             <p className="curKey">
               id: <span> {currentHoveredDrop.id} </span>
             </p>
+          </div>
+        )}
+        {!currentHoveredDrop && (
+          <div className="searchbox">
+            <input
+              type="text"
+              placeholder="search"
+              value={searchPrompt || ""}
+              onChange={(e) => setSearchPrompt(e.target.value)}
+              onFocus={() => {
+                setSearchPrompt("");
+                d3.select(".results").style("display", "flex");
+              }}
+              onBlur={() => {
+                setTimeout(() => {
+                  setSearchPrompt(null);
+                  d3.select(".results").style("display", "none");
+                }, 100);
+              }}
+            ></input>
+            <div className="results" style={{ display: "none" }}>
+              {searchResults.map(({ obj: wd }) => (
+                <button key={wd.key} onClick={() => updateActiveDrops(wd)}>
+                  {DESCRIPTIONS_DATA[wd.key].display_name ||
+                    DESCRIPTIONS_DATA[wd.key].id}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>

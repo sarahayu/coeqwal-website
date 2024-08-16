@@ -792,48 +792,57 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   bottom: 2rem;
   right: 2rem;
   display: flex;
-  gap: 1em;
+  gap: 1.5rem;
   align-items: end;
 }
 
 .wide-view-action-btn {
+  color: #333;
   font-size: 2rem;
-  background: #efefef;
-  opacity: 0.8;
-  border: 2px solid black;
   cursor: pointer;
   padding: 0.5em 1em;
-  border-radius: 100vh;
+  border: none;
+  border-radius: 0.5rem;
   font-weight: bold;
   display: flex;
   gap: 0.3em;
   align-items: center;
-  transition: background-color 0.1s;
+  transition: all 0.3s;
   animation: enterView 0.1s;
+
+  background-color: white;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .wide-view-action-btn:hover {
-  background-color: white;
+  background-color: #edf1fa;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.5) 0px 1px 3px -1px;
 }
 
 .supplement-btn {
+  color: #333;
   font-size: 1rem;
-  opacity: 0.8;
-  background-color: #efefef;
-  border: 2px solid gray;
-  color: gray;
   cursor: pointer;
-  padding: 0.5em 1em;
-  border-radius: 100vh;
+  padding: 0.8em 1.2em;
+  border: none;
+  border-radius: 0.5rem;
   display: flex;
   gap: 0.3em;
   align-items: center;
-  transition: background-color 0.1s;
+  transition: all 0.3s;
   animation: enterView 0.1s;
+
+  background-color: white;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .supplement-btn:hover {
-  background-color: white;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.5) 0px 1px 3px -1px;
+  background-color: #edf1fa;
 }
 
 @keyframes enterView {
@@ -848,17 +857,57 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #infobox {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 1em;
+  right: 1em;
   display: flex;
   flex-direction: column;
   width: min-content;
   padding: 2rem;
-  pointer-events: none;
+
+  background: rgba(239, 239, 239, 0.568);
+  backdrop-filter: blur(10px);
+  border-radius: 1em;
+  border: 1px solid rgba(239, 239, 239, 0.868);
 }
 
 #infobox svg {
   pointer-events: all;
+}
+
+.searchbox {
+  margin-top: 1rem;
+  width: 100%;
+  position: relative;
+}
+
+.searchbox input {
+  border: none;
+  width: 100%;
+  padding: 0.5em 1em;
+  border-radius: 100vh;
+  opacity: 0.5;
+  font-size: 0.8rem;
+}
+
+.searchbox .results {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  font-size: 0.8rem;
+  border-radius: 1em;
+  overflow-y: hidden;
+  width: 100%;
+}
+
+.results button {
+  border: none;
+  cursor: pointer;
+  padding: 0.4em 1em;
+  background-color: white;
+}
+
+.results button:hover {
+  background-color: rgb(244, 244, 244);
 }
 
 .details {

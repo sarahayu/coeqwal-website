@@ -41,9 +41,7 @@ export function drawMinimapSVG() {
     .join("path")
     .attr("d", (d) => d3.geoPath().projection(proj)(d))
     .attr("class", (d) => "outline " + d.properties.CalLiteID)
-    .attr("stroke", (d) =>
-      d.properties.CalLiteID ? "transparent" : "lightgray"
-    )
+    .attr("stroke", (d) => (d.properties.CalLiteID ? "transparent" : "gray"))
     .attr("stroke-width", 1)
     .attr("fill", "transparent");
 

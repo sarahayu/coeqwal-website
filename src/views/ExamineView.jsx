@@ -181,15 +181,16 @@ export default function ExamineView() {
       camera.getZFromFarHeight(
         curMinidropsRef.current.height * SPREAD_1_2 * 1.5
       );
-    const margin = labelFontSize;
-
-    const [worldX, worldY] = camera.screenToWorld(0, 0);
 
     d3.select("#examine-group .large-drop-label")
-      .attr("x", worldX + margin)
-      .attr("y", worldY + margin)
+      .attr("x", curMinidropsRef.current.x)
+      .attr(
+        "y",
+        curMinidropsRef.current.y +
+          (curMinidropsRef.current.height / 2) * SPREAD_1_2 * 0.9
+      )
       .attr("opacity", 0)
-      .attr("text-anchor", "start")
+      .attr("text-anchor", "middle")
       .attr("font-size", labelFontSize)
       .call(
         generateTSpan(

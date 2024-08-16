@@ -75,10 +75,11 @@ export default function App() {
   }, []);
 
   const resetCamera = useCallback(function (animated = true, callback) {
+    const farHeight = waterdrops.height * 1.2;
     const pos = [
       0,
       -waterdrops.height * 0.08,
-      camera.getZFromFarHeight(waterdrops.height),
+      camera.getZFromFarHeight(farHeight),
     ];
 
     let transitionDuration = 0;
@@ -92,7 +93,7 @@ export default function App() {
       camera.callZoomFromWorldViewport({
         worldX: pos[0],
         worldY: -pos[1],
-        farHeight: waterdrops.height,
+        farHeight,
       });
       callback && callback();
     }

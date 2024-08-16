@@ -89,3 +89,12 @@ export function arrRemove(arr, item) {
 export function copyCoords(arr) {
   return arr.map((a) => Array.from(a));
 }
+
+// https://www.geeksforgeeks.org/implement-search-box-with-debounce-in-javascript/
+export const debounce = (fn, delay = 1000) => {
+  let timerId = null;
+  return (...args) => {
+    clearTimeout(timerId);
+    timerId = setTimeout(() => fn(...args), delay);
+  };
+};

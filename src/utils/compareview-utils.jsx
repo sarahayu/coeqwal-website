@@ -1,12 +1,9 @@
 import * as d3 from "d3";
 
-import { interpolateWatercolorBlue } from "bucket-lib/utils";
-
-import { LOD_1_LEVELS, LOD_1_RAD_PX, SPREAD_1_2 } from "settings";
+import { LOD_1_RAD_PX, SPREAD_1_2 } from "settings";
 
 import { DESCRIPTIONS_DATA } from "data/descriptions-data";
 import { clipEnds, dropCenterCorrection } from "utils/math-utils";
-import { genUUID, wrap } from "utils/misc-utils";
 import { DROPLET_SHAPE, generateTSpan } from "utils/render-utils";
 import { circlet, gradientInit, gradientUpdate } from "./render-utils";
 
