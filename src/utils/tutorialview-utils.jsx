@@ -1,16 +1,10 @@
 import * as d3 from "d3";
 
 import { ticksExact } from "bucket-lib/utils";
-import {
-  DELIV_KEY_STRING,
-  MAX_DELIVS,
-  OBJECTIVES_DATA,
-  SCENARIO_KEY_STRING,
-} from "data/objectives-data";
-import { DESCRIPTIONS_DATA } from "data/descriptions-data";
-import { SPREAD_1_2 } from "settings";
+import { objectivesData } from "data/objectives-data";
+import { descriptionsData } from "data/descriptions-data";
+import { settings } from "settings";
 import { DROPLET_SHAPE, generateTSpan } from "./render-utils";
-import { LOD_1_RAD_PX } from "settings";
 import { dropCenterCorrection } from "./math-utils";
 import { genUUID, wrap } from "./misc-utils";
 import { gradientUpdate } from "./render-utils";
@@ -31,13 +25,13 @@ export const DEFAULT_OBJECTIVE = "DEL_CVP_PAG_N";
 export const COMP_OBJECTIVE = "DEL_CVP_PRF_S";
 export const DEFAULT_SCENARIO = "expl0000";
 export const PAG_DELIVS =
-  OBJECTIVES_DATA[DEFAULT_OBJECTIVE][SCENARIO_KEY_STRING][DEFAULT_SCENARIO][
-    DELIV_KEY_STRING
-  ];
+  objectivesData.OBJECTIVES_DATA[DEFAULT_OBJECTIVE][
+    objectivesData.SCENARIO_KEY_STRING
+  ][DEFAULT_SCENARIO][objectivesData.DELIV_KEY_STRING];
 export const PRF_DELIVS =
-  OBJECTIVES_DATA[COMP_OBJECTIVE][SCENARIO_KEY_STRING][DEFAULT_SCENARIO][
-    DELIV_KEY_STRING
-  ];
+  objectivesData.OBJECTIVES_DATA[COMP_OBJECTIVE][
+    objectivesData.SCENARIO_KEY_STRING
+  ][DEFAULT_SCENARIO][objectivesData.DELIV_KEY_STRING];
 
 export const VARIATIONS = [
   "expl0020", // change priority
@@ -48,9 +42,9 @@ export const VARIATIONS = [
 
 export const VARIATIONS_DELIVS = VARIATIONS.map(
   (vars) =>
-    OBJECTIVES_DATA[DEFAULT_OBJECTIVE][SCENARIO_KEY_STRING][vars][
-      DELIV_KEY_STRING
-    ]
+    objectivesData.OBJECTIVES_DATA[DEFAULT_OBJECTIVE][
+      objectivesData.SCENARIO_KEY_STRING
+    ][vars][objectivesData.DELIV_KEY_STRING]
 );
 
 export const VARIATIONS_INTERPERS = VARIATIONS_DELIVS.map((varDelivs) =>
@@ -59,7 +53,7 @@ export const VARIATIONS_INTERPERS = VARIATIONS_DELIVS.map((varDelivs) =>
     .domain(ticksExact(0, 1, varDelivs.length))
     .range(
       varDelivs
-        .map((v) => v / MAX_DELIVS)
+        .map((v) => v / objectivesData.MAX_DELIVS)
         .sort()
         .reverse()
     )
@@ -70,7 +64,7 @@ export const PAG_INTERPER = d3
   .scaleLinear()
   .domain(ticksExact(0, 1, PAG_DELIVS.length))
   .range(
-    PAG_DELIVS.map((v) => v / MAX_DELIVS)
+    PAG_DELIVS.map((v) => v / objectivesData.MAX_DELIVS)
       .sort()
       .reverse()
   )
@@ -80,7 +74,7 @@ export const PRF_INTERPER = d3
   .scaleLinear()
   .domain(ticksExact(0, 1, PRF_DELIVS.length))
   .range(
-    PRF_DELIVS.map((v) => v / MAX_DELIVS)
+    PRF_DELIVS.map((v) => v / objectivesData.MAX_DELIVS)
       .sort()
       .reverse()
   )
@@ -146,10 +140,10 @@ function largeDropInit({ nodes, height, key }) {
       .attr("class", "highlight-circle")
       .attr("stroke", "none")
       .attr("fill", "yellow")
-      .attr("r", LOD_1_RAD_PX * 2);
+      .attr("r", settings.LOD_1_RAD_PX * 2);
 
     s.append("text")
-      .style("font-size", (height * SPREAD_1_2) / 15)
+      .style("font-size", (height * settings.SPREAD_1_2) / 15)
       .attr("class", "fancy-font large-gray-text")
       .attr("text-anchor", "middle");
 
@@ -175,23 +169,24 @@ function smallDropInit({ key, levs, x, y }) {
     if (key === "expl0000") {
       d3.select(s.node().parentNode)
         .select(".highlight-circle")
-        .attr("cx", x * SPREAD_1_2)
+        .attr("cx", x * settings.SPREAD_1_2)
         .attr(
           "cy",
-          y * SPREAD_1_2 - dropCenterCorrection({ rad: LOD_1_RAD_PX })
+          y * settings.SPREAD_1_2 -
+            dropCenterCorrection({ rad: settings.LOD_1_RAD_PX })
         );
     }
 
     s.append("path")
       .attr("d", DROPLET_SHAPE)
       .attr("class", "outline")
-      .attr("transform", `scale(${LOD_1_RAD_PX * 0.95})`);
+      .attr("transform", `scale(${settings.LOD_1_RAD_PX * 0.95})`);
 
     s.append("path")
       .attr("class", "fill")
       .attr("d", DROPLET_SHAPE)
       .attr("fill", `url(#${randId})`)
-      .attr("transform", `scale(${LOD_1_RAD_PX})`);
+      .attr("transform", `scale(${settings.LOD_1_RAD_PX})`);
   };
 }
 
@@ -199,10 +194,10 @@ function largeDropUpdate({ nodes, key, height }) {
   return (s) => {
     s.select("text")
       .attr("x", 0)
-      .attr("y", (height / 2) * SPREAD_1_2 * 0.8)
+      .attr("y", (height / 2) * settings.SPREAD_1_2 * 0.8)
       .call(
         generateTSpan(
-          DESCRIPTIONS_DATA[key].display_name || DESCRIPTIONS_DATA[key].id
+          descriptionsData[key].display_name || descriptionsData[key].id
         )
       );
 
@@ -211,7 +206,8 @@ function largeDropUpdate({ nodes, key, height }) {
       .attr("display", "initial")
       .attr(
         "transform",
-        ({ x, y }) => `translate(${x * SPREAD_1_2}, ${y * SPREAD_1_2})`
+        ({ x, y }) =>
+          `translate(${x * settings.SPREAD_1_2}, ${y * settings.SPREAD_1_2})`
       )
       .each(function (node) {
         d3.select(this).call(smallDropUpdate(node));

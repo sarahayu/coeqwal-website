@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { useRef } from "react";
-import { MAX_DELIVS } from "data/objectives-data";
+import { objectivesData } from "data/objectives-data";
 import yearlyData from "data/yearly.json";
 import {
   DEFAULT_OBJECTIVE,
@@ -54,7 +54,7 @@ export function useTutorialGraph() {
       .padding(0.4);
     const y = d3
       .scaleLinear()
-      .domain([0, MAX_DELIVS])
+      .domain([0, objectivesData.MAX_DELIVS])
       .range([BAR_CHART_HEIGHT, 0]);
 
     const xaxis = d3
@@ -112,7 +112,7 @@ export function useTutorialGraph() {
       .padding(0.4);
     const y = d3
       .scaleLinear()
-      .domain([0, MAX_DELIVS])
+      .domain([0, objectivesData.MAX_DELIVS])
       .range([BAR_CHART_HEIGHT, 0]);
 
     const xaxis = d3
@@ -145,7 +145,7 @@ export function useTutorialGraph() {
     const { x, dataDescending } = pagRefs.current;
     const y = d3
       .scaleLinear()
-      .domain([0, MAX_DELIVS])
+      .domain([0, objectivesData.MAX_DELIVS])
       .range([BAR_CHART_HEIGHT, 0]);
 
     d3.select("#pag-bar-graph .svg-group")
@@ -170,7 +170,7 @@ export function useTutorialGraph() {
     const { x, dataDescending } = prfRefs.current;
     const y = d3
       .scaleLinear()
-      .domain([0, MAX_DELIVS])
+      .domain([0, objectivesData.MAX_DELIVS])
       .range([BAR_CHART_HEIGHT, 0]);
 
     d3.select("#prf-bar-graph .svg-group")

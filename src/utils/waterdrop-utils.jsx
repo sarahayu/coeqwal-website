@@ -1,39 +1,35 @@
 import { ticksExact } from "bucket-lib/utils";
-import {
-  LOD_1_LARGE_DROP_PAD_FACTOR,
-  LOD_1_LEVELS,
-  LOD_1_MIN_LEV_VAL,
-  LOD_1_RAD_PX,
-  LOD_1_SMALL_DROP_PAD_FACTOR,
-} from "settings";
+import { settings } from "settings";
 
-import {
-  DATA_GROUPINGS,
-  FLATTENED_DATA,
-  MAX_DELIVS,
-  OBJECTIVE_IDS,
-  SCENARIO_IDS,
-} from "data/objectives-data";
+import { objectivesData } from "data/objectives-data";
 
 import { calcDomLev, createInterpsFromDelivs } from "utils/data-utils";
 import { placeDropsUsingPhysics, rotatePoint } from "utils/math-utils";
 import { mapBy } from "utils/misc-utils";
 
 // TODO optimize!!
-export function initWaterdrops(grouping) {
-  const groupKeys = grouping === "objective" ? OBJECTIVE_IDS : SCENARIO_IDS;
-  const memberKeys = grouping === "objective" ? SCENARIO_IDS : OBJECTIVE_IDS;
+function initWaterdrops(grouping) {
+  console.time("init waterdrops");
+  const groupKeys =
+    grouping === "objective"
+      ? objectivesData.OBJECTIVE_IDS
+      : objectivesData.SCENARIO_IDS;
+  const memberKeys =
+    grouping === "objective"
+      ? objectivesData.SCENARIO_IDS
+      : objectivesData.OBJECTIVE_IDS;
 
   const amtGroups = groupKeys.length;
   const amtPerGroup = memberKeys.length;
 
   const largeDropRad =
     Math.sqrt(amtPerGroup / Math.PI) *
-    LOD_1_RAD_PX *
+    settings.LOD_1_RAD_PX *
     2 *
-    LOD_1_SMALL_DROP_PAD_FACTOR *
-    LOD_1_LARGE_DROP_PAD_FACTOR;
-  const smallDropRad = LOD_1_RAD_PX * LOD_1_SMALL_DROP_PAD_FACTOR;
+    settings.LOD_1_SMALL_DROP_PAD_FACTOR *
+    settings.LOD_1_LARGE_DROP_PAD_FACTOR;
+  const smallDropRad =
+    settings.LOD_1_RAD_PX * settings.LOD_1_SMALL_DROP_PAD_FACTOR;
 
   const largeNodesPhys = placeDropsUsingPhysics(
     0,
@@ -68,21 +64,23 @@ export function initWaterdrops(grouping) {
 
   let idx = 0;
 
-  for (const nodeData of FLATTENED_DATA) {
+  for (const nodeData of objectivesData.FLATTENED_DATA) {
     const { id, objective, scenario, deliveries } = nodeData;
 
-    const i = createInterpsFromDelivs(deliveries, MAX_DELIVS);
-    const wds = ticksExact(0, 1, LOD_1_LEVELS + 1).map((d) => i(d));
+    const i = createInterpsFromDelivs(deliveries, objectivesData.MAX_DELIVS);
+    const wds = ticksExact(0, 1, settings.LOD_1_LEVELS + 1).map((d) => i(d));
 
     const levs = wds.map(
-      (w, i) => Math.max(w, i == 0 ? LOD_1_MIN_LEV_VAL : 0) * LOD_1_RAD_PX
+      (w, i) =>
+        Math.max(w, i == 0 ? settings.LOD_1_MIN_LEV_VAL : 0) *
+        settings.LOD_1_RAD_PX
     );
 
     const groupID = grouping === "objective" ? objective : scenario;
     const memberID = grouping === "objective" ? scenario : objective;
 
-    const groupRank = DATA_GROUPINGS[grouping][groupID].rank;
-    const memberRank = DATA_GROUPINGS[grouping][groupID][id];
+    const groupRank = objectivesData.DATA_GROUPINGS[grouping][groupID].rank;
+    const memberRank = objectivesData.DATA_GROUPINGS[grouping][groupID][id];
 
     const localTilt = Math.random() * 50 - 25;
     const parentTilt = largeNodesPos[groupRank].tilt;
@@ -93,7 +91,7 @@ export function initWaterdrops(grouping) {
     const node = {
       id,
       levs,
-      maxLev: LOD_1_RAD_PX,
+      maxLev: settings.LOD_1_RAD_PX,
       domLev: calcDomLev(levs),
       tilt: localTilt,
       dur: Math.random() * 100 + 400,
@@ -115,7 +113,7 @@ export function initWaterdrops(grouping) {
 
   for (const groupKey of groupKeys) {
     const { x, y, tilt } =
-      largeNodesPos[DATA_GROUPINGS[grouping][groupKey].rank];
+      largeNodesPos[objectivesData.DATA_GROUPINGS[grouping][groupKey].rank];
     groupNodes.push({
       x,
       y,
@@ -126,9 +124,13 @@ export function initWaterdrops(grouping) {
     });
   }
 
+  console.timeEnd("init waterdrops");
+
   return {
     nodes: nodes,
     groups: groupNodes,
     height: largeNodesPhys.height,
   };
 }
+
+export const waterdrops = initWaterdrops("objective");

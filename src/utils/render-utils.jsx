@@ -1,6 +1,6 @@
 import { interpolateWatercolorBlue } from "bucket-lib/utils";
 import * as d3 from "d3";
-import { LOD_1_LEVELS } from "settings";
+import { settings } from "settings";
 import { wrap } from "./misc-utils";
 
 // path generated when WATERDROP_ICON size = 2
@@ -180,7 +180,10 @@ export function gradientInit(levs, gradId) {
       for (let j = 0; j < 2; j++) {
         stops
           .append("stop")
-          .attr("stop-color", interpolateWatercolorBlue(i / LOD_1_LEVELS));
+          .attr(
+            "stop-color",
+            interpolateWatercolorBlue(i / settings.LOD_1_LEVELS)
+          );
       }
     });
   };

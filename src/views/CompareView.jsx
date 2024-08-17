@@ -4,37 +4,18 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { AppContext } from "AppContext";
 import DotHistogram from "components/DotHistogram";
 import SceneSettingStickers from "components/SceneSettingStickers";
-import { FLATTENED_DATA, KEY_SETTINGS_MAP } from "data/objectives-data";
-import { SPREAD_1_2 } from "settings";
+import { objectivesData } from "data/objectives-data";
+import { settings } from "settings";
 
 import { avgCoords } from "utils/math-utils";
 import { isState } from "utils/misc-utils";
 import { hideElems, removeElems, showElems } from "utils/render-utils";
-
-import {
-  calcLinesAndPositions,
-  getWaterdropGroups,
-  updateColorDrops,
-  updateDropsSVG,
-  updateLabelSVG,
-  updateScenIndicatorsSVG,
-} from "utils/compareview-utils";
 import { deserialize } from "utils/data-utils";
+import { helpers } from "utils/compareview-helpers";
 import { useDragPanels } from "hooks/useDragPanels";
 
 export default function CompareView() {
-  const {
-    state,
-    setState,
-    setGoBack,
-    resetCamera,
-    activeWaterdrops,
-    waterdrops,
-    camera,
-    goals,
-    setGoals,
-    addZoomHandler,
-  } = useContext(AppContext);
+  const appCtx = useContext(AppContext);
 
   const [activeMinidrop, setActiveMinidrop] = useState();
   const [colorSetting, setColorSetting] = useState(null);
@@ -46,7 +27,7 @@ export default function CompareView() {
   const centerRef = useRef();
 
   const getScreenDropHeight = () =>
-    groupsRef.current.groups[0].height * SPREAD_1_2;
+    groupsRef.current.groups[0].height * settings.SPREAD_1_2;
 
   useEffect(function initialize() {
     const container = d3
@@ -58,31 +39,36 @@ export default function CompareView() {
     container.append("text").attr("id", "member-variable");
     container.append("text").attr("id", "member-label");
 
-    addZoomHandler(function (transform) {
+    appCtx.addZoomHandler(function (transform) {
       setCamTransform(transform);
     });
   }, []);
 
   useEffect(
     function enterState() {
-      if (isState(state, "CompareView")) {
+      if (isState(appCtx.state, "CompareView")) {
         const container = d3.select("#compare-group");
 
-        const { viewCenter, transitionDuration = 0 } = state;
+        const { viewCenter, transitionDuration = 0 } = appCtx.state;
 
         centerRef.current = viewCenter;
 
-        groupsRef.current = getWaterdropGroups(
-          activeWaterdrops,
-          waterdrops,
+        groupsRef.current = helpers.getWaterdropGroups(
+          appCtx.activeWaterdrops,
+          appCtx.waterdrops,
           viewCenter
         );
 
-        updateDropsSVG(container, groupsRef.current, transitionDuration / 5, {
-          onHover: (d) => {
-            setActiveMinidrop({ key: d.key });
-          },
-        });
+        helpers.updateDropsSVG(
+          container,
+          groupsRef.current,
+          transitionDuration / 5,
+          {
+            onHover: (d) => {
+              setActiveMinidrop({ key: d.key });
+            },
+          }
+        );
 
         hideElems(".large-gray-text", container);
 
@@ -95,13 +81,13 @@ export default function CompareView() {
           showElems(".comp-settings", d3, "flex");
         }, transitionDuration + 500);
 
-        setGoBack(() => () => {
-          const transitionDuration = resetCamera();
+        appCtx.setGoBack(() => () => {
+          const transitionDuration = appCtx.resetCamera();
 
-          setState({ state: "WideView", transitionDuration });
+          appCtx.setState({ state: "WideView", transitionDuration });
         });
 
-        setCamTransform(camera.curTransform);
+        setCamTransform(appCtx.camera.curTransform);
 
         return function exitState() {
           removeElems(".large-drop, .circlet, .comp-line", container);
@@ -110,28 +96,28 @@ export default function CompareView() {
           hideElems(".comp-settings");
 
           setPanels([]);
-          setGoBack(null);
+          appCtx.setGoBack(null);
         };
       }
     },
-    [state]
+    [appCtx.state]
   );
 
   useEffect(
     function updateCirclets() {
       if (activeMinidrop) {
-        const [positions, lines, nodes] = calcLinesAndPositions(
+        const [positions, lines, nodes] = helpers.calcLinesAndPositions(
           groupsRef.current,
           activeMinidrop.key
         );
 
         setPanels(makePanelsFromNodes(nodes));
-        updateLabelSVG(
+        helpers.updateLabelSVG(
           avgCoords(positions),
           activeMinidrop.key.slice(4),
           getScreenDropHeight()
         );
-        updateScenIndicatorsSVG(positions, lines);
+        helpers.updateScenIndicatorsSVG(positions, lines);
       }
     },
     [activeMinidrop]
@@ -147,12 +133,12 @@ export default function CompareView() {
       }
 
       const getOpacity = (key) => {
-        return KEY_SETTINGS_MAP[key][colorSetting];
+        return objectivesData.KEY_SETTINGS_MAP[key][colorSetting];
       };
 
       const colors = ["red", "orange", "blue", "green", "magenta"];
 
-      updateColorDrops(
+      helpers.updateColorDrops(
         container,
         groupsRef.current,
         getOpacity,
@@ -224,10 +210,10 @@ export default function CompareView() {
           <DotHistogram
             width={300}
             height={200}
-            data={FLATTENED_DATA[nodeID].deliveries}
-            goal={goals[id]}
+            data={objectivesData.FLATTENED_DATA[nodeID].deliveries}
+            goal={appCtx.goals[id]}
             setGoal={(newGoal) => {
-              setGoals((g) => {
+              appCtx.setGoals((g) => {
                 g[id] = newGoal;
                 return { ...g };
               });

@@ -25,10 +25,10 @@ import {
 import { useTutorialState } from "hooks/useTutorialState";
 import { useTutorialComparer } from "hooks/useTutorialComparer";
 import { useTutorialGraph } from "hooks/useTutorialGraph";
-import { DESCRIPTIONS_DATA } from "data/descriptions-data";
+import { descriptionsData } from "data/descriptions-data";
 
 export default function TutorialView() {
-  const { state, setState, waterdrops, camera } = useContext(AppContext);
+  const appCtx = useContext(AppContext);
 
   const {
     userGoal,
@@ -50,20 +50,21 @@ export default function TutorialView() {
 
   useLayoutEffect(
     function enterState() {
-      if (isState(state, "TutorialView")) {
+      if (isState(appCtx.state, "TutorialView")) {
         hideElems(
           ".bucket-wrapper, .vardrop, .var-scen-label, .vardrop .dot-histogram-wrapper, .main-histogram, .tut-comparer-graphics-wrapper"
         );
 
         initGraphArea();
-        initComparer(waterdrops, camera);
+        initComparer(appCtx.waterdrops, appCtx.camera);
 
         return function exitState() {
+          appCtx.resetCamera(false);
           hideElems(".tutorial-view");
         };
       }
     },
-    [state]
+    [appCtx.state]
   );
 
   const actions = useMemo(
@@ -162,7 +163,7 @@ export default function TutorialView() {
     }
   };
 
-  if (!isState(state, "TutorialView")) return;
+  if (!isState(appCtx.state, "TutorialView")) return;
 
   return (
     <div className="tutorial-view">
@@ -178,7 +179,7 @@ export default function TutorialView() {
         />
         <button
           className="skip-btn"
-          onClick={() => setState({ state: "WideView" })}
+          onClick={() => appCtx.setState({ state: "WideView" })}
         >
           Skip intro
         </button>
@@ -194,7 +195,7 @@ export default function TutorialView() {
               colorInterp={INTERP_COLOR}
             />
             <p className="fancy-font objective-label">
-              {DESCRIPTIONS_DATA[DEFAULT_OBJECTIVE].display_name}
+              {descriptionsData[DEFAULT_OBJECTIVE].display_name}
             </p>
           </div>
           <div className="tut-graph">
@@ -206,7 +207,7 @@ export default function TutorialView() {
               colorInterp={INTERP_COLOR}
             />
             <p className="fancy-font objective-label">
-              {DESCRIPTIONS_DATA[COMP_OBJECTIVE].display_name}
+              {descriptionsData[COMP_OBJECTIVE].display_name}
             </p>
           </div>
         </div>
@@ -277,7 +278,7 @@ export default function TutorialView() {
               scenario <span className="scen-number">{"0000"}</span>
             </p>
             <p className="fancy-font objective-label">
-              {DESCRIPTIONS_DATA[DEFAULT_OBJECTIVE].display_name}
+              {descriptionsData[DEFAULT_OBJECTIVE].display_name}
             </p>
           </div>
           <div className="main-histogram">
@@ -402,7 +403,7 @@ export default function TutorialView() {
           their outcomes compare? Go to the next step to find out!
           <button
             className="fancy-font"
-            onClick={() => setState({ state: "WideView" })}
+            onClick={() => appCtx.setState({ state: "WideView" })}
           >
             click to explore!
           </button>

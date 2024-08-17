@@ -1,23 +1,37 @@
 import { mapBy } from "utils/misc-utils";
 
-export const SPATIAL_DATA = await (async function load() {
-  const objs = await (await fetch("./callite_spatial.json")).json();
+async function initSpatialData() {
+  const SPATIAL_DATA = await (async function load() {
+    const objs = await (await fetch("./callite_spatial.json")).json();
 
-  console.log("DATA: loading callite spatial data");
+    console.log("DATA: loading callite spatial data");
 
-  return objs;
-})();
+    return objs;
+  })();
 
-export const SPATIAL_FEATURES = (function () {
-  return mapBy(SPATIAL_DATA.features, ({ properties }) => properties.CalLiteID);
-})();
+  const SPATIAL_FEATURES = (function () {
+    return mapBy(
+      SPATIAL_DATA.features,
+      ({ properties }) => properties.CalLiteID
+    );
+  })();
 
-export const CALIFORNIA_OUTLINE = await (async function load() {
-  const objs = await (await fetch("./california.json")).json();
+  const CALIFORNIA_OUTLINE = await (async function load() {
+    const objs = await (await fetch("./california.json")).json();
 
-  console.log("DATA: loading california spatial data");
+    console.log("DATA: loading california spatial data");
 
-  return objs;
-})();
+    return objs;
+  })();
 
-export const CALIFORNIA_CENTER = [-119, 37.7749];
+  const CALIFORNIA_CENTER = [-119, 37.7749];
+
+  return {
+    SPATIAL_DATA,
+    SPATIAL_FEATURES,
+    CALIFORNIA_OUTLINE,
+    CALIFORNIA_CENTER,
+  };
+}
+
+export const spatialData = await initSpatialData();

@@ -1,13 +1,10 @@
 import * as d3 from "d3";
 import { useEffect, useRef, useState } from "react";
-import { SPREAD_1_2, LOD_1_RAD_PX } from "settings";
+import { settings } from "settings";
 
 import { circlet, hideElems, showElems } from "utils/render-utils";
 import { avgCoords } from "utils/math-utils";
-import {
-  calcLinesAndPositions,
-  getWaterdropGroups,
-} from "utils/compareview-utils";
+import { helpers as compareViewHelpers } from "utils/compareview-helpers";
 import {
   DEFAULT_SCENARIO,
   DEFAULT_OBJECTIVE,
@@ -23,7 +20,7 @@ export function useTutorialComparer() {
   useEffect(
     function updateCirclets() {
       if (activeMinidrop) {
-        const [positions, lines] = calcLinesAndPositions(
+        const [positions, lines] = compareViewHelpers.calcLinesAndPositions(
           groupsRef.current,
           activeMinidrop
         );
@@ -36,13 +33,14 @@ export function useTutorialComparer() {
   );
 
   function initComparer(waterdrops, camera) {
-    groupsRef.current = getWaterdropGroups(
+    groupsRef.current = compareViewHelpers.getWaterdropGroups(
       [DEFAULT_OBJECTIVE, COMP_OBJECTIVE],
       waterdrops,
       [0, 0]
     );
 
-    const farHeight = waterdrops.groups[0].height * 2 * SPREAD_1_2 * 0.75;
+    const farHeight =
+      waterdrops.groups[0].height * 2 * settings.SPREAD_1_2 * 0.75;
     const k = camera.height / farHeight;
 
     let x = camera.width / 2;
@@ -100,9 +98,9 @@ export function useTutorialComparer() {
     const [textX, textY] = pos;
 
     const smallTextSize =
-      (groupsRef.current.groups[0].height * SPREAD_1_2) / 15;
+      (groupsRef.current.groups[0].height * settings.SPREAD_1_2) / 15;
     const largeTextSize =
-      (groupsRef.current.groups[0].height * SPREAD_1_2) / 10;
+      (groupsRef.current.groups[0].height * settings.SPREAD_1_2) / 10;
 
     d3.select("#comparer-graphics")
       .select("#member-label")
@@ -130,7 +128,7 @@ export function useTutorialComparer() {
       .join("circle")
       .attr("class", "circlet")
       .call(circlet)
-      .attr("r", LOD_1_RAD_PX * 1.5)
+      .attr("r", settings.LOD_1_RAD_PX * 1.5)
       .transition()
       .duration(100)
       .attr("cx", (d) => d[0])

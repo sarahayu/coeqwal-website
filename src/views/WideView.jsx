@@ -11,35 +11,17 @@ import { BiCross, BiNetworkChart } from "react-icons/bi";
 import fuzzysort from "fuzzysort";
 
 import { AppContext } from "AppContext";
-import { DESCRIPTIONS_DATA } from "data/descriptions-data";
-import { SPATIAL_FEATURES } from "data/spatial-data";
-import { SPREAD_1_2 } from "settings";
-import { dropsMesh, scene } from "three-resources";
+import { descriptionsData } from "data/descriptions-data";
+import { spatialData } from "data/spatial-data";
+import { settings } from "settings";
 
 import { avgCoords, dropCenterCorrection } from "utils/math-utils";
 import { arrRemove, isState } from "utils/misc-utils";
-import {
-  drawMinimapSVG,
-  fadeOutDrops,
-  fontSizer,
-  updateLargeDropSVG,
-} from "utils/wideview-utils";
 import { generateTSpan, hideElems, showElems } from "utils/render-utils";
-import { OBJECTIVE_IDS } from "data/objectives-data";
+import { helpers } from "utils/wideview-helpers";
 
 export default function WideView() {
-  const {
-    waterdrops,
-    state,
-    setState,
-    camera,
-    zoomTo,
-    setActiveWaterdrops,
-    activeWaterdrops,
-    setDisableCamAdjustments,
-    getOutlineOpacity,
-    addZoomHandler,
-  } = useContext(AppContext);
+  const appCtx = useContext(AppContext);
 
   const [curScreenTransform, setCurScreenTransform] = useState({
     zoom: 1,
@@ -54,25 +36,27 @@ export default function WideView() {
   const activeDropsRef = useRef([]);
 
   useEffect(function initialize() {
+    if (!appCtx.waterdrops) return;
+
     initSVGGraphics();
 
     const cleanup = registerEventListeners();
 
-    drawMinimapSVG();
+    helpers.drawMinimapSVG();
 
     return cleanup;
   }, []);
 
   useEffect(
     function enterState() {
-      if (isState(state, "WideView")) {
-        const { transitionDuration = 0 } = state;
+      if (isState(appCtx.state, "WideView")) {
+        const { transitionDuration = 0 } = appCtx.state;
         d3.select("body").style("overflow", "hidden");
 
         enableZoomRef.current = true;
         setCurScreenTransform((cst) => ({
           ...cst,
-          zoom: camera.curTransform.k,
+          zoom: appCtx.camera.curTransform.k,
         }));
 
         drawTHREEGraphics();
@@ -87,7 +71,7 @@ export default function WideView() {
         };
       }
     },
-    [state]
+    [appCtx.state]
   );
 
   useEffect(
@@ -95,40 +79,51 @@ export default function WideView() {
       if (enableZoomRef.current) {
         d3.select("#wide-group")
           .selectAll(".cloud-text")
-          .each(fontSizer(curScreenTransform, camera, waterdrops.height));
+          .each(
+            helpers.fontSizer(
+              curScreenTransform,
+              appCtx.camera,
+              appCtx.waterdrops.height
+            )
+          );
       }
     },
     [curScreenTransform]
   );
 
   const handleClickExamine = useCallback(function () {
-    setDisableCamAdjustments(true);
+    appCtx.setDisableCamAdjustments(true);
 
     const { x, y, height } = activeDropsRef.current[0];
 
     const newCamPos = [
       x,
       y - dropCenterCorrection({ height }),
-      camera.getZFromFarHeight(height * SPREAD_1_2 * 1.5),
+      appCtx.camera.getZFromFarHeight(height * settings.SPREAD_1_2 * 1.5),
     ];
 
-    const [startZoom, transitionDuration] = zoomTo(
+    const [startZoom, transitionDuration] = appCtx.zoomTo(
       newCamPos,
       function onFinish() {
-        setDisableCamAdjustments(false);
+        appCtx.setDisableCamAdjustments(false);
       }
     );
 
     startZoom();
 
-    setState({ state: "ExamineView", transitionDuration });
+    appCtx.setState({ state: "ExamineView", transitionDuration });
 
-    const startOpacity = getOutlineOpacity(camera.curTransform.k);
-    fadeOutDrops(dropsMesh, scene, startOpacity, transitionDuration / 2);
+    const startOpacity = appCtx.getOutlineOpacity(appCtx.camera.curTransform.k);
+    helpers.fadeOutDrops(
+      appCtx.dropsMesh,
+      appCtx.scene,
+      startOpacity,
+      transitionDuration / 2
+    );
   }, []);
 
   const handleClickCompare = useCallback(function () {
-    setDisableCamAdjustments(true);
+    appCtx.setDisableCamAdjustments(true);
 
     const dropsMidpoint = avgCoords(
       activeDropsRef.current.map((w) => [w.x, w.y])
@@ -136,32 +131,37 @@ export default function WideView() {
 
     const newCamPos = [
       ...dropsMidpoint,
-      camera.getZFromFarHeight(
-        waterdrops.groups[0].height * 2 * SPREAD_1_2 * 0.75 * 2
+      appCtx.camera.getZFromFarHeight(
+        appCtx.waterdrops.groups[0].height * 2 * settings.SPREAD_1_2 * 0.75 * 2
       ),
     ];
 
-    const [startZoom, transitionDuration] = zoomTo(
+    const [startZoom, transitionDuration] = appCtx.zoomTo(
       newCamPos,
       function onFinish() {
-        setDisableCamAdjustments(false);
+        appCtx.setDisableCamAdjustments(false);
       }
     );
 
     startZoom();
 
-    setState({
+    appCtx.setState({
       state: "CompareView",
       transitionDuration,
       viewCenter: dropsMidpoint,
     });
 
-    const startOpacity = getOutlineOpacity(camera.curTransform.k);
-    fadeOutDrops(dropsMesh, scene, startOpacity, transitionDuration / 5);
+    const startOpacity = appCtx.getOutlineOpacity(appCtx.camera.curTransform.k);
+    helpers.fadeOutDrops(
+      appCtx.dropsMesh,
+      appCtx.scene,
+      startOpacity,
+      transitionDuration / 5
+    );
   }, []);
 
   const handleClickDeselectAll = useCallback(function () {
-    setActiveWaterdrops([]);
+    appCtx.setActiveWaterdrops([]);
     activeDropsRef.current = [];
     d3.selectAll("#wide-group .circlet").classed("active", false);
   }, []);
@@ -178,7 +178,7 @@ export default function WideView() {
     svgGroup
       .append("text")
       .attr("class", "instruction-text large-gray-text fancy-font")
-      .attr("x", 0 - waterdrops.height * 0.6);
+      .attr("x", 0 - appCtx.waterdrops.height * 0.6);
   }
 
   function registerEventListeners() {
@@ -197,7 +197,7 @@ export default function WideView() {
       }));
     };
 
-    addZoomHandler(cameraListener);
+    appCtx.addZoomHandler(cameraListener);
     window.addEventListener("mousemove", mouseListener);
 
     return function cleanup() {
@@ -207,17 +207,19 @@ export default function WideView() {
 
   function drawTHREEGraphics() {
     console.time("drawing");
-    dropsMesh.draw(scene);
+    appCtx.dropsMesh.draw(appCtx.scene);
     console.timeEnd("drawing");
 
-    dropsMesh.updateVisibility(1);
-    dropsMesh.updateOutlineVisibility(getOutlineOpacity(camera.curTransform.k));
+    appCtx.dropsMesh.updateVisibility(1);
+    appCtx.dropsMesh.updateOutlineVisibility(
+      appCtx.getOutlineOpacity(appCtx.camera.curTransform.k)
+    );
   }
 
   function drawSVGGraphics() {
     const container = d3.select("#wide-group");
 
-    updateLargeDropSVG(container, waterdrops, {
+    helpers.updateLargeDropSVG(container, appCtx.waterdrops, {
       onClick: updateActiveDrops,
       onHover: hoverDrop,
       onUnhover: unhoverDrop,
@@ -228,7 +230,8 @@ export default function WideView() {
     }
 
     const fontSize =
-      (20 / camera.height) * camera.getZFromFarHeight(waterdrops.height);
+      (20 / appCtx.camera.height) *
+      appCtx.camera.getZFromFarHeight(appCtx.waterdrops.height);
     container
       .select(".instruction-text")
       .attr("y", -fontSize * 5)
@@ -248,9 +251,8 @@ export default function WideView() {
 
   function updateActiveDrops(d) {
     const container = d3.select("#wide-group");
-    console.log(d);
 
-    setActiveWaterdrops((aw) => {
+    appCtx.setActiveWaterdrops((aw) => {
       if (aw.includes(d.key)) {
         aw = arrRemove(aw, d.key);
         activeDropsRef.current = arrRemove(activeDropsRef.current, d);
@@ -269,7 +271,7 @@ export default function WideView() {
   function hoverDrop(d) {
     setCurrentHoveredDrop({
       id: d.key,
-      description: DESCRIPTIONS_DATA[d.key].desc,
+      description: descriptionsData[d.key].desc,
     });
 
     d3.select("#minimap")
@@ -285,10 +287,86 @@ export default function WideView() {
       .attr("fill", "transparent");
   }
 
+  const searchResults = useMemo(() => {
+    if (searchPrompt === null) return [];
+
+    return fuzzysort.go(searchPrompt, appCtx.waterdrops.groups, {
+      keys: [
+        (obj) => descriptionsData[obj.key].id,
+        (obj) => descriptionsData[obj.key].display_name,
+        (obj) => descriptionsData[obj.key].desc,
+      ],
+      limit: 10,
+      all: true,
+    });
+  }, [searchPrompt, appCtx.waterdrops]);
+
+  return (
+    <>
+      <div id="infobox">
+        <svg id="minimap"></svg>
+        {currentHoveredDrop && (
+          <div className="details">
+            {!spatialData.SPATIAL_FEATURES[currentHoveredDrop.id] && (
+              <p className="no-loc-data">No Location Data</p>
+            )}
+            <p className="curDesc">{currentHoveredDrop.description}</p>
+            <p className="curKey">
+              id: <span> {currentHoveredDrop.id} </span>
+            </p>
+          </div>
+        )}
+        {!currentHoveredDrop && (
+          <div className="searchbox">
+            <input
+              type="text"
+              placeholder="search"
+              value={searchPrompt || ""}
+              onChange={(e) => setSearchPrompt(e.target.value)}
+              onFocus={() => {
+                setSearchPrompt("");
+                d3.select(".results").style("display", "flex");
+              }}
+              onBlur={() => {
+                setTimeout(() => {
+                  setSearchPrompt(null);
+                  d3.select(".results").style("display", "none");
+                }, 100);
+              }}
+            ></input>
+            <div className="results" style={{ display: "none" }}>
+              {searchResults.map(({ obj: wd }) => (
+                <button key={wd.key} onClick={() => updateActiveDrops(wd)}>
+                  {descriptionsData[wd.key].display_name ||
+                    descriptionsData[wd.key].id}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="action-btn-wrapper">
+        <ActionButtons
+          appCtx={appCtx}
+          handleClickExamine={handleClickExamine}
+          handleClickDeselectAll={handleClickDeselectAll}
+          handleClickCompare={handleClickCompare}
+        />
+      </div>
+    </>
+  );
+}
+
+function ActionButtons({
+  appCtx,
+  handleClickExamine,
+  handleClickDeselectAll,
+  handleClickCompare,
+}) {
   let examineBtn, compareBtn;
 
-  if (isState(state, "WideView") && activeWaterdrops.length) {
-    if (activeWaterdrops.length === 1) {
+  if (isState(appCtx.state, "WideView") && appCtx.activeWaterdrops.length) {
+    if (appCtx.activeWaterdrops.length === 1) {
       examineBtn = (
         <button
           onClick={handleClickExamine}
@@ -319,68 +397,10 @@ export default function WideView() {
     }
   }
 
-  const searchResults = useMemo(() => {
-    if (searchPrompt === null) return [];
-
-    return fuzzysort.go(searchPrompt, waterdrops.groups, {
-      keys: [
-        (obj) => DESCRIPTIONS_DATA[obj.key].id,
-        (obj) => DESCRIPTIONS_DATA[obj.key].display_name,
-        (obj) => DESCRIPTIONS_DATA[obj.key].desc,
-      ],
-      limit: 10,
-      all: true,
-    });
-  }, [searchPrompt, waterdrops]);
-
   return (
     <>
-      <div id="infobox">
-        <svg id="minimap"></svg>
-        {currentHoveredDrop && (
-          <div className="details">
-            {!SPATIAL_FEATURES[currentHoveredDrop.id] && (
-              <p className="no-loc-data">No Location Data</p>
-            )}
-            <p className="curDesc">{currentHoveredDrop.description}</p>
-            <p className="curKey">
-              id: <span> {currentHoveredDrop.id} </span>
-            </p>
-          </div>
-        )}
-        {!currentHoveredDrop && (
-          <div className="searchbox">
-            <input
-              type="text"
-              placeholder="search"
-              value={searchPrompt || ""}
-              onChange={(e) => setSearchPrompt(e.target.value)}
-              onFocus={() => {
-                setSearchPrompt("");
-                d3.select(".results").style("display", "flex");
-              }}
-              onBlur={() => {
-                setTimeout(() => {
-                  setSearchPrompt(null);
-                  d3.select(".results").style("display", "none");
-                }, 100);
-              }}
-            ></input>
-            <div className="results" style={{ display: "none" }}>
-              {searchResults.map(({ obj: wd }) => (
-                <button key={wd.key} onClick={() => updateActiveDrops(wd)}>
-                  {DESCRIPTIONS_DATA[wd.key].display_name ||
-                    DESCRIPTIONS_DATA[wd.key].id}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-      <div className="action-btn-wrapper">
-        {examineBtn}
-        {compareBtn}
-      </div>
+      {examineBtn}
+      {compareBtn}
     </>
   );
 }

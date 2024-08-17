@@ -4,47 +4,31 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { AppContext } from "AppContext";
 import DotHistogram from "components/DotHistogram";
 import SceneSettingSubcard from "components/SceneSettingSubcard";
-import { FLATTENED_DATA, KEY_SETTINGS_MAP } from "data/objectives-data";
-import { SPREAD_1_2 } from "settings";
+import { objectivesData } from "data/objectives-data";
+import { settings } from "settings";
 
-import { DESCRIPTIONS_DATA } from "data/descriptions-data";
-import { updateColorDrops, updateSmallDropSVG } from "utils/examineview-utils";
-import { arrRemove, isState, useStateRef } from "utils/misc-utils";
+import { descriptionsData } from "data/descriptions-data";
+import { helpers } from "utils/examineview-helpers";
+import { arrRemove, isState } from "utils/misc-utils";
 import {
   generateTSpan,
   hideElems,
   removeElems,
-  screenToWorld,
   showElems,
-  worldToScreen,
 } from "utils/render-utils";
 import { deserialize } from "utils/data-utils";
 import { clipEnds, dist } from "utils/math-utils";
 import { radToDeg } from "three/src/math/MathUtils";
 import { useDragPanels } from "hooks/useDragPanels";
-import { LOD_1_RAD_PX } from "settings";
 
 export default function ExamineView() {
-  const {
-    state,
-    setState,
-    setGoBack,
-    resetCamera,
-    activeWaterdrops,
-    waterdrops,
-    camera,
-    addZoomHandler,
-    goals,
-    setGoals,
-  } = useContext(AppContext);
+  const appCtx = useContext(AppContext);
 
   const activeMinidropsRef = useRef([]);
   const curMinidropsRef = useRef(null);
 
   const [colorSetting, setColorSetting] = useState(null);
-  const [camTransform, setCamTransform, camTransformRef] = useStateRef(
-    d3.zoomIdentity
-  );
+  const [camTransform, setCamTransform] = useState(d3.zoomIdentity);
   const { panels, panelsRef, setPanels, onPanelDragStart, getPanelStyle } =
     useDragPanels(camTransform);
   const [hoveredCard, setHoveredCard] = useState(null);
@@ -68,21 +52,21 @@ export default function ExamineView() {
       .append("text")
       .attr("class", "large-drop-label large-gray-text fancy-font");
 
-    addZoomHandler(function (transform) {
+    appCtx.addZoomHandler(function (transform) {
       setCamTransform(transform);
     });
   }, []);
 
   useEffect(
     function enterState() {
-      if (isState(state, "ExamineView")) {
-        const { transitionDuration = 0 } = state;
+      if (isState(appCtx.state, "ExamineView")) {
+        const { transitionDuration = 0 } = appCtx.state;
         const container = d3.select("#examine-group");
-        curMinidropsRef.current = waterdrops.groups.find(
-          (g) => g.key === activeWaterdrops[0]
+        curMinidropsRef.current = appCtx.waterdrops.groups.find(
+          (g) => g.key === appCtx.activeWaterdrops[0]
         );
 
-        updateSmallDropSVG(
+        helpers.updateSmallDropSVG(
           container,
           curMinidropsRef.current,
           transitionDuration / 2,
@@ -95,13 +79,13 @@ export default function ExamineView() {
 
         setTimeout(positionTexts, transitionDuration * 1.2);
 
-        setGoBack(() => () => {
-          const transitionDuration = resetCamera();
+        appCtx.setGoBack(() => () => {
+          const transitionDuration = appCtx.resetCamera();
 
-          setState({ state: "WideView", transitionDuration });
+          appCtx.setState({ state: "WideView", transitionDuration });
         });
 
-        setCamTransform(camera.curTransform);
+        setCamTransform(appCtx.camera.curTransform);
         showElems("#examine-group");
 
         return function exitState() {
@@ -114,11 +98,11 @@ export default function ExamineView() {
           setPanels([]);
           activeMinidropsRef.current = [];
           curMinidropsRef.current = null;
-          setGoBack(null);
+          appCtx.setGoBack(null);
         };
       }
     },
-    [state]
+    [appCtx.state]
   );
 
   useEffect(
@@ -131,12 +115,12 @@ export default function ExamineView() {
       }
 
       const getOpacity = (key) => {
-        return KEY_SETTINGS_MAP[key][colorSetting];
+        return objectivesData.KEY_SETTINGS_MAP[key][colorSetting];
       };
 
       const colors = ["red", "orange", "blue", "green", "magenta"];
 
-      updateColorDrops(
+      helpers.updateColorDrops(
         container,
         curMinidropsRef.current,
         getOpacity,
@@ -150,16 +134,16 @@ export default function ExamineView() {
 
   function positionTexts() {
     const instrFontSize =
-      (16 / camera.height) *
-      camera.getZFromFarHeight(
-        curMinidropsRef.current.height * SPREAD_1_2 * 1.5
+      (16 / appCtx.camera.height) *
+      appCtx.camera.getZFromFarHeight(
+        curMinidropsRef.current.height * settings.SPREAD_1_2 * 1.5
       );
 
     d3.select("#examine-group .instruction-text")
       .attr(
         "x",
         curMinidropsRef.current.x -
-          curMinidropsRef.current.height * SPREAD_1_2 * 0.8
+          curMinidropsRef.current.height * settings.SPREAD_1_2 * 0.8
       )
       .attr("y", curMinidropsRef.current.y - instrFontSize)
       .attr("opacity", 0)
@@ -177,9 +161,9 @@ export default function ExamineView() {
       });
 
     const labelFontSize =
-      (20 / camera.height) *
-      camera.getZFromFarHeight(
-        curMinidropsRef.current.height * SPREAD_1_2 * 1.5
+      (20 / appCtx.camera.height) *
+      appCtx.camera.getZFromFarHeight(
+        curMinidropsRef.current.height * settings.SPREAD_1_2 * 1.5
       );
 
     d3.select("#examine-group .large-drop-label")
@@ -187,15 +171,15 @@ export default function ExamineView() {
       .attr(
         "y",
         curMinidropsRef.current.y +
-          (curMinidropsRef.current.height / 2) * SPREAD_1_2 * 0.9
+          (curMinidropsRef.current.height / 2) * settings.SPREAD_1_2 * 0.9
       )
       .attr("opacity", 0)
       .attr("text-anchor", "middle")
       .attr("font-size", labelFontSize)
       .call(
         generateTSpan(
-          DESCRIPTIONS_DATA[activeWaterdrops[0]].display_name ||
-            DESCRIPTIONS_DATA[activeWaterdrops[0]].id,
+          descriptionsData[appCtx.activeWaterdrops[0]].display_name ||
+            descriptionsData[appCtx.activeWaterdrops[0]].id,
           1.2
         )
       )
@@ -205,7 +189,7 @@ export default function ExamineView() {
 
   function addDetailPanel(dropId, preview = false, forceReplace = false) {
     const { x: groupX, y: groupY } = curMinidropsRef.current;
-    const { x, y, id, key } = waterdrops.nodes[dropId];
+    const { x, y, id, key } = appCtx.waterdrops.nodes[dropId];
     setPanels((p) => {
       if (p.findIndex(({ id: pid }) => id === pid) !== -1) {
         if (!forceReplace) return p;
@@ -214,8 +198,8 @@ export default function ExamineView() {
       }
       const newPanel = {
         text: key.slice(4),
-        x: groupX + x * SPREAD_1_2,
-        y: groupY + y * SPREAD_1_2,
+        x: groupX + x * settings.SPREAD_1_2,
+        y: groupY + y * settings.SPREAD_1_2,
         offsetX: 20,
         offsetY: 40,
         id,
@@ -291,7 +275,7 @@ export default function ExamineView() {
       (p) => p.id === id
     );
 
-    const [cx, cy] = camera.worldToScreen(circleX, circleY);
+    const [cx, cy] = appCtx.camera.worldToScreen(circleX, circleY);
 
     const panelBox = d3
       .select(`.examine-panel#p${id}`)
@@ -328,7 +312,7 @@ export default function ExamineView() {
     return line;
   }
 
-  if (isState(state, "ExamineView")) {
+  if (isState(appCtx.state, "ExamineView")) {
     return (
       <>
         {panels.map(
@@ -348,11 +332,11 @@ export default function ExamineView() {
               <DotHistogram
                 width={300}
                 height={200}
-                data={FLATTENED_DATA[id].deliveries}
-                goal={goals[activeWaterdrops[0]]}
+                data={objectivesData.FLATTENED_DATA[id].deliveries}
+                goal={appCtx.goals[appCtx.activeWaterdrops[0]]}
                 setGoal={(newGoal) => {
-                  setGoals((g) => {
-                    g[activeWaterdrops[0]] = newGoal;
+                  appCtx.setGoals((g) => {
+                    g[appCtx.activeWaterdrops[0]] = newGoal;
                     return { ...g };
                   });
                 }}

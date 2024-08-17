@@ -2,11 +2,11 @@ import * as d3 from "d3";
 import { useEffect, useMemo, useRef } from "react";
 import { getQuantileBins } from "bucket-lib/quantile-histogram";
 
-import { MAX_DELIVS } from "data/objectives-data";
+import { objectivesData } from "data/objectives-data";
 
 const NUM_CIRCLES = 20;
 const MARGIN = { top: 10, right: 10, bottom: 20, left: 10 };
-const DOMAIN = [0, MAX_DELIVS];
+const DOMAIN = [0, objectivesData.MAX_DELIVS];
 
 const WATERDROP_ICON = {
   draw: function (context, size) {
