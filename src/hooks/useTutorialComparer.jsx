@@ -4,14 +4,11 @@ import { settings } from "settings";
 
 import { circlet, hideElems, showElems } from "utils/render-utils";
 import { avgCoords } from "utils/math-utils";
-import { helpers as compareViewHelpers } from "utils/compareview-helpers";
-import {
-  DEFAULT_SCENARIO,
-  DEFAULT_OBJECTIVE,
-  COMP_OBJECTIVE,
-  updateDropsSVG,
-} from "utils/tutorialview-utils";
+import { constants, updateDropsSVG } from "utils/tutorialview-utils";
 
+import { helpers as compareViewHelpers } from "views/compareview-helpers";
+
+// TODO turn into component?
 export function useTutorialComparer() {
   const [activeMinidrop, setActiveMinidrop] = useState();
   const groupsRef = useRef();
@@ -34,7 +31,7 @@ export function useTutorialComparer() {
 
   function initComparer(waterdrops, camera) {
     groupsRef.current = compareViewHelpers.getWaterdropGroups(
-      [DEFAULT_OBJECTIVE, COMP_OBJECTIVE],
+      [constants.DEFAULT_OBJECTIVE, constants.COMP_OBJECTIVE],
       waterdrops,
       [0, 0]
     );
@@ -90,8 +87,11 @@ export function useTutorialComparer() {
       },
     });
 
-    setActiveMinidrop(DEFAULT_SCENARIO);
-    hideElems(`.large-drop.${COMP_OBJECTIVE}, .indicator-group`, container);
+    setActiveMinidrop(constants.DEFAULT_SCENARIO);
+    hideElems(
+      `.large-drop.${constants.COMP_OBJECTIVE}, .indicator-group`,
+      container
+    );
   }
 
   function updateLabel(pos) {
@@ -160,7 +160,10 @@ export function useTutorialComparer() {
           .scale(camCentersRef.current.midpoint.k)
       );
 
-    showElems(`.large-drop.${COMP_OBJECTIVE}, .indicator-group`, container);
+    showElems(
+      `.large-drop.${constants.COMP_OBJECTIVE}, .indicator-group`,
+      container
+    );
   }
 
   return { initComparer, introDrop2 };

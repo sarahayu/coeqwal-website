@@ -1,9 +1,10 @@
 import * as d3 from "d3";
 import { useState } from "react";
-import { VARIATIONS } from "utils/tutorialview-utils";
+import { constants } from "utils/tutorialview-utils";
 
 export function useTutorialState() {
   const [userGoal, setUserGoal] = useState(200);
+  const [ready, setReady] = useState(false);
   const [bucketInterperPAG, setBucketInterperPAG] = useState(() =>
     d3.scaleLinear().range([0, 0])
   );
@@ -14,12 +15,14 @@ export function useTutorialState() {
     d3.scaleLinear().range([0, 0])
   );
   const [variationInterpers, setVariationInterpers] = useState(() =>
-    VARIATIONS.map(() => d3.scaleLinear().range([0, 0]))
+    constants.VARIATIONS.map(() => d3.scaleLinear().range([0, 0]))
   );
 
   return {
     userGoal,
     setUserGoal,
+    ready,
+    setReady,
     bucketInterperPAG,
     setBucketInterperPAG,
     bucketInterperPRF,

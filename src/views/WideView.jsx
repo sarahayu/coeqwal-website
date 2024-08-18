@@ -18,7 +18,8 @@ import { settings } from "settings";
 import { avgCoords, dropCenterCorrection } from "utils/math-utils";
 import { arrRemove, isState } from "utils/misc-utils";
 import { generateTSpan, hideElems, showElems } from "utils/render-utils";
-import { helpers } from "utils/wideview-helpers";
+
+import { helpers } from "./wideview-helpers";
 
 export default function WideView() {
   const appCtx = useContext(AppContext);

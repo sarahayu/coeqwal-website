@@ -8,7 +8,6 @@ import { objectivesData } from "data/objectives-data";
 import { settings } from "settings";
 
 import { descriptionsData } from "data/descriptions-data";
-import { helpers } from "utils/examineview-helpers";
 import { arrRemove, isState } from "utils/misc-utils";
 import {
   generateTSpan,
@@ -20,6 +19,8 @@ import { deserialize } from "utils/data-utils";
 import { clipEnds, dist } from "utils/math-utils";
 import { radToDeg } from "three/src/math/MathUtils";
 import { useDragPanels } from "hooks/useDragPanels";
+
+import { helpers } from "./examineview-helpers";
 
 export default function ExamineView() {
   const appCtx = useContext(AppContext);
