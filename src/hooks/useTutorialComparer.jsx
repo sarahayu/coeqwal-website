@@ -166,5 +166,27 @@ export function useTutorialComparer() {
     );
   }
 
-  return { initComparer, introDrop2 };
+  function exitDrop2() {
+    const container = d3.select("#comparer-graphics");
+
+    container
+      .select(".svg-group")
+      .transition()
+      .attr(
+        "transform",
+        d3.zoomIdentity
+          .translate(
+            camCentersRef.current.firstDrop.x,
+            camCentersRef.current.firstDrop.y
+          )
+          .scale(camCentersRef.current.firstDrop.k)
+      );
+
+    hideElems(
+      `.large-drop.${constants.COMP_OBJECTIVE}, .indicator-group`,
+      container
+    );
+  }
+
+  return { initComparer, introDrop2, exitDrop2 };
 }

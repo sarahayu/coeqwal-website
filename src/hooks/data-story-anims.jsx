@@ -219,11 +219,6 @@ function initAllAnims() {
 
       // PRF
       {
-        const y = d3
-          .scaleLinear()
-          .domain([0, objectivesData.MAX_DELIVS])
-          .range([constants.BAR_CHART_HEIGHT, 0]);
-
         d3.select("#prf-bar-graph .svg-group")
           .selectAll(".bars")
           .data(_prfDataDescending, (d) => d.placeFromLeft)
@@ -237,7 +232,7 @@ function initAllAnims() {
 
     async function barsCondenseDo() {
       // PAG
-      const condensePAG = async () => {
+      {
         const newWidth = constants.BAR_CHART_WIDTH / 8;
         const svgGroup = d3.select("#pag-bar-graph .svg-group");
 
@@ -245,7 +240,7 @@ function initAllAnims() {
 
         const bars = svgGroup.selectAll(".bars");
 
-        await bars
+        bars
           .style("mix-blend-mode", "multiply")
           .transition()
           .duration(500)
@@ -260,32 +255,37 @@ function initAllAnims() {
           .duration(500)
           .attr("width", newWidth)
           .attr("x", constants.BAR_CHART_WIDTH / 2 - newWidth / 2)
-          .end();
+          .end()
+          .catch(() => {})
+          .then(() => {
+            svgGroup
+              .select(".anim-xaxis")
+              .transition()
+              .transition(500)
+              .attr(
+                "transform",
+                `translate(0, ${constants.BAR_CHART_HEIGHT + 50})`
+              )
+              .attr("opacity", 0);
 
-        svgGroup
-          .select(".anim-xaxis")
-          .transition()
-          .transition(500)
-          .attr("transform", `translate(0, ${constants.BAR_CHART_HEIGHT + 50})`)
-          .attr("opacity", 0);
+            bars.transition().delay(500).attr("x", 0);
 
-        bars.transition().delay(500).attr("x", 0);
-
-        svgGroup
-          .transition()
-          .delay(500)
-          .attr(
-            "transform",
-            `translate(${
-              BAR_CHART_MARGIN.left +
-              constants.BAR_CHART_WIDTH / 2 -
-              newWidth / 2
-            },${BAR_CHART_MARGIN.top})`
-          );
-      };
+            svgGroup
+              .transition()
+              .delay(500)
+              .attr(
+                "transform",
+                `translate(${
+                  BAR_CHART_MARGIN.left +
+                  constants.BAR_CHART_WIDTH / 2 -
+                  newWidth / 2
+                },${BAR_CHART_MARGIN.top})`
+              );
+          });
+      }
 
       // PRF
-      const condensePRF = async () => {
+      {
         const newWidth = constants.BAR_CHART_WIDTH / 8;
         const svgGroup = d3.select("#prf-bar-graph .svg-group");
 
@@ -293,7 +293,7 @@ function initAllAnims() {
 
         const bars = svgGroup.selectAll(".bars");
 
-        await bars
+        bars
           .style("mix-blend-mode", "multiply")
           .transition()
           .duration(500)
@@ -308,37 +308,39 @@ function initAllAnims() {
           .duration(500)
           .attr("width", newWidth)
           .attr("x", constants.BAR_CHART_WIDTH / 2 - newWidth / 2)
-          .end();
+          .end()
+          .catch(() => {})
+          .then(() => {
+            svgGroup
+              .select(".anim-xaxis")
+              .transition()
+              .transition(500)
+              .attr(
+                "transform",
+                `translate(0, ${constants.BAR_CHART_HEIGHT + 50})`
+              )
+              .attr("opacity", 0);
 
-        svgGroup
-          .select(".anim-xaxis")
-          .transition()
-          .transition(500)
-          .attr("transform", `translate(0, ${constants.BAR_CHART_HEIGHT + 50})`)
-          .attr("opacity", 0);
+            bars.transition().delay(500).attr("x", 0);
 
-        bars.transition().delay(500).attr("x", 0);
-
-        svgGroup
-          .transition()
-          .delay(500)
-          .attr(
-            "transform",
-            `translate(${
-              BAR_CHART_MARGIN.left +
-              constants.BAR_CHART_WIDTH / 2 -
-              newWidth / 2
-            },${BAR_CHART_MARGIN.top})`
-          );
-      };
-
-      condensePAG();
-      condensePRF();
+            svgGroup
+              .transition()
+              .delay(500)
+              .attr(
+                "transform",
+                `translate(${
+                  BAR_CHART_MARGIN.left +
+                  constants.BAR_CHART_WIDTH / 2 -
+                  newWidth / 2
+                },${BAR_CHART_MARGIN.top})`
+              );
+          });
+      }
     }
 
     function barsCondenseUndo() {
       // PAG
-      const decondensePAG = async () => {
+      {
         const svgGroup = d3.select("#pag-bar-graph .svg-group");
 
         const bars = svgGroup.selectAll(".bars");
@@ -350,7 +352,9 @@ function initAllAnims() {
           .attr("transform", `translate(0, ${constants.BAR_CHART_HEIGHT})`)
           .attr("opacity", 1);
 
-        svgGroup.select(".anim-xaxis").call(_pagXAxis.tickFormat(null));
+        svgGroup
+          .select(".anim-xaxis")
+          .call(_pagXAxis.tickFormat((d) => `year ${d}`));
 
         svgGroup
           .transition()
@@ -360,7 +364,7 @@ function initAllAnims() {
             `translate(${BAR_CHART_MARGIN.left},${BAR_CHART_MARGIN.top})`
           );
 
-        await bars
+        bars
           .transition()
           .delay(
             (d) =>
@@ -373,13 +377,15 @@ function initAllAnims() {
           .transition()
           .duration(500)
           .attr("opacity", 1)
-          .end();
-
-        bars.style("mix-blend-mode", "normal");
-      };
+          .end()
+          .catch(() => {})
+          .then(() => {
+            bars.style("mix-blend-mode", "normal");
+          });
+      }
 
       // PRF
-      const decondensePRF = async () => {
+      {
         const svgGroup = d3.select("#prf-bar-graph .svg-group");
 
         const bars = svgGroup.selectAll(".bars");
@@ -391,7 +397,9 @@ function initAllAnims() {
           .attr("transform", `translate(0, ${constants.BAR_CHART_HEIGHT})`)
           .attr("opacity", 1);
 
-        svgGroup.select(".anim-xaxis").call(_prfXAxis.tickFormat(null));
+        svgGroup
+          .select(".anim-xaxis")
+          .call(_prfXAxis.tickFormat((d) => `year ${d}`));
 
         svgGroup
           .transition()
@@ -401,7 +409,7 @@ function initAllAnims() {
             `translate(${BAR_CHART_MARGIN.left},${BAR_CHART_MARGIN.top})`
           );
 
-        await bars
+        bars
           .transition()
           .delay(
             (d) =>
@@ -414,13 +422,12 @@ function initAllAnims() {
           .transition()
           .duration(500)
           .attr("opacity", 1)
-          .end();
-
-        bars.style("mix-blend-mode", "normal");
-      };
-
-      decondensePAG();
-      decondensePRF();
+          .end()
+          .catch(() => {})
+          .then(() => {
+            bars.style("mix-blend-mode", "normal");
+          });
+      }
     }
 
     prepareSVG();
@@ -454,15 +461,12 @@ function initAllAnims() {
       deps.setBucketInterperPAG(() => d3.scaleLinear().range([0, 0]));
       deps.setBucketInterperPRF(() => d3.scaleLinear().range([0, 0]));
 
-      // allow time for bucket animation to finish
-      setTimeout(() => {
-        d3.selectAll(".tut-graph-wrapper .bucket-wrapper").style(
-          "display",
-          "none"
-        );
-        d3.select("#pag-bar-graph").transition().attr("opacity", 1);
-        d3.select("#prf-bar-graph").transition().attr("opacity", 1);
-      }, 500);
+      d3.selectAll(".tut-graph-wrapper .bucket-wrapper").style(
+        "display",
+        "none"
+      );
+      d3.select("#pag-bar-graph").transition().attr("opacity", 1);
+      d3.select("#prf-bar-graph").transition().attr("opacity", 1);
     }
 
     return {
@@ -496,7 +500,11 @@ function initAllAnims() {
     }
 
     function animUndo() {
-      // TODO
+      d3.selectAll(".vardrop")
+        .style("display", "none")
+        .classed("hasarrow", false);
+
+      showElems(".main-waterdrop .objective-label");
     }
 
     return {
@@ -512,7 +520,10 @@ function initAllAnims() {
     }
 
     function animUndo() {
-      // TODO
+      d3.selectAll(".vardrop path").style("stroke-dasharray", "10 10");
+      deps.setVariationInterpers(
+        constants.VARIATIONS.map(() => d3.scaleLinear().range([0, 0]))
+      );
     }
 
     return {
@@ -521,13 +532,24 @@ function initAllAnims() {
     };
   }
 
-  function initHighlightBestAnim() {
+  function initShowScenLabelAnim() {
     return {
       do: function () {
         d3.selectAll(".var-scen-label").style("display", "block");
       },
       undo: function () {
-        // TODO
+        d3.selectAll(".var-scen-label").style("display", "none");
+      },
+    };
+  }
+
+  function initHighlightBestAnim() {
+    return {
+      do: function () {
+        d3.select(".drop1").classed("highlighted", true);
+      },
+      undo: function () {
+        d3.select(".drop1").classed("highlighted", false);
       },
     };
   }
@@ -562,7 +584,27 @@ function initAllAnims() {
     }
 
     function animUndo() {
-      // TODO
+      d3.select(".drop1").classed("highlighted", true);
+      d3.selectAll(".vardrop").classed("hasarrow", true);
+
+      d3.selectAll(".var-scen-label").style("opacity", "1");
+      d3.selectAll(".var-scen-label").style("color", "black");
+      d3.selectAll(".scen-number").style("color", "orange");
+
+      d3.select(".main-waterdrop").transition().style("transform", "none");
+      // undo scaling of label due to shrinking div
+      d3.select(".main-waterdrop .var-scen-label")
+        .transition()
+        .style("transform", "scale(1)");
+      d3.selectAll(".drop1 .waterdrop-wrapper, .drop3 .waterdrop-wrapper")
+        .transition()
+        .style("transform", "none");
+      d3.selectAll(".drop2 .waterdrop-wrapper, .drop4 .waterdrop-wrapper")
+        .transition()
+        .style("transform", "none");
+
+      d3.select(".main-histogram").style("display", "none");
+      d3.selectAll(".vardrop .dot-histogram-wrapper").style("display", "none");
     }
 
     return {
@@ -578,7 +620,8 @@ function initAllAnims() {
     }
 
     function showPAGAnimUndo() {
-      // TODO
+      showElems(".scrollama-2 .tut-drop-graphics-wrapper", d3, "grid");
+      hideElems(".scrollama-2 .tut-comparer-graphics-wrapper");
     }
 
     function showPRFAnimDo() {
@@ -586,7 +629,7 @@ function initAllAnims() {
     }
 
     function showPRFAnimUndo() {
-      // TODO
+      deps.tutorialComparer.exitDrop2();
     }
 
     return {
@@ -607,6 +650,7 @@ function initAllAnims() {
     initDropFillAnim,
     initChangeRealityAnim,
     initFillVarDropsAnim,
+    initShowScenLabelAnim,
     initHighlightBestAnim,
     initShowQuantilesAnim,
     initComparerAnimGroup,

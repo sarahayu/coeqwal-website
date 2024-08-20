@@ -25,6 +25,7 @@ export function useDataStory(deps) {
       const dropFillAnim = anims.initDropFillAnim(context);
       const changeRealityAnim = anims.initChangeRealityAnim(context);
       const fillVarDropsAnim = anims.initFillVarDropsAnim(context);
+      const showScenLabelAnim = anims.initShowScenLabelAnim(context);
       const highlightBestAnim = anims.initHighlightBestAnim(context);
       const showQuantilesAnim = anims.initShowQuantilesAnim(context);
       const comparerAnimGroup = anims.initComparerAnimGroup(context);
@@ -76,7 +77,7 @@ export function useDataStory(deps) {
         },
         {
           name: "theseVarsCalled",
-          // no anims
+          animHandler: showScenLabelAnim,
         },
         {
           name: "atAGlance",
