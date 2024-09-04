@@ -246,7 +246,7 @@ export default function WideView() {
       )
       .selectAll("tspan")
       .each(function (_, i) {
-        d3.select(this).attr("dx", i * 5);
+        d3.select(this).attr("dx", i * fontSize);
       });
   }
 

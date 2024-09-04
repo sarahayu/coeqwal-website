@@ -158,7 +158,7 @@ export default function ExamineView() {
       })
       .selectAll("tspan")
       .each(function (_, i) {
-        d3.select(this).attr("dx", i * 3);
+        d3.select(this).attr("dx", i * instrFontSize);
       });
 
     const labelFontSize =

@@ -106,8 +106,8 @@ export default function useAppState() {
     return transitionDuration;
   }, []);
 
-  const zoomTo = useCallback(function (xyz, callback) {
-    const i = threeResources.camera.interpolateZoomCamera(xyz);
+  const zoomTo = useCallback(function (worldPos, callback) {
+    const i = threeResources.camera.interpolateZoomCamera(worldPos);
 
     const duration = i.duration / 2;
 
