@@ -201,27 +201,38 @@ export default function CompareView() {
           setColorSetting={setColorSetting}
         />
       )}
-      {panels.map(({ x, y, id, isLeft, offsetX, offsetY, nodeID }, i) => (
-        <div
-          className={"panel compare-panel" + (isLeft ? " left" : "")}
-          key={i}
-          style={getPanelStyle({ x, y, offsetX, offsetY })}
-          onMouseDown={(e) => onPanelDragStart(e, { id })}
-        >
-          <DotHistogram
-            width={300}
-            height={200}
-            data={objectivesData.FLATTENED_DATA[nodeID].deliveries}
-            goal={appCtx.goals[id]}
-            setGoal={(newGoal) => {
-              appCtx.setGoals((g) => {
-                g[id] = newGoal;
-                return { ...g };
-              });
-            }}
-          />
-        </div>
-      ))}
+      {panels.map(({ x, y, id, isLeft, offsetX, offsetY, nodeID }, i) => {
+        const { objective, scenario } = objectivesData.FLATTENED_DATA[nodeID];
+
+        const baselineMax = d3.max(
+          objectivesData.OBJECTIVES_DATA[objective][
+            objectivesData.SCENARIO_KEY_STRING
+          ][scenario][objectivesData.DELIV_KEY_STRING]
+        );
+
+        return (
+          <div
+            className={"panel compare-panel" + (isLeft ? " left" : "")}
+            key={i}
+            style={getPanelStyle({ x, y, offsetX, offsetY })}
+            onMouseDown={(e) => onPanelDragStart(e, { id })}
+          >
+            <DotHistogram
+              width={300}
+              height={200}
+              data={objectivesData.FLATTENED_DATA[nodeID].deliveries}
+              domain={[0, baselineMax]}
+              goal={appCtx.goals[id]}
+              setGoal={(newGoal) => {
+                appCtx.setGoals((g) => {
+                  g[id] = newGoal;
+                  return { ...g };
+                });
+              }}
+            />
+          </div>
+        );
+      })}
     </>
   );
 }

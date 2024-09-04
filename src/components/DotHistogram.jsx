@@ -6,7 +6,6 @@ import { objectivesData } from "data/objectives-data";
 
 const NUM_CIRCLES = 20;
 const MARGIN = { top: 10, right: 10, bottom: 20, left: 10 };
-const DOMAIN = [0, objectivesData.MAX_DELIVS];
 
 const WATERDROP_ICON = {
   draw: function (context, size) {
@@ -21,7 +20,7 @@ const WATERDROP_ICON = {
 
 export default function DotHistogram({
   data,
-  domain = DOMAIN,
+  domain = [0, objectivesData.MAX_DELIVS],
   goal,
   setGoal,
   width = 600,

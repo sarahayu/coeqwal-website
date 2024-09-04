@@ -10,6 +10,7 @@ async function initObjectivesData() {
   const MAX_DELIVS = 1200;
   const SCENARIO_KEY_STRING = "scens";
   const DELIV_KEY_STRING = "delivs";
+  const BASELINE_SCEN = "expl0000";
 
   const OBJECTIVES_DATA = await (async function load() {
     const objs = await (await fetch("./objectives.json")).json();
@@ -140,6 +141,7 @@ async function initObjectivesData() {
     MAX_DELIVS,
     SCENARIO_KEY_STRING,
     DELIV_KEY_STRING,
+    BASELINE_SCEN,
     OBJECTIVES_DATA,
     OBJECTIVE_IDS,
     OBJECTIVE_GOALS_MAP,

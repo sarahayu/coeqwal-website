@@ -324,7 +324,7 @@ export default function ExamineView() {
             const baselineMax = d3.max(
               objectivesData.OBJECTIVES_DATA[objective][
                 objectivesData.SCENARIO_KEY_STRING
-              ][scenario][objectivesData.DELIV_KEY_STRING]
+              ][objectivesData.BASELINE_SCEN][objectivesData.DELIV_KEY_STRING]
             );
 
             return (
