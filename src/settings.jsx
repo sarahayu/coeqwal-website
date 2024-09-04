@@ -2,7 +2,7 @@ function initSettings() {
   const LOD_1_LEVELS = 5;
   const LOD_1_RAD_PX = 1;
   const LOD_1_MIN_LEV_VAL = 0.1;
-  const LOD_1_SMALL_DROP_PAD_FACTOR = 1.3;
+  const LOD_1_SMALL_DROP_PAD_FACTOR = 3;
   const LOD_1_LARGE_DROP_PAD_FACTOR = 1.2;
 
   const LOD_2_SMALL_DROP_PAD_FACTOR = 3;

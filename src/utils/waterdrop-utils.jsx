@@ -1,3 +1,4 @@
+import * as d3 from "d3";
 import { ticksExact } from "bucket-lib/utils";
 import { settings } from "settings";
 
@@ -41,7 +42,7 @@ function initWaterdrops(grouping) {
   );
 
   for (let i = 0; i < largeNodesPhys.length; i++) {
-    largeNodesPhys[i].tilt = Math.random() * 50 - 25;
+    largeNodesPhys[i].tilt = 0;
   }
 
   const largeNodesPos = mapBy(largeNodesPhys, ({ id }) => id);
@@ -67,7 +68,14 @@ function initWaterdrops(grouping) {
   for (const nodeData of objectivesData.FLATTENED_DATA) {
     const { id, objective, scenario, deliveries } = nodeData;
 
-    const i = createInterpsFromDelivs(deliveries, objectivesData.MAX_DELIVS);
+    const i = createInterpsFromDelivs(
+      deliveries,
+      d3.max(
+        objectivesData.OBJECTIVES_DATA[objective][
+          objectivesData.SCENARIO_KEY_STRING
+        ]["expl0000"][objectivesData.DELIV_KEY_STRING]
+      )
+    );
     const wds = ticksExact(0, 1, settings.LOD_1_LEVELS + 1).map((d) => i(d));
 
     const levs = wds.map(
@@ -82,7 +90,7 @@ function initWaterdrops(grouping) {
     const groupRank = objectivesData.DATA_GROUPINGS[grouping][groupID].rank;
     const memberRank = objectivesData.DATA_GROUPINGS[grouping][groupID][id];
 
-    const localTilt = Math.random() * 50 - 25;
+    const localTilt = 0;
     const parentTilt = largeNodesPos[groupRank].tilt;
 
     const { x, y } = smallNodesPos[memberRank];

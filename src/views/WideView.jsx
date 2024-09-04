@@ -272,7 +272,7 @@ export default function WideView() {
   function hoverDrop(d) {
     setCurrentHoveredDrop({
       id: d.key,
-      description: descriptionsData[d.key].desc,
+      description: descriptionsData[d.key]?.desc || d.key,
     });
 
     d3.select("#minimap")
@@ -292,11 +292,7 @@ export default function WideView() {
     if (searchPrompt === null) return [];
 
     return fuzzysort.go(searchPrompt, appCtx.waterdrops.groups, {
-      keys: [
-        (obj) => descriptionsData[obj.key].id,
-        (obj) => descriptionsData[obj.key].display_name,
-        (obj) => descriptionsData[obj.key].desc,
-      ],
+      keys: [(obj) => obj.key],
       limit: 10,
       all: true,
     });
@@ -338,8 +334,7 @@ export default function WideView() {
             <div className="results" style={{ display: "none" }}>
               {searchResults.map(({ obj: wd }) => (
                 <button key={wd.key} onClick={() => updateActiveDrops(wd)}>
-                  {descriptionsData[wd.key].display_name ||
-                    descriptionsData[wd.key].id}
+                  {wd.key}
                 </button>
               ))}
             </div>

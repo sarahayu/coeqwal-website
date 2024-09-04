@@ -89,7 +89,7 @@ export default function TutorialView() {
               colorInterp={constants.INTERP_COLOR}
             />
             <p className="fancy-font objective-label">
-              {descriptionsData[constants.DEFAULT_OBJECTIVE].display_name}
+              {descriptionsData[constants.DEFAULT_OBJECTIVE]?.display_name}
             </p>
           </div>
           <div className="tut-graph">
@@ -101,7 +101,7 @@ export default function TutorialView() {
               colorInterp={constants.INTERP_COLOR}
             />
             <p className="fancy-font objective-label">
-              {descriptionsData[constants.COMP_OBJECTIVE].display_name}
+              {descriptionsData[constants.COMP_OBJECTIVE]?.display_name}
             </p>
           </div>
         </div>
@@ -132,7 +132,7 @@ export default function TutorialView() {
               scenario <span className="scen-number">{"0000"}</span>
             </p>
             <p className="fancy-font objective-label">
-              {descriptionsData[constants.DEFAULT_OBJECTIVE].display_name}
+              {descriptionsData[constants.DEFAULT_OBJECTIVE]?.display_name}
             </p>
           </div>
           <div className="main-histogram">

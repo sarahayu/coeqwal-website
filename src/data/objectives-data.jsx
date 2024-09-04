@@ -18,10 +18,7 @@ async function initObjectivesData() {
       // shuffle so clusters of identical scenario results don't get processed deterministically
       for (const scen of shuffle(obj[SCENARIO_KEY_STRING])) {
         // data cleanup, clamping
-        const unord = scen[DELIV_KEY_STRING].map((v) =>
-          clamp(v, 0, MAX_DELIVS)
-        );
-
+        const unord = scen[DELIV_KEY_STRING];
         scen[DELIV_KEY_STRING] = unord.sort((a, b) => b - a);
       }
       obj[SCENARIO_KEY_STRING] = mapBy(
