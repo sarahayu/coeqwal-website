@@ -22,8 +22,7 @@ export default function BucketGlyph({
   const svgSelector = useRef();
 
   const liquidLevels = useMemo(
-    () =>
-      ticksExact(0, 1 - 1 / resolution, resolution).map((d) => levelInterp(d)),
+    () => ticksExact(0, 1, resolution + 1).map((d) => levelInterp(d)),
     [levelInterp, resolution]
   );
 
@@ -85,7 +84,7 @@ export default function BucketGlyph({
       .attr("width", innerWidth * 2)
       .attr("height", innerHeight * 2)
       .attr("x", -innerWidth / 2)
-      .attr("fill", (_, i) => colorInterp(i / (resolution - 1)));
+      .attr("fill", (_, i) => colorInterp(i / resolution));
 
     liquids
       .transition("liquidLevel")
