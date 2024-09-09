@@ -9,7 +9,7 @@ import { constants, updateDropsSVG } from "utils/tutorialview-utils";
 import { helpers as compareViewHelpers } from "views/compareview-helpers";
 
 // TODO turn into component?
-export function useTutorialComparer() {
+export function useCompareLargeDrops() {
   const [activeMinidrop, setActiveMinidrop] = useState();
   const groupsRef = useRef();
   const camCentersRef = useRef({});
@@ -29,9 +29,9 @@ export function useTutorialComparer() {
     [activeMinidrop]
   );
 
-  function initComparer(waterdrops, camera) {
+  function initialize(waterdrops, camera) {
     groupsRef.current = compareViewHelpers.getWaterdropGroups(
-      [constants.DEFAULT_OBJECTIVE, constants.COMP_OBJECTIVE],
+      [constants.PAG_OBJECTIVE, constants.PRF_OBJECTIVE],
       waterdrops,
       [0, 0]
     );
@@ -89,7 +89,7 @@ export function useTutorialComparer() {
 
     setActiveMinidrop(constants.DEFAULT_SCENARIO);
     hideElems(
-      `.large-drop.${constants.COMP_OBJECTIVE}, .indicator-group`,
+      `.large-drop.${constants.PRF_OBJECTIVE}, .indicator-group`,
       container
     );
   }
@@ -161,7 +161,7 @@ export function useTutorialComparer() {
       );
 
     showElems(
-      `.large-drop.${constants.COMP_OBJECTIVE}, .indicator-group`,
+      `.large-drop.${constants.PRF_OBJECTIVE}, .indicator-group`,
       container
     );
   }
@@ -183,10 +183,10 @@ export function useTutorialComparer() {
       );
 
     hideElems(
-      `.large-drop.${constants.COMP_OBJECTIVE}, .indicator-group`,
+      `.large-drop.${constants.PRF_OBJECTIVE}, .indicator-group`,
       container
     );
   }
 
-  return { initComparer, introDrop2, exitDrop2 };
+  return { initComparer: initialize, introDrop2, exitDrop2 };
 }

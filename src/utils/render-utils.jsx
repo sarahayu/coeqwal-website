@@ -2,6 +2,7 @@ import { interpolateWatercolorBlue } from "bucket-lib/utils";
 import * as d3 from "d3";
 import { settings } from "settings";
 import { wrap } from "./misc-utils";
+import { percentToRatioFilled } from "./math-utils";
 
 // path generated when WATERDROP_ICON size = 2
 export const DROPLET_SHAPE = "M0,-1L0.5,-0.5A0.707,0.707,0,1,1,-0.5,-0.5L0,-1Z";
@@ -208,7 +209,7 @@ export function gradientUpdate(levs, maxLev) {
 
       d3.select(this).attr(
         "offset",
-        `${(1 - levs[valOffset] / maxLev) * 100}%`
+        `${(1 - percentToRatioFilled(levs[valOffset] / maxLev)) * 100}%`
       );
     });
   };

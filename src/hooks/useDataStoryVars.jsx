@@ -2,9 +2,8 @@ import * as d3 from "d3";
 import { useState } from "react";
 import { constants } from "utils/tutorialview-utils";
 
-export function useTutorialState() {
+export function useDataStoryVars() {
   const [userGoal, setUserGoal] = useState(200);
-  const [ready, setReady] = useState(false);
   const [bucketInterperPAG, setBucketInterperPAG] = useState(() =>
     d3.scaleLinear().range([0, 0])
   );
@@ -21,8 +20,6 @@ export function useTutorialState() {
   return {
     userGoal,
     setUserGoal,
-    ready,
-    setReady,
     bucketInterperPAG,
     setBucketInterperPAG,
     bucketInterperPRF,

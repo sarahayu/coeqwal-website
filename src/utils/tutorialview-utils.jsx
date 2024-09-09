@@ -5,7 +5,7 @@ import { objectivesData } from "data/objectives-data";
 import { descriptionsData } from "data/descriptions-data";
 import { settings } from "settings";
 import { DROPLET_SHAPE, generateTSpan } from "./render-utils";
-import { dropCenterCorrection } from "./math-utils";
+import { dropCenterCorrection, percentToRatioFilled } from "./math-utils";
 import { genUUID } from "./misc-utils";
 import { gradientUpdate } from "./render-utils";
 import { gradientInit } from "./render-utils";
@@ -22,15 +22,17 @@ function initConstants() {
     "#112A57",
   ]);
 
-  const DEFAULT_OBJECTIVE = "DEL_CVP_PAG_N";
-  const COMP_OBJECTIVE = "DEL_CVP_PRF_S";
+  const PAG_OBJECTIVE = "DEL_CVP_PAG_N";
+  const PRF_OBJECTIVE = "DEL_CVP_PRF_S";
+
   const DEFAULT_SCENARIO = "expl0000";
+
   const PAG_DELIVS =
-    objectivesData.OBJECTIVES_DATA[DEFAULT_OBJECTIVE][
+    objectivesData.OBJECTIVES_DATA[PAG_OBJECTIVE][
       objectivesData.SCENARIO_KEY_STRING
     ][DEFAULT_SCENARIO][objectivesData.DELIV_KEY_STRING];
   const PRF_DELIVS =
-    objectivesData.OBJECTIVES_DATA[COMP_OBJECTIVE][
+    objectivesData.OBJECTIVES_DATA[PRF_OBJECTIVE][
       objectivesData.SCENARIO_KEY_STRING
     ][DEFAULT_SCENARIO][objectivesData.DELIV_KEY_STRING];
 
@@ -43,43 +45,61 @@ function initConstants() {
 
   const VARIATIONS_DELIVS = VARIATIONS.map(
     (vars) =>
-      objectivesData.OBJECTIVES_DATA[DEFAULT_OBJECTIVE][
+      objectivesData.OBJECTIVES_DATA[PAG_OBJECTIVE][
         objectivesData.SCENARIO_KEY_STRING
       ][vars][objectivesData.DELIV_KEY_STRING]
   );
 
-  const VARIATIONS_INTERPERS = VARIATIONS_DELIVS.map((varDelivs) =>
+  const VARIATIONS_INTERPERS = VARIATIONS_DELIVS.map(
+    (varDelivs) => (val) =>
+      percentToRatioFilled(
+        d3
+          .scaleLinear()
+          .domain(ticksExact(0, 1, varDelivs.length))
+          .range(
+            varDelivs
+              .map((v) => v / objectivesData.MAX_DELIVS)
+              .sort()
+              .reverse()
+          )
+          .clamp(true)(val)
+      )
+  );
+
+  const PAG_INTERPER = (val) =>
     d3
       .scaleLinear()
-      .domain(ticksExact(0, 1, varDelivs.length))
+      .domain(ticksExact(0, 1, PAG_DELIVS.length))
       .range(
-        varDelivs
-          .map((v) => v / objectivesData.MAX_DELIVS)
+        PAG_DELIVS.map((v) => v / objectivesData.MAX_DELIVS)
           .sort()
           .reverse()
       )
-      .clamp(true)
-  );
+      .clamp(true)(val);
 
-  const PAG_INTERPER = d3
-    .scaleLinear()
-    .domain(ticksExact(0, 1, PAG_DELIVS.length))
-    .range(
-      PAG_DELIVS.map((v) => v / objectivesData.MAX_DELIVS)
-        .sort()
-        .reverse()
-    )
-    .clamp(true);
+  const PAG_INTERPER_DROP = (val) =>
+    percentToRatioFilled(
+      d3
+        .scaleLinear()
+        .domain(ticksExact(0, 1, PAG_DELIVS.length))
+        .range(
+          PAG_DELIVS.map((v) => v / objectivesData.MAX_DELIVS)
+            .sort()
+            .reverse()
+        )
+        .clamp(true)(val)
+    );
 
-  const PRF_INTERPER = d3
-    .scaleLinear()
-    .domain(ticksExact(0, 1, PRF_DELIVS.length))
-    .range(
-      PRF_DELIVS.map((v) => v / objectivesData.MAX_DELIVS)
-        .sort()
-        .reverse()
-    )
-    .clamp(true);
+  const PRF_INTERPER = (val) =>
+    d3
+      .scaleLinear()
+      .domain(ticksExact(0, 1, PRF_DELIVS.length))
+      .range(
+        PRF_DELIVS.map((v) => v / objectivesData.MAX_DELIVS)
+          .sort()
+          .reverse()
+      )
+      .clamp(true)(val);
 
   const DROP_VARIATIONS = [
     {
@@ -112,8 +132,8 @@ function initConstants() {
     BAR_CHART_WIDTH,
     BAR_CHART_HEIGHT,
     INTERP_COLOR,
-    DEFAULT_OBJECTIVE,
-    COMP_OBJECTIVE,
+    PAG_OBJECTIVE,
+    PRF_OBJECTIVE,
     DEFAULT_SCENARIO,
     PAG_DELIVS,
     PRF_DELIVS,
@@ -121,6 +141,7 @@ function initConstants() {
     VARIATIONS_DELIVS,
     VARIATIONS_INTERPERS,
     PAG_INTERPER,
+    PAG_INTERPER_DROP,
     PRF_INTERPER,
     DROP_VARIATIONS,
   };

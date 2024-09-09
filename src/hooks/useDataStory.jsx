@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { scripts } from "utils/story-scripts";
+import { useDataStoryVars } from "hooks/useDataStoryVars";
+import { useCompareLargeDrops } from "hooks/useCompareLargeDrops";
 import { animations as anims } from "./data-story-anims";
 
-export function useDataStory(deps) {
+export function useDataStory(appCtx) {
   /*
     slides = [
         name: string,
@@ -13,12 +15,26 @@ export function useDataStory(deps) {
     ]
      */
   const [slides, setSlides] = useState([]);
+  const [domReady, setDomReady] = useState(false);
+
+  const signalDOMReady = useCallback(function () {
+    setDomReady(true);
+  });
+
+  const storyVars = useDataStoryVars();
+  const largeDropComparer = useCompareLargeDrops();
 
   useEffect(
     function initialize() {
-      if (!deps.ready) return;
+      if (!domReady) return;
 
-      const context = { deps };
+      largeDropComparer.initComparer(appCtx.waterdrops, appCtx.camera);
+      const context = {
+        deps: {
+          ...storyVars,
+          largeDropComparer,
+        },
+      };
 
       const chartAnimGroup = anims.initChartAnimGroup(context);
       const bucketsFillAnim = anims.initBucketsFillAnim(context);
@@ -31,6 +47,18 @@ export function useDataStory(deps) {
       const comparerAnimGroup = anims.initComparerAnimGroup(context);
 
       const _slides = [
+        {
+          name: "howMuchIntro",
+          // animHandler: chartAnimGroup.barsAppear,
+        },
+        {
+          name: "norCal",
+          // animHandler: chartAnimGroup.barsAppear,
+        },
+        {
+          name: "soCal",
+          // animHandler: chartAnimGroup.barsAppear,
+        },
         {
           name: "barsAppear",
           animHandler: chartAnimGroup.barsAppear,
@@ -103,7 +131,7 @@ export function useDataStory(deps) {
 
       setSlides(_slides);
     },
-    [deps.ready]
+    [domReady]
   );
 
   const getFromTo = useCallback(
@@ -123,7 +151,11 @@ export function useDataStory(deps) {
     [slides]
   );
 
-  return getFromTo;
+  return {
+    signalDOMReady,
+    getSlidesInRange: getFromTo,
+    storyVars,
+  };
 }
 
 function attachScripts(slides) {

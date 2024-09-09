@@ -41,7 +41,7 @@ function initAllAnims() {
             `translate(${BAR_CHART_MARGIN.left},${BAR_CHART_MARGIN.top})`
           );
 
-        const dataDescending = yearlyData[constants.DEFAULT_OBJECTIVE]
+        const dataDescending = yearlyData[constants.PAG_OBJECTIVE]
           .map((val, placeFromLeft) => ({
             val,
             placeFromLeft,
@@ -108,7 +108,7 @@ function initAllAnims() {
             `translate(${BAR_CHART_MARGIN.left},${BAR_CHART_MARGIN.top})`
           );
 
-        const dataDescending = yearlyData[constants.COMP_OBJECTIVE]
+        const dataDescending = yearlyData[constants.PRF_OBJECTIVE]
           .map((val, placeFromLeft) => ({
             val,
             placeFromLeft,
@@ -477,7 +477,7 @@ function initAllAnims() {
 
   function initDropFillAnim({ deps }) {
     function animDo() {
-      deps.setDropInterper(() => constants.PAG_INTERPER);
+      deps.setDropInterper(() => constants.PAG_INTERPER_DROP);
     }
 
     function animUndo() {
@@ -615,21 +615,25 @@ function initAllAnims() {
 
   function initComparerAnimGroup({ deps }) {
     function showPAGAnimDo() {
-      hideElems(".scrollama-2 .tut-drop-graphics-wrapper");
-      showElems(".scrollama-2 .tut-comparer-graphics-wrapper");
+      hideElems(".scrollama-compare-scenobjs .tut-drop-graphics-wrapper");
+      showElems(".scrollama-compare-scenobjs .tut-comparer-graphics-wrapper");
     }
 
     function showPAGAnimUndo() {
-      showElems(".scrollama-2 .tut-drop-graphics-wrapper", d3, "grid");
-      hideElems(".scrollama-2 .tut-comparer-graphics-wrapper");
+      showElems(
+        ".scrollama-compare-scenobjs .tut-drop-graphics-wrapper",
+        d3,
+        "grid"
+      );
+      hideElems(".scrollama-compare-scenobjs .tut-comparer-graphics-wrapper");
     }
 
     function showPRFAnimDo() {
-      deps.tutorialComparer.introDrop2();
+      deps.largeDropComparer.introDrop2();
     }
 
     function showPRFAnimUndo() {
-      deps.tutorialComparer.exitDrop2();
+      deps.largeDropComparer.exitDrop2();
     }
 
     return {

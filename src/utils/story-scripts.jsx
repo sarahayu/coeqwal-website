@@ -2,6 +2,18 @@ import React from "react";
 
 function initScripts() {
   return {
+    howMuchIntro: (
+      <div className="tut-text-card">
+        <em>How much water do the people of California get?</em> Let's focus on
+        two groups of people:
+      </div>
+    ),
+    norCal: (
+      <div className="tut-text-card">the agriculture group in the north...</div>
+    ),
+    soCal: (
+      <div className="tut-text-card">...and the refuge group in the south.</div>
+    ),
     barsAppear: (
       <div className="tut-text-card">
         This is the average yearly amount of water each group receives,
