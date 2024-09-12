@@ -1,0 +1,697 @@
+[
+  {
+    "id": "C408_LBOUND",
+    "display_name": "Old & Middle River Requirement",
+    "desc": "OMR Requirement"
+  },
+  {
+    "id": "COREQSACDV",
+    "display_name": "CO Sacramento Required Flow",
+    "desc": "CO Sac Req Flow"
+  },
+  {
+    "id": "CO_EC_MONTH",
+    "display_name": "CO Salinity",
+    "desc": "CO Salinity"
+  },
+  {
+    "id": "C_CALAV",
+    "display_name": "Calaveras River Flow (mouth)",
+    "desc": "Calaveras River Flow at mouth"
+  },
+  {
+    "id": "C_CHOWR",
+    "display_name": "Chowchilla River Flow",
+    "desc": "Chowchilla River Flow"
+  },
+  {
+    "id": "C_DAGUER",
+    "display_name": "Yuba River Flow (Daguerre Pt. Dam)",
+    "desc": "Yuba River Flow below Daguerre Pt Dam"
+  },
+  {
+    "id": "C_DELTA",
+    "display_name": "NDOI Excess",
+    "desc": "NDOI Excess"
+  },
+  {
+    "id": "C_DELTA_CVP",
+    "display_name": "Delta Excess Outflow (CVP)",
+    "desc": "Delta Excess Outflow Central Valley Project"
+  },
+  {
+    "id": "C_DXC_DXC",
+    "display_name": "Delta X-channel Flow",
+    "desc": "Delta X-channel Flow"
+  },
+  {
+    "id": "C_DXC_GEO",
+    "display_name": "Georgianna Slough Flow",
+    "desc": "Georgianna Slough Flow"
+  },
+  {
+    "id": "C_ESTMN",
+    "display_name": "Eastman Lake Release",
+    "desc": "Release from Eastman Lake to Chowchilla River"
+  },
+  {
+    "id": "C_FOLSM",
+    "display_name": "Folsom Release",
+    "desc": "Folsom Release to American River"
+  },
+  {
+    "id": "C_FREEPORT",
+    "display_name": "Sacramento River Flow (Freeport)",
+    "desc": "Sacramento River Flow at Freeport"
+  },
+  {
+    "id": "C_FRSNO",
+    "display_name": "Fresno River Flow",
+    "desc": "Fresno River Flow"
+  },
+  {
+    "id": "C_GRAVF",
+    "display_name": "San Joaquin River Flow (Gravelly Ford)",
+    "desc": "San Joaquin River Flow at Gravelly Ford"
+  },
+  {
+    "id": "C_HNSLY",
+    "display_name": "Hensley Lake Release",
+    "desc": "Release from Hensley Lake to Fresno River"
+  },
+  {
+    "id": "C_HOOD",
+    "display_name": "Sacramento River Flow (Hood)",
+    "desc": "Sacramento River Flow at Hood"
+  },
+  {
+    "id": "C_HST",
+    "display_name": "American River Flow (H St.)",
+    "desc": "American River Flow at H Street"
+  },
+  {
+    "id": "C_HST_EXC",
+    "display_name": "American River Hst Excess Flow",
+    "desc": "American River Hst Excess Flow"
+  },
+  {
+    "id": "C_KSWCK",
+    "display_name": "Sacramento River Flow (Keswick Dam)",
+    "desc": "Sacramento River Flow below Keswick Dam"
+  },
+  {
+    "id": "C_KSWCK_EXC",
+    "display_name": "Keswick Excess Flow",
+    "desc": "Keswick Excess Flow"
+  },
+  {
+    "id": "C_KSWCK_MIF",
+    "display_name": "Sacramento River Min. Flow (Keswick Dam)",
+    "desc": "Sacramento River Minimum Flow below Keswick Dam"
+  },
+  {
+    "id": "C_LWSTN",
+    "display_name": "Trinity Flow (Lewiston)",
+    "desc": "Trinity Flow below Lewiston"
+  },
+  {
+    "id": "C_MCLRE",
+    "display_name": "Lake McClure Release",
+    "desc": "Release from Lake McClure to Merced River"
+  },
+  {
+    "id": "C_MELON",
+    "display_name": "New Melones Release",
+    "desc": "New Melones Release to Stanislaus River"
+  },
+  {
+    "id": "C_MERCED2",
+    "display_name": "Merced River Flow (mouth)",
+    "desc": "Merced River Flow at mouth"
+  },
+  {
+    "id": "C_MLRTN",
+    "display_name": "Friant Dam Release",
+    "desc": "Release from Friant Dam to San Joaquin River"
+  },
+  {
+    "id": "C_MOKLMN",
+    "display_name": "Mokelumne Flow",
+    "desc": "Mokelumne Flow"
+  },
+  {
+    "id": "C_NHGAN",
+    "display_name": "New Hogan Release",
+    "desc": "Release from New Hogan Reservoir to Calaveras River"
+  },
+  {
+    "id": "C_NIMBUS",
+    "display_name": "American River Flow (Nimbus Dam)",
+    "desc": "American River Flow below Nimbus Dam"
+  },
+  {
+    "id": "C_NIMBUS_EXC",
+    "display_name": "Lake Natoma Excess Flow",
+    "desc": "Lake Natoma Excess Flow"
+  },
+  {
+    "id": "C_NIMBUS_MIF",
+    "display_name": "American River Min. Flow (Nimbus Dam)",
+    "desc": "American River Minimum Flow below Nimbus Dam"
+  },
+  {
+    "id": "C_OMR",
+    "display_name": "Old & Middle River Flow",
+    "desc": "Old and Middle River Combined Flow"
+  },
+  {
+    "id": "C_OROVL",
+    "display_name": "Oroville Release",
+    "desc": "Oroville Release to Feather River"
+  },
+  {
+    "id": "C_PEDRO",
+    "display_name": "New Don Pedro Release",
+    "desc": "Release from New Don Pedro Reservoir to Tuolumne River"
+  },
+  {
+    "id": "C_REDBLF",
+    "display_name": "Sacramento River Flow (Red Bluff Diversion Dam)",
+    "desc": "Sacramento River Flow below Red Bluff Diversion Dam"
+  },
+  {
+    "id": "C_SACRV",
+    "display_name": "Sacramento River Flow (Rio Vista)",
+    "desc": "Sacramento River Flow at Rio Vista"
+  },
+  {
+    "id": "C_SACRV_EXC",
+    "display_name": "Sacramento River Excess Flow (Rio Vista)",
+    "desc": "Sacramento River above Rio Vista Excess Flow"
+  },
+  {
+    "id": "C_SHSTA",
+    "display_name": "Shasta Release",
+    "desc": "Shasta Release to Sacramento River"
+  },
+  {
+    "id": "C_SJRMER",
+    "display_name": "San Joaquin River Flow (Merced)",
+    "desc": "San Joaquin River Flow below confluence with Merced"
+  },
+  {
+    "id": "C_SJRSACK",
+    "display_name": "San Joaquin River Flow (Sack Dam)",
+    "desc": "San Joaquin River Flow below Sack Dam"
+  },
+  {
+    "id": "C_SJRVER",
+    "display_name": "San Joaquin River Flow (Vernalis)",
+    "desc": "San Joaquin River Flow at Vernalis"
+  },
+  {
+    "id": "C_SJRVI",
+    "display_name": "San Joaquin River (Venice Island)",
+    "desc": "Qwest (San Joaquin River near Venice Island)"
+  },
+  {
+    "id": "C_STANGDWN",
+    "display_name": "Stanislaus River Flow (Goodwin)",
+    "desc": "Stanislaus River Flow below Goodwin"
+  },
+  {
+    "id": "C_STANGDWN_MIF",
+    "display_name": "Stanislaus River Min. Flow (Goodwin)",
+    "desc": "Stanislaus River Minimum Flow below Goodwin"
+  },
+  {
+    "id": "C_STANRIPN",
+    "display_name": "Stanislaus River Flow (mouth)",
+    "desc": "Stanislaus River Flow at mouth"
+  },
+  {
+    "id": "C_THERM",
+    "display_name": "Feather River Flow (Thermalito)",
+    "desc": "Feather River Flow below Thermalito"
+  },
+  {
+    "id": "C_THERM_MIF",
+    "display_name": "Feather River Min. Flow (Thermalito)",
+    "desc": "Feather River Minimum Flow below Thermalito"
+  },
+  {
+    "id": "C_TRNTY",
+    "display_name": "Trinity Release",
+    "desc": "Trinity Release"
+  },
+  {
+    "id": "C_TUOL",
+    "display_name": "Tuolumne River Flow (mouth)",
+    "desc": "Tuolumne River Flow at mouth - Below Diversions at LaGrange Dam"
+  },
+  {
+    "id": "C_WILKNS",
+    "display_name": "Sacramento River (Wilkins Slough)",
+    "desc": "Sacramento River near Wilkins Slough (flow)"
+  },
+  {
+    "id": "C_WILKNS_EXC",
+    "display_name": "Wilkins Slough Excess Flow",
+    "desc": "Wilkins Slough Excess Flow"
+  },
+  {
+    "id": "C_WKYTN",
+    "display_name": "Clear Creek Flow (Whiskeytown)",
+    "desc": "Clear Creek Flow below Whiskeytown"
+  },
+  {
+    "id": "C_YOLOBP",
+    "display_name": "Yolo Bypass Flow",
+    "desc": "Flow through Yolo Bypass"
+  },
+  {
+    "id": "C_YUBFEA",
+    "display_name": "Feather River Flow (Yuba City)",
+    "desc": "Feather River Flow near Yuba City (below confluence with Yuba River)"
+  },
+  {
+    "id": "C_YUBFEA_MIF",
+    "display_name": "Feather River Min. Flow (mouth)",
+    "desc": "Feather River Minimum Flow at mouth"
+  },
+  {
+    "id": "DEL_CVP_PAG_N",
+    "display_name": "Agriculture North Delta (CVP)",
+    "desc": "Central Valley Project North of Delta Agriculture Deliveries"
+  },
+  {
+    "id": "DEL_CVP_PAG_S",
+    "display_name": "Agriculture South Delta (CVP)",
+    "desc": "Central Valley Project South of Delta Agriculture Deliveries"
+  },
+  {
+    "id": "DEL_CVP_PEX_S",
+    "display_name": "Exchange Contractor South Delta (CVP)",
+    "desc": "Central Valley Project Exchange Contractor Deliveries South of Delta"
+  },
+  {
+    "id": "DEL_CVP_PMI_N",
+    "display_name": "M&I North Delta (CVP)",
+    "desc": "Central Valley Project Delivery PMI N"
+  },
+  {
+    "id": "DEL_CVP_PMI_S",
+    "display_name": "M&I South Delta (CVP)",
+    "desc": "Central Valley Project Delivery PMI S"
+  },
+  {
+    "id": "DEL_CVP_PRF_N",
+    "display_name": "Refuge North Delta (CVP)",
+    "desc": "Central Valley Project Delivery PRF N"
+  },
+  {
+    "id": "DEL_CVP_PRF_S",
+    "display_name": "Refuge South Delta (CVP)",
+    "desc": "Central Valley Project Refuge Deliveries - South of Delta"
+  },
+  {
+    "id": "DEL_CVP_PSC_N",
+    "display_name": "Sacramento River Settlement (CVP)",
+    "desc": "Central Valley Project Settlement Contractor Deliveries"
+  },
+  {
+    "id": "DEL_CVP_TOTAL_N",
+    "display_name": "Total North Delta (CVP)",
+    "desc": "Total combined Central Valley Project deliveries (all contract types) North of Delta"
+  },
+  {
+    "id": "DEL_CVP_TOTAL_S",
+    "display_name": "Total South Delta (CVP)",
+    "desc": "Total combined Central Valley Project delivery (all contract types) South of Delta"
+  },
+  {
+    "id": "DEL_SWP_MWD",
+    "display_name": "M&I Metropolitan Water District (SWP)",
+    "desc": "State Water Project M&I Deliveries to Metropolitan Water District"
+  },
+  {
+    "id": "DEL_SWP_OTH",
+    "display_name": "M&I Other (SWP)",
+    "desc": "State Water Project M&I Deliveries other than Metropolitan Water District (includes areas in South Bay as well)"
+  },
+  {
+    "id": "DEL_SWP_PAG",
+    "display_name": "Agriculture (SWP)",
+    "desc": "Total State Water Project Ag Deliveries"
+  },
+  {
+    "id": "DEL_SWP_PAG_N",
+    "display_name": "Agriculture North Delta (SWP)",
+    "desc": "State Water Project Agriculture Deliveries NOD (Includes FRSA)"
+  },
+  {
+    "id": "DEL_SWP_PAG_S",
+    "display_name": "Agriculture South Delta (SWP)",
+    "desc": "State Water Project Agriculture Deliveries SOD"
+  },
+  {
+    "id": "DEL_SWP_PIN",
+    "display_name": "Delivery Int. (SWP)",
+    "desc": "State Water Project Delivery Int"
+  },
+  {
+    "id": "DEL_SWP_PMI",
+    "display_name": "M&I (SWP)",
+    "desc": "Total State Water Project M&I Deliveries"
+  },
+  {
+    "id": "DEL_SWP_PMI_N",
+    "display_name": "M&I North Delta (SWP)",
+    "desc": "State Water Project M&I Deliveries NOD"
+  },
+  {
+    "id": "DEL_SWP_PMI_S",
+    "display_name": "M&I South Delta (SWP)",
+    "desc": "State Water Project M&I Deliveries SOD"
+  },
+  {
+    "id": "DO_REQ_X2CHS_OUT",
+    "display_name": "X2 CHS Delta Required Outflow",
+    "desc": "X2 CHS Delta Req Outflow"
+  },
+  {
+    "id": "DO_REQ_X2CNF_OUT",
+    "display_name": "X2 CNF Delta Required Outflow",
+    "desc": "X2 CNF Delta Req Outflow"
+  },
+  {
+    "id": "DO_REQ_X2ROE_OUT",
+    "display_name": "X2 ROE Delta Required Outflow",
+    "desc": "X2 ROE Delta Req Outflow"
+  },
+  {
+    "id": "D_BANKS",
+    "display_name": "Banks Export Total",
+    "desc": "Banks Export Total"
+  },
+  {
+    "id": "D_BANKS_CVP",
+    "display_name": "Banks Export (CVP)",
+    "desc": "Banks Export Central Valley Project"
+  },
+  {
+    "id": "D_BANKS_SWP",
+    "display_name": "Banks Export (SWP)",
+    "desc": "Banks Export State Water Project"
+  },
+  {
+    "id": "D_CCWD",
+    "display_name": "CCWD (CVP)",
+    "desc": "CCWD Central Valley Project Delivery"
+  },
+  {
+    "id": "D_CLEARTU",
+    "display_name": "Trinity Import (Clear Creek Tunnel)",
+    "desc": "Trinity Import through Clear Creek Tunnel"
+  },
+  {
+    "id": "D_CVP_CVC",
+    "display_name": "CVC (CVP)",
+    "desc": "CVC Delivery"
+  },
+  {
+    "id": "D_DELTAREQD",
+    "display_name": "Delta Minimum Outflow Achieved",
+    "desc": "Delta Minimum Outflow Achieved"
+  },
+  {
+    "id": "D_DELTAREQD_SMSCGADJ",
+    "display_name": "SMSCG Salinty Effect Flow Equivalent",
+    "desc": "SMSCG Salinty Effect Flow Equivalent"
+  },
+  {
+    "id": "D_FKCNL",
+    "display_name": "Friant-Kern Canal Diversion",
+    "desc": "Friant-Kern Canal Diversion"
+  },
+  {
+    "id": "D_FREWEIR",
+    "display_name": "Fremont Weir Spill",
+    "desc": "Fremont Weir Spill (Classified as Delivery in CalLite)"
+  },
+  {
+    "id": "D_JONES",
+    "display_name": "Jones Export",
+    "desc": "Jones Export"
+  },
+  {
+    "id": "D_MDRCNL",
+    "display_name": "Madera Canal Diversion",
+    "desc": "Madera Canal Diversion"
+  },
+  {
+    "id": "D_REDBLF",
+    "display_name": "Red Bluff Diversion",
+    "desc": "Red Bluff Diversion"
+  },
+  {
+    "id": "D_STANGDWNA1",
+    "display_name": "Stanislaus River (OID/SSJID Sale to SEWD)",
+    "desc": "Stanislaus River Delivery - OID/SSJID Sale to SEWD"
+  },
+  {
+    "id": "D_STANGDWNB",
+    "display_name": "Stanislaus River (Oakdale North / SSJID 1)",
+    "desc": "Stanislaus River Delivery - Oakdale North / SSJID 1"
+  },
+  {
+    "id": "D_STANGDWNC",
+    "display_name": "Stanislaus River (Oakdale North / SSJID 2)",
+    "desc": "Stanislaus River Delivery - Oakdale North / SSJID 2"
+  },
+  {
+    "id": "D_STANGDWN_CSJSEWD_PAG",
+    "display_name": "Stanislaus River (SEWD/CSJ)",
+    "desc": "Stanislaus River Delivery - SEWD/CSJ"
+  },
+  {
+    "id": "EMREQSACDV",
+    "display_name": "EM Sacramento Req. Flow",
+    "desc": "EM Sacramento Req Flow"
+  },
+  {
+    "id": "EM_EC_MONTH",
+    "display_name": "EM Salinity",
+    "desc": "EM Salinity"
+  },
+  {
+    "id": "INFLOW",
+    "display_name": "Sacramento River & San Joaquin River Inflow",
+    "desc": "Combined Sacramento and San Joaquin Rivers inflow to Delta"
+  },
+  {
+    "id": "JPREQSACDV",
+    "display_name": "JP Sacramento Req. Flow",
+    "desc": "JP Sacramento Req Flow"
+  },
+  {
+    "id": "JP_EC_MONTH",
+    "display_name": "JP Salinity",
+    "desc": "JP Salinity"
+  },
+  {
+    "id": "MRDO_FINALDV",
+    "display_name": "X2 Delta Req. Outflow ",
+    "desc": "FINAL X2 Delta Req Outflow (day weighted)"
+  },
+  {
+    "id": "NDO",
+    "display_name": "Net Delta Outflow",
+    "desc": "Net Delta Outflow"
+  },
+  {
+    "id": "PERDV_CVPAG_S",
+    "display_name": "Agriculture South Delta Alloc. (CVP)",
+    "desc": "Central Valley Project Allocation (SOD Ag)"
+  },
+  {
+    "id": "PERDV_CVPAG_SYS",
+    "display_name": "Agriculture Alloc. (CVP)",
+    "desc": "Central Valley Project Allocation (Ag)"
+  },
+  {
+    "id": "PERDV_CVPEX_S",
+    "display_name": "Exchange Alloc. (CVP)",
+    "desc": "Central Valley Project Allocation (Exchange Contractors)"
+  },
+  {
+    "id": "PERDV_CVPMI_S",
+    "display_name": "M&I South Delta Alloc. (CVP)",
+    "desc": "Central Valley Project Allocation (SOD M&I)"
+  },
+  {
+    "id": "PERDV_CVPMI_SYS",
+    "display_name": "M&I Alloc. (CVP)",
+    "desc": "Central Valley Project Allocation (M&I)"
+  },
+  {
+    "id": "PERDV_CVPSC_SYS",
+    "display_name": "Settlement Alloc. (CVP)",
+    "desc": "Central Valley Project Allocation (Settlement Contractors)"
+  },
+  {
+    "id": "PERDV_SWP_AG1",
+    "display_name": "Agriculture Alloc. (SWP)",
+    "desc": "State Water Project Allocation (Ag)"
+  },
+  {
+    "id": "PERDV_SWP_FSC",
+    "display_name": "FRSA Alloc. (SWP)",
+    "desc": "State Water Project Allocation (FRSA)"
+  },
+  {
+    "id": "PERDV_SWP_MWD1",
+    "display_name": "M&I Alloc. (SWP)",
+    "desc": "State Water Project Allocation (M&I)"
+  },
+  {
+    "id": "RSREQSACDV",
+    "display_name": "RS Sacramento Req Flow",
+    "desc": "RS Sacramento Req Flow"
+  },
+  {
+    "id": "RS_EC_MONTH",
+    "display_name": "RS Salinity",
+    "desc": "RS Salinity"
+  },
+  {
+    "id": "SAC_IN",
+    "display_name": "Sacramento Basin Inflow",
+    "desc": "Sacramento Basin Inflow to Delta"
+  },
+  {
+    "id": "SHORT_CVP_PEX_S",
+    "display_name": "",
+    "desc": ""
+  },
+  {
+    "id": "SHORT_CVP_PRF_S",
+    "display_name": "",
+    "desc": ""
+  },
+  {
+    "id": "SHORT_CVP_TOT_S",
+    "display_name": "",
+    "desc": ""
+  },
+  {
+    "id": "SJR_IN",
+    "display_name": "San Joaquin River Inflow",
+    "desc": "San Joaquin inflow to Delta"
+  },
+  {
+    "id": "SWPTOTALDEL",
+    "display_name": "Delivery (SWP)",
+    "desc": "State Water Project Delivery"
+  },
+  {
+    "id": "SWP_CO_TOTAL",
+    "display_name": "South Delta Carryover (SWP)",
+    "desc": "State Water Project South of Delta Delivery - Carryover"
+  },
+  {
+    "id": "SWP_FRSA",
+    "display_name": "",
+    "desc": ""
+  },
+  {
+    "id": "SWP_TA_TOTAL",
+    "display_name": "Delivery Firm (SWP)",
+    "desc": "State Water Project Delivery Firm"
+  },
+  {
+    "id": "SWP_WR_FEATH",
+    "display_name": "",
+    "desc": ""
+  },
+  {
+    "id": "S_ESTMN",
+    "display_name": "Eastman Lake Storage",
+    "desc": "Eastman Lake Storage"
+  },
+  {
+    "id": "S_FOLSM",
+    "display_name": "Folsom Storage",
+    "desc": "Folsom Reservoir Storage"
+  },
+  {
+    "id": "S_FOLSMLEVEL5DV",
+    "display_name": "Folsom Level 5 Storage",
+    "desc": "Folsom Level 5"
+  },
+  {
+    "id": "S_HNSLY",
+    "display_name": "Hensley Lake Storage",
+    "desc": "Hensley Lake Storage"
+  },
+  {
+    "id": "S_MCLRE",
+    "display_name": "Lake McClure Storage",
+    "desc": "Lake McClure Storage"
+  },
+  {
+    "id": "S_MELON",
+    "display_name": "New Melones Storage",
+    "desc": "New Melones Reservoir Storage"
+  },
+  {
+    "id": "S_MLRTN",
+    "display_name": "Millerton Lake Storage",
+    "desc": "Millerton Lake Resrvoir Storage"
+  },
+  {
+    "id": "S_NHGAN",
+    "display_name": "New Hogan Storage",
+    "desc": "New Hogan Storage"
+  },
+  {
+    "id": "S_OROVL",
+    "display_name": "Oroville Storage",
+    "desc": "Oroville Reservoir Storage"
+  },
+  {
+    "id": "S_PEDRO",
+    "display_name": "New Don Pedro Storage",
+    "desc": "New Don Pedro Storage"
+  },
+  {
+    "id": "S_SHSTA",
+    "display_name": "Shasta Storage",
+    "desc": "Shasta Reservoir Storage"
+  },
+  {
+    "id": "S_SHSTALEVEL5DV",
+    "display_name": "Shasta Level 5 Storage",
+    "desc": "Shasta Level 5"
+  },
+  {
+    "id": "S_SLCVP",
+    "display_name": "San Luis Storage (CVP)",
+    "desc": "Central Valley Project San Luis Storage"
+  },
+  {
+    "id": "S_SLSWP",
+    "display_name": "San Luis Storage (SWP)",
+    "desc": "State Water Project San Luis Storage"
+  },
+  {
+    "id": "S_TRNTY",
+    "display_name": "Trinity Storage",
+    "desc": "Trinity Reservoir Storage"
+  },
+  {
+    "id": "X2_PRV",
+    "display_name": "",
+    "desc": "Distance from Golden Gate Bridge to 2 ppt isohaline in Delta"
+  }
+]
