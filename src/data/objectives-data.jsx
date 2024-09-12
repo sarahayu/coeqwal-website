@@ -75,6 +75,32 @@ async function initObjectivesData() {
     return map;
   })();
 
+  const MIN_MAXES = (function () {
+    const minmaxes = {};
+
+    for (const objective of OBJECTIVE_IDS) {
+      const baselineMax = d3.max(
+        OBJECTIVES_DATA[objective][SCENARIO_KEY_STRING][BASELINE_SCEN][
+          DELIV_KEY_STRING
+        ]
+      );
+
+      const scenariosMin = d3.min(
+        SCENARIO_IDS.map((scenario) =>
+          d3.min(
+            OBJECTIVES_DATA[objective][SCENARIO_KEY_STRING][scenario][
+              DELIV_KEY_STRING
+            ]
+          )
+        )
+      );
+
+      minmaxes[objective] = [scenariosMin, baselineMax];
+    }
+
+    return minmaxes;
+  })();
+
   // Flattening hierarchical data makes it more flexible for classifying
   // (from experience). id conveniently corresponds to index.
   // Also cache classifications (by objective and by scenario, for now)
@@ -159,6 +185,7 @@ async function initObjectivesData() {
     OBJECTIVE_GOALS_MAP,
     SCENARIO_IDS,
     KEY_SETTINGS_MAP,
+    MIN_MAXES,
     FLATTENED_DATA,
     DATA_GROUPINGS,
   };

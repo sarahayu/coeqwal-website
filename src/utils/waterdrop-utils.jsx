@@ -8,6 +8,8 @@ import { calcDomLev, createInterpsFromDelivs } from "utils/data-utils";
 import { placeDropsUsingPhysics, rotatePoint } from "utils/math-utils";
 import { mapBy } from "utils/misc-utils";
 
+const BASELINE_SCENARIO = "expl0000";
+
 // TODO optimize!!
 function initWaterdrops(grouping) {
   console.time("init waterdrops");
@@ -68,14 +70,9 @@ function initWaterdrops(grouping) {
   for (const nodeData of objectivesData.FLATTENED_DATA) {
     const { id, objective, scenario, deliveries } = nodeData;
 
-    const i = createInterpsFromDelivs(
-      deliveries,
-      d3.max(
-        objectivesData.OBJECTIVES_DATA[objective][
-          objectivesData.SCENARIO_KEY_STRING
-        ]["expl0000"][objectivesData.DELIV_KEY_STRING]
-      )
-    );
+    const [delivMin, delivMax] = objectivesData.MIN_MAXES[objective];
+
+    const i = createInterpsFromDelivs(deliveries, delivMin, delivMax);
     const wds = ticksExact(0, 1, settings.LOD_1_LEVELS + 1).map((d) => i(d));
 
     const levs = wds.map(

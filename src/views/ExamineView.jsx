@@ -321,11 +321,7 @@ export default function ExamineView() {
           ({ text, x, y, id, offsetX, offsetY, panelKey, preview }) => {
             const { objective, scenario } = objectivesData.FLATTENED_DATA[id];
 
-            const baselineMax = d3.max(
-              objectivesData.OBJECTIVES_DATA[objective][
-                objectivesData.SCENARIO_KEY_STRING
-              ][objectivesData.BASELINE_SCEN][objectivesData.DELIV_KEY_STRING]
-            );
+            const [scenMin, baselineMax] = objectivesData.MIN_MAXES[objective];
 
             return (
               <div
@@ -344,7 +340,7 @@ export default function ExamineView() {
                   width={300}
                   height={200}
                   data={objectivesData.FLATTENED_DATA[id].deliveries}
-                  domain={[0, baselineMax]}
+                  domain={[scenMin, baselineMax]}
                   goal={appCtx.goals[appCtx.activeWaterdrops[0]]}
                   setGoal={(newGoal) => {
                     appCtx.setGoals((g) => {
