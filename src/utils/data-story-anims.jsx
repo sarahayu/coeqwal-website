@@ -6,6 +6,63 @@ import yearlyData from "data/yearly.json";
 import { hideElems, showElems } from "utils/render-utils";
 
 function initAllAnims() {
+  function initShowLocationAnimGroup() {
+    function showPAGDo() {
+      d3.select("#tut-minimap")
+        .select(".outline." + constants.PAG_OBJECTIVE)
+        .style("scale", 10)
+        .transition()
+        .style("scale", 1)
+        .attr("fill", "gray");
+    }
+
+    function showPAGUndo() {
+      d3.select("#tut-minimap")
+        .select(".outline." + constants.PAG_OBJECTIVE)
+        .style("scale", 1)
+        .transition()
+        .attr("fill", "transparent");
+    }
+
+    function showPRFDo() {
+      d3.select("#tut-minimap")
+        .select(".outline." + constants.PAG_OBJECTIVE)
+        .style("scale", 1)
+        .transition()
+        .attr("fill", "transparent");
+      d3.select("#tut-minimap")
+        .select(".outline." + constants.PRF_OBJECTIVE)
+        .style("scale", 10)
+        .transition()
+        .style("scale", 1)
+        .attr("fill", "gray");
+    }
+
+    function showPRFUndo() {
+      d3.select("#tut-minimap")
+        .select(".outline." + constants.PAG_OBJECTIVE)
+        .style("scale", 10)
+        .transition()
+        .style("scale", 1)
+        .attr("fill", "gray");
+      d3.select("#tut-minimap")
+        .select(".outline." + constants.PRF_OBJECTIVE)
+        .transition()
+        .attr("fill", "transparent");
+    }
+
+    return {
+      showPAG: {
+        do: showPAGDo,
+        undo: showPAGUndo,
+      },
+      showPRF: {
+        do: showPRFDo,
+        undo: showPRFUndo,
+      },
+    };
+  }
+
   function initChartAnimGroup() {
     let _pagX;
     let _prfX;
@@ -649,6 +706,7 @@ function initAllAnims() {
   }
 
   return {
+    initShowLocationAnimGroup,
     initChartAnimGroup,
     initBucketsFillAnim,
     initDropFillAnim,

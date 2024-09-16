@@ -3,7 +3,7 @@ import React from "react";
 function initScripts() {
   return {
     howMuchIntro: (
-      <div className="tut-text-card">
+      <div className="tut-text-card hero">
         <em>How much water do the people of California get?</em> Let's focus on
         two groups of people:
       </div>

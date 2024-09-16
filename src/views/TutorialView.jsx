@@ -1,4 +1,5 @@
-import React, { useContext, useLayoutEffect } from "react";
+import * as d3 from "d3";
+import React, { useContext, useEffect, useLayoutEffect, useRef } from "react";
 import { Scrollama, Step } from "react-scrollama";
 
 import { AppContext } from "AppContext";
@@ -14,11 +15,12 @@ import { constants } from "utils/tutorialview-utils";
 import { useDataStory } from "hooks/useDataStory";
 
 import { descriptionsData } from "data/descriptions-data";
+import { spatialData } from "data/spatial-data";
 
 export default function TutorialView() {
   const appCtx = useContext(AppContext);
 
-  const { signalDOMReady, getSlidesInRange, storyVars } = useDataStory(appCtx);
+  const { hookAnimations, getSlidesInRange, storyVars } = useDataStory(appCtx);
 
   useLayoutEffect(
     function enterState() {
@@ -27,7 +29,7 @@ export default function TutorialView() {
           ".bucket-wrapper, .vardrop, .var-scen-label, .vardrop .dot-histogram-wrapper, .main-histogram, .tut-comparer-graphics-wrapper"
         );
 
-        signalDOMReady();
+        hookAnimations();
 
         return function exitState() {
           appCtx.resetCamera(false);
@@ -43,22 +45,12 @@ export default function TutorialView() {
   return (
     <div className="tutorial-view">
       <div className="scrollama scrollama-locations">
-        <img
-          src="./northdelta.png"
-          alt="Map of California with northern delta area highlighted"
-        />
+        <Minimap />
+        <SkipBtn onClick={() => appCtx.setState({ state: "WideView" })} />
         <DataStoryScrollama>
           {getSlidesInRange("howMuchIntro", "soCal").map((slide, i) => (
             <Step key={i} data={slide}>
               {slide.script}
-              {i === 0 && (
-                <button
-                  className="skip-btn"
-                  onClick={() => appCtx.setState({ state: "WideView" })}
-                >
-                  Skip intro
-                </button>
-              )}
             </Step>
           ))}
         </DataStoryScrollama>
@@ -96,26 +88,91 @@ export default function TutorialView() {
 }
 
 function DataStoryScrollama({ children }) {
-  const onStepEnter = async ({ data, direction }) => {
+  const onStepEnter = async ({ data, direction, element }) => {
     if (direction === "up") return;
     data.animHandler?.do();
+    d3.select(element).transition().style("opacity", 1);
   };
 
-  const onStepExit = async ({ data, direction }) => {
+  const onStepExit = async ({ data, direction, element }) => {
     if (direction === "down") return;
     data.animHandler?.undo();
+    d3.select(element).transition().style("opacity", 0.2);
   };
 
   return (
-    <Scrollama offset={0.5} onStepEnter={onStepEnter} onStepExit={onStepExit}>
+    <Scrollama offset={0.8} onStepEnter={onStepEnter} onStepExit={onStepExit}>
       {children}
     </Scrollama>
   );
 }
 
+function Minimap({}) {
+  useEffect(function initialize() {
+    const width = 400,
+      height = 500;
+
+    const drawnRegions = [constants.PAG_OBJECTIVE, constants.PRF_OBJECTIVE];
+
+    const minimap = d3
+      .select("#tut-minimap")
+      .attr("width", width)
+      .attr("height", height);
+
+    const proj = d3
+      .geoMercator()
+      .scale(2000)
+      .center(spatialData.CALIFORNIA_CENTER)
+      .translate([width / 2, height / 2]);
+
+    const lineGeom = [
+      ...spatialData.SPATIAL_DATA.features.filter((f) =>
+        drawnRegions.includes(f.properties.CalLiteID)
+      ),
+      spatialData.CALIFORNIA_OUTLINE,
+    ];
+
+    minimap
+      .selectAll("path")
+      .data(lineGeom)
+      .join("path")
+      .attr("d", (d) => d3.geoPath().projection(proj)(d))
+      .attr("class", (d) => "outline " + d.properties.CalLiteID)
+      .attr("stroke", (d) => (d.properties.CalLiteID ? "transparent" : "gray"))
+      .attr("stroke-width", 1)
+      .style("transform-origin", (d) => {
+        const [x, y] = proj(d.geometry.coordinates[0][0][0]);
+
+        return `${x}px ${y}px`;
+      })
+      .attr("fill", "transparent");
+  }, []);
+
+  return <svg className="tut-minimap" id="tut-minimap"></svg>;
+}
+
+function SkipBtn({ onClick }) {
+  useEffect(function mountFadeOutEffect() {
+    const startPos = document.documentElement.scrollTop;
+    const buffer = 50;
+
+    window.addEventListener("scroll", function () {
+      const curPos = document.documentElement.scrollTop;
+      const opac = Math.max(0, 1 - (curPos - startPos) / buffer);
+
+      d3.select(".skip-btn").style("opacity", opac);
+    });
+  }, []);
+  return (
+    <button className="skip-btn" onClick={onClick}>
+      Skip intro
+    </button>
+  );
+}
+
 function CallToExploreCard({ onClick }) {
   return (
-    <div className="tut-text-card">
+    <div className="tut-text-card cte">
       Thus, tradeoffs must often be made when managing California's water
       supply. What are the ways we can manage California's water, and how do
       their outcomes compare? Go to the next step to find out!

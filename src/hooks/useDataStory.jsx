@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { scripts } from "utils/story-scripts";
-import { useDataStoryVars } from "hooks/useDataStoryVars";
+import { useCallback, useState } from "react";
+
 import { useCompareLargeDrops } from "hooks/useCompareLargeDrops";
-import { animations as anims } from "./data-story-anims";
+import { useDataStoryVars } from "hooks/useDataStoryVars";
+import { animations as anims } from "utils/data-story-anims";
+import { scripts } from "utils/story-scripts";
 
 export function useDataStory(appCtx) {
   /*
@@ -15,19 +16,12 @@ export function useDataStory(appCtx) {
     ]
      */
   const [slides, setSlides] = useState([]);
-  const [domReady, setDomReady] = useState(false);
-
-  const signalDOMReady = useCallback(function () {
-    setDomReady(true);
-  });
 
   const storyVars = useDataStoryVars();
   const largeDropComparer = useCompareLargeDrops();
 
-  useEffect(
-    function initialize() {
-      if (!domReady) return;
-
+  const hookAnimations = useCallback(
+    function () {
       largeDropComparer.initComparer(appCtx.waterdrops, appCtx.camera);
       const context = {
         deps: {
@@ -36,6 +30,7 @@ export function useDataStory(appCtx) {
         },
       };
 
+      const showLocationAnimGroup = anims.initShowLocationAnimGroup(context);
       const chartAnimGroup = anims.initChartAnimGroup(context);
       const bucketsFillAnim = anims.initBucketsFillAnim(context);
       const dropFillAnim = anims.initDropFillAnim(context);
@@ -49,15 +44,15 @@ export function useDataStory(appCtx) {
       const _slides = [
         {
           name: "howMuchIntro",
-          // animHandler: chartAnimGroup.barsAppear,
+          // no anims
         },
         {
           name: "norCal",
-          // animHandler: chartAnimGroup.barsAppear,
+          animHandler: showLocationAnimGroup.showPAG,
         },
         {
           name: "soCal",
-          // animHandler: chartAnimGroup.barsAppear,
+          animHandler: showLocationAnimGroup.showPRF,
         },
         {
           name: "barsAppear",
@@ -131,7 +126,7 @@ export function useDataStory(appCtx) {
 
       setSlides(_slides);
     },
-    [domReady]
+    [appCtx.waterdrops, appCtx.camera]
   );
 
   const getFromTo = useCallback(
@@ -152,7 +147,7 @@ export function useDataStory(appCtx) {
   );
 
   return {
-    signalDOMReady,
+    hookAnimations,
     getSlidesInRange: getFromTo,
     storyVars,
   };

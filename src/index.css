@@ -1088,7 +1088,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   margin-inline: auto;
   position: relative;
   isolation: isolate;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
   border-radius: 1em;
 }
 
@@ -1097,6 +1098,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .tut-text-card:last-of-type {
+  margin-bottom: 100vh;
+}
+
+.scrollama .tut-text-card {
+  opacity: 0.2;
+}
+
+.scrollama .tut-text-card.hero {
+  opacity: 1;
+}
+
+.tut-text-card.cte {
   margin-bottom: 40vh;
 }
 
@@ -1119,8 +1132,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .skip-btn {
   position: absolute;
-  bottom: 3rem;
-  right: 0;
+  top: calc(100vh - 5rem);
+  right: calc((100% - var(--width)) / 2 - 1rem);
   background-color: none;
   border: none;
   padding: 1em;
@@ -1490,4 +1503,31 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   right: 100%;
   top: 50%;
   transform: translate(50%, -50%);
+}
+
+.scrollama-locations {
+  --width: min(45rem, 100%);
+}
+
+.scrollama-locations .tut-minimap {
+  position: sticky;
+  top: 50%;
+  transform: translateY(-50%);
+  width: max-content;
+  display: block;
+  margin-left: auto;
+  margin-right: calc(50% - var(--width) / 2);
+}
+
+.scrollama-locations .tut-text-card {
+  margin-left: calc(50% - var(--width) / 2);
+  width: calc(var(--width) - 300px);
+  max-width: 100%;
+}
+
+.scrollama-locations .tut-text-card:first-of-type {
+  --map-svg-height: 500px;
+
+  margin-top: calc(-1 * var(--map-svg-height) + 50vh);
+  transform: translateY(-50%);
 }
