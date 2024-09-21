@@ -6,9 +6,9 @@ import { AppContext } from "AppContext";
 
 import { isState } from "utils/misc-utils";
 
-import BucketGlyph from "bucket-lib/BucketGlyph";
+import BucketGlyph from "components/BucketGlyph";
+import DropletGlyph from "components/DropletGlyph";
 import DotHistogram from "components/DotHistogram";
-import WaterdropGlyph from "components/WaterdropGlyph";
 
 import { hideElems } from "utils/render-utils";
 import { constants } from "utils/tutorialview-utils";
@@ -69,7 +69,7 @@ export default function TutorialView() {
       </div>
       <div className="scrollama scrollama-compare-scenobjs">
         <CompareScenariosGraphics storyVars={storyVars} />
-        <OtherBigDroplet />
+        <CompareBigDroplets />
         <DataStoryScrollama>
           {getSlidesInRange("forNowLetsFocus", "letsBringRefuge").map(
             (slide, i) => (
@@ -227,7 +227,7 @@ function CompareScenariosGraphics({ storyVars }) {
   );
 }
 
-function OtherBigDroplet() {
+function CompareBigDroplets() {
   return (
     <div className="tut-comparer-graphics-wrapper">
       <svg id="comparer-graphics"></svg>
@@ -245,7 +245,7 @@ function MainWaterdropGraphics({
   return (
     <>
       <div className="main-waterdrop">
-        <WaterdropGlyph
+        <DropletGlyph
           levelInterp={dropInterper}
           width={400}
           height={constants.BAR_CHART_HEIGHT}
@@ -272,7 +272,7 @@ function MainWaterdropGraphics({
 function VariationWaterdropGraphics({ variations, goal, setGoal }) {
   return variations.map(({ idx, scen, clas, desc, interper, histData }) => (
     <div className={`vardrop ${clas}`} key={idx} desc={desc}>
-      <WaterdropGlyph
+      <DropletGlyph
         levelInterp={interper}
         width={400}
         height={(constants.BAR_CHART_HEIGHT * 2) / 3}

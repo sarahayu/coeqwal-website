@@ -1,8 +1,9 @@
 import * as d3 from "d3";
-import { useEffect, useMemo, useRef } from "react";
-import { getQuantileBins } from "bucket-lib/quantile-histogram";
+import { useLayoutEffect, useMemo, useRef } from "react";
+import { quantileBins } from "bucket-lib/quantile-bins";
 
 import { objectivesData } from "data/objectives-data";
+import { clamp } from "utils/math-utils";
 
 const NUM_CIRCLES = 20;
 const MARGIN = { top: 10, right: 10, bottom: 20, left: 10 };
@@ -27,13 +28,12 @@ export default function DotHistogram({
   height = 400,
   shortForm = false,
 }) {
-  const { current: razorID } = useRef(Math.floor(Math.random() * 1e9));
-  const { current: razorAreaID } = useRef(Math.floor(Math.random() * 1e9));
+  const razorElement = useRef();
+  const razorAreaElement = useRef();
 
   const svgSelector = useRef();
   const circles = useMemo(
-    () =>
-      getQuantileBins(data, DOMAIN, data.length / NUM_CIRCLES, width, height),
+    () => quantileBins(width, height, data.length / NUM_CIRCLES, DOMAIN)(data),
     [data]
   );
 
@@ -42,7 +42,7 @@ export default function DotHistogram({
   const y = d3.scaleLinear().domain(dataRange).range([height, 0]);
   const count = circles.filter((d) => d[0] > goal).length;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const svgContainer = svgSelector.current
       .attr("width", width + MARGIN.left + MARGIN.right)
       .attr("height", height + MARGIN.top + MARGIN.bottom)
@@ -70,8 +70,7 @@ export default function DotHistogram({
       .attr("transform", `translate(${width / 2}, ${30})`)
       .text("Delivery (TAF)");
 
-    const razor = document.querySelector(`#i${razorID}`);
-    razor.style.transform = `translateX(${d3
+    razorElement.current.style.transform = `translateX(${d3
       .scaleLinear()
       .domain(DOMAIN)
       .range([MARGIN.left, width + MARGIN.left])
@@ -80,7 +79,7 @@ export default function DotHistogram({
     const ignoreFn = (e) => e.preventDefault();
     let dragging = false;
 
-    document.querySelector(`#i${razorID}`).addEventListener("mousedown", () => {
+    razorElement.current.addEventListener("mousedown", () => {
       dragging = true;
       window.addEventListener("selectstart", ignoreFn);
     });
@@ -90,28 +89,26 @@ export default function DotHistogram({
       window.removeEventListener("selectstart", ignoreFn);
     });
 
-    document
-      .querySelector(`#i${razorAreaID}`)
-      .addEventListener("mousemove", (e) => {
-        if (dragging && e.target.id === `i${razorAreaID}`) {
-          razor.style.transform = `translateX(${Math.min(
-            Math.max(e.offsetX, MARGIN.left),
-            MARGIN.left + width
-          )}px)
-            `;
+    razorAreaElement.current.addEventListener("mousemove", (e) => {
+      if (dragging && e.target === razorAreaElement.current) {
+        const razorPos = clamp(e.offsetX, MARGIN.left, MARGIN.left + width);
+        d3.select(razorElement.current).style(
+          "transform",
+          `translateX(${razorPos}px)`
+        );
 
-          setGoal(
-            d3
-              .scaleLinear()
-              .domain([MARGIN.left, width + MARGIN.left])
-              .range(DOMAIN)
-              .clamp(true)(e.offsetX)
-          );
-        }
-      });
+        setGoal(
+          d3
+            .scaleLinear()
+            .domain([MARGIN.left, width + MARGIN.left])
+            .range(DOMAIN)
+            .clamp(true)(e.offsetX)
+        );
+      }
+    });
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const svgCircles = svgSelector.current
       .select(".graph-area")
       .selectAll(".icons")
@@ -125,12 +122,11 @@ export default function DotHistogram({
         );
       });
 
-    svgCircles.attr("transform", (d) => `translate(${x(d[0])},${y(d[1])})`);
+    svgCircles
+      .attr("transform", (d) => `translate(${x(d[0])},${y(d[1])})`)
+      .attr("fill", (d) => (d[0] > goal ? "steelblue" : "black"));
 
-    svgCircles.attr("fill", (d) => (d[0] > goal ? "steelblue" : "black"));
-
-    const razor = document.querySelector(`#i${razorID}`);
-    razor.style.transform = `translateX(${d3
+    razorElement.current.style.transform = `translateX(${d3
       .scaleLinear()
       .domain(DOMAIN)
       .range([MARGIN.left, width + MARGIN.left])
@@ -139,12 +135,12 @@ export default function DotHistogram({
 
   return (
     <div
-      className={`dot-${razorAreaID} dot-histogram-wrapper`}
-      id={`i${razorAreaID}`}
+      className={`dot-histogram-wrapper`}
+      ref={(e) => (razorAreaElement.current = e)}
     >
       <div
         className={`pdf-razor ` + (shortForm ? "short-form" : "")}
-        id={`i${razorID}`}
+        ref={(e) => (razorElement.current = e)}
       >
         <div>
           <span>

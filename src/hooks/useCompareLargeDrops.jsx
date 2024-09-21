@@ -144,7 +144,7 @@ export function useCompareLargeDrops() {
       .attr("d", (d) => d3.line()(d));
   }
 
-  function introDrop2() {
+  function showOtherDrop() {
     const container = d3.select("#comparer-graphics");
 
     container
@@ -166,7 +166,7 @@ export function useCompareLargeDrops() {
     );
   }
 
-  function exitDrop2() {
+  function hideOtherDrop() {
     const container = d3.select("#comparer-graphics");
 
     container
@@ -188,5 +188,5 @@ export function useCompareLargeDrops() {
     );
   }
 
-  return { initComparer: initialize, introDrop2, exitDrop2 };
+  return { initComparer: initialize, showOtherDrop, hideOtherDrop };
 }

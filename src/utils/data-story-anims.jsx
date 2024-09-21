@@ -686,11 +686,11 @@ function initAllAnims() {
     }
 
     function showPRFAnimDo() {
-      deps.largeDropComparer.introDrop2();
+      deps.largeDropComparer.showOtherDrop();
     }
 
     function showPRFAnimUndo() {
-      deps.largeDropComparer.exitDrop2();
+      deps.largeDropComparer.hideOtherDrop();
     }
 
     return {

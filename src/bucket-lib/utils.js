@@ -1,38 +1,7 @@
 import * as d3 from "d3";
-import { useRef } from "react";
+import { drawBucketMask } from "./bucket-glyph";
 
-// inclusive
-export function ticksExact(start, stop, count) {
-  return d3.range(count).map((i) => (i / (count - 1)) * (stop - start) + start);
-}
-
-export function bucketPath(width, height, filled = 1.0, taper = 0.8) {
-  let bottomRight = width * taper + (width * (1 - taper)) / 2,
-    bottomLeft = (width * (1 - taper)) / 2;
-  let data = [
-    {
-      x: d3.interpolate(bottomRight, width)(filled),
-      y: d3.interpolate(height, 0)(filled),
-    },
-    { x: bottomRight, y: height },
-    { x: bottomLeft, y: height },
-    {
-      x: d3.interpolate(bottomLeft, 0)(filled),
-      y: d3.interpolate(height, 0)(filled),
-    },
-  ];
-  let lineFunc = d3
-    .line()
-    .x(function (d) {
-      return d.x;
-    })
-    .y(function (d) {
-      return d.y;
-    });
-  return lineFunc(data) + "z";
-}
-
-export function quantileBins(numericBins, unitsPerQuantile, maxQuantiles) {
+function distributeQuantiles(numericBins, unitsPerQuantile, maxQuantiles) {
   let quantileBins = numericBins.map((bin) =>
     Math.round(bin.length / unitsPerQuantile)
   );
@@ -65,29 +34,50 @@ export function quantileBins(numericBins, unitsPerQuantile, maxQuantiles) {
   return quantileBins;
 }
 
-// https://www.developerway.com/posts/implementing-advanced-use-previous-hook
-export function usePrevious(value, isEqualFunc) {
-  // initialise the ref with previous and current values
-  const ref = useRef({
-    value: value,
-    prev: null,
-  });
+const interpolateWatercolorBlue = (i) =>
+  d3.interpolateBlues(d3.scaleLinear([0.2, 1.0])(i));
 
-  const current = ref.current.value;
-
-  // if the value passed into hook doesn't match what we store as "current"
-  // move the "current" to the "previous"
-  // and store the passed value as "current"
-  if (isEqualFunc ? !isEqualFunc(value, current) : value !== current) {
-    ref.current = {
-      value: value,
-      prev: current,
-    };
-  }
-
-  // return the previous value only
-  return ref.current.prev;
+function levelToDropletLevel(p) {
+  p -= 0.0088;
+  return Math.min(
+    1,
+    Math.max(
+      0,
+      (3.1304 * p ** 3 - 4.2384 * p ** 2 + 3.3471 * p + 0.0298) / 2.2326
+    )
+  );
 }
 
-export const interpolateWatercolorBlue = (i) =>
-  d3.interpolateBlues(d3.scaleLinear([0.2, 1.0])(i));
+const WATERDROP_ICON = {
+  draw: function (context, size) {
+    context.moveTo(0, -size / 2);
+    context.lineTo(size / 4, -size / 4);
+
+    context.arc(0, 0, size / Math.SQRT2 / 2, -Math.PI / 4, (Math.PI * 5) / 4);
+    context.lineTo(0, -size / 2);
+    context.closePath();
+  },
+};
+
+function ticksExact(start, stop, count) {
+  return d3.range(count).map((i) => (i / (count - 1)) * (stop - start) + start);
+}
+
+function bucketPath(width, height, filled = 1.0, taper = 0.8) {
+  const getPath = (fn) => {
+    const path = d3.path();
+    fn(path, width, height);
+    return path.toString();
+  };
+
+  return getPath(drawBucketMask);
+}
+
+export {
+  distributeQuantiles,
+  interpolateWatercolorBlue,
+  levelToDropletLevel,
+  WATERDROP_ICON,
+  ticksExact,
+  bucketPath,
+};
