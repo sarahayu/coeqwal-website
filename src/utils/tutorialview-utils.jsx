@@ -1,14 +1,9 @@
 import * as d3 from "d3";
 
 import { ticksExact } from "bucket-lib/utils";
+
 import { objectivesData } from "data/objectives-data";
-import { descriptionsData } from "data/descriptions-data";
-import { settings } from "settings";
-import { DROPLET_SHAPE, generateTSpan } from "./render-utils";
-import { dropCenterCorrection, percentToRatioFilled } from "./math-utils";
-import { genUUID } from "./misc-utils";
-import { gradientUpdate } from "./render-utils";
-import { gradientInit } from "./render-utils";
+import { percentToRatioFilled } from "./math-utils";
 
 function initConstants() {
   const BAR_CHART_WIDTH = 500,
@@ -147,128 +142,6 @@ function initConstants() {
   };
 }
 
-function largeDropInit({ nodes, height, key }) {
-  return (s) => {
-    s.attr("class", "large-drop " + key);
-
-    s.append("circle")
-      .attr("class", "highlight-circle")
-      .attr("stroke", "none")
-      .attr("fill", "yellow")
-      .attr("r", settings.LOD_1_RAD_PX * 2);
-
-    s.append("text")
-      .style("font-size", (height * settings.SPREAD_1_2) / 15)
-      .attr("class", "fancy-font large-gray-text")
-      .attr("text-anchor", "middle");
-
-    s.selectAll(".small-drop")
-      .data(nodes)
-      .enter()
-      .append("g")
-      .attr("class", "small-drop")
-      .each(function (node) {
-        d3.select(this).call(smallDropInit(node));
-      });
-  };
-}
-
-function smallDropInit({ key, levs, x, y }) {
-  return (s) => {
-    s.append("rect").attr("class", "bbox").style("visibility", "hidden");
-
-    const randId = `tut-grad-${genUUID()}`;
-
-    s.call(gradientInit(levs, randId));
-
-    if (key === "expl0000") {
-      d3.select(s.node().parentNode)
-        .select(".highlight-circle")
-        .attr("cx", x * settings.SPREAD_1_2)
-        .attr(
-          "cy",
-          y * settings.SPREAD_1_2 -
-            dropCenterCorrection({ rad: settings.LOD_1_RAD_PX })
-        );
-    }
-
-    s.append("path")
-      .attr("d", DROPLET_SHAPE)
-      .attr("class", "outline")
-      .attr("transform", `scale(${settings.LOD_1_RAD_PX * 0.95})`);
-
-    s.append("path")
-      .attr("class", "fill")
-      .attr("d", DROPLET_SHAPE)
-      .attr("fill", `url(#${randId})`)
-      .attr("transform", `scale(${settings.LOD_1_RAD_PX})`);
-  };
-}
-
-function largeDropUpdate({ nodes, key, height }) {
-  return (s) => {
-    s.select("text")
-      .attr("x", 0)
-      .attr("y", (height / 2) * settings.SPREAD_1_2 * 0.8)
-      .call(
-        generateTSpan(
-          descriptionsData[key].display_name || descriptionsData[key].id
-        )
-      );
-
-    s.selectAll(".small-drop")
-      .data(nodes)
-      .attr("display", "initial")
-      .attr(
-        "transform",
-        ({ x, y }) =>
-          `translate(${x * settings.SPREAD_1_2}, ${y * settings.SPREAD_1_2})`
-      )
-      .each(function (node) {
-        d3.select(this).call(smallDropUpdate(node));
-      });
-  };
-}
-
-function smallDropUpdate({ levs, maxLev }) {
-  return (s) => {
-    s.call(gradientUpdate(levs, maxLev));
-
-    const dropBBox = s.select(".fill").node().getBBox();
-
-    s.select(".bbox")
-      .attr("x", dropBBox.x)
-      .attr("y", dropBBox.y)
-      .attr("width", dropBBox.width)
-      .attr("height", dropBBox.height);
-  };
-}
-
-function updateDropsSVG(container, waterdropGroups, { onHover }) {
-  container
-    .selectAll(".large-drop")
-    .data(waterdropGroups.groups)
-    .join((enter) => {
-      return enter.append("g").each(function (group, i) {
-        d3.select(this).call(
-          largeDropInit(group, waterdropGroups.groupPositions[i])
-        );
-      });
-    })
-    .attr("transform", (_, i) => {
-      const groupPos = waterdropGroups.groupPositions[i];
-      return `translate(${groupPos[0]}, ${groupPos[1]})`;
-    })
-    .each(function (group) {
-      d3.select(this)
-        .call(largeDropUpdate(group))
-        .selectAll(".small-drop")
-        .on("mouseenter", function (e, d) {
-          onHover && onHover(d);
-        });
-    });
-}
-
 const constants = initConstants();
 
-export { constants, updateDropsSVG };
+export { constants };

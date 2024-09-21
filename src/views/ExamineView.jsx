@@ -18,9 +18,8 @@ import {
 import { deserialize } from "utils/data-utils";
 import { clipEnds, dist } from "utils/math-utils";
 import { radToDeg } from "three/src/math/MathUtils";
+import { helpers } from "utils/examineview-helpers";
 import { useDragPanels } from "hooks/useDragPanels";
-
-import { helpers } from "./examineview-helpers";
 
 export default function ExamineView() {
   const appCtx = useContext(AppContext);

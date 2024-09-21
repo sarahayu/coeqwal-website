@@ -11,9 +11,8 @@ import { avgCoords } from "utils/math-utils";
 import { isState } from "utils/misc-utils";
 import { hideElems, removeElems, showElems } from "utils/render-utils";
 import { deserialize } from "utils/data-utils";
+import { helpers } from "utils/compareview-helpers";
 import { useDragPanels } from "hooks/useDragPanels";
-
-import { helpers } from "./compareview-helpers";
 
 export default function CompareView() {
   const appCtx = useContext(AppContext);

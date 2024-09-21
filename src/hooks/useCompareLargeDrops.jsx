@@ -4,9 +4,8 @@ import { settings } from "settings";
 
 import { circlet, hideElems, showElems } from "utils/render-utils";
 import { avgCoords } from "utils/math-utils";
-import { constants, updateDropsSVG } from "utils/tutorialview-utils";
-
-import { helpers as compareViewHelpers } from "views/compareview-helpers";
+import { constants } from "utils/tutorialview-utils";
+import { helpers as compareViewHelpers } from "utils/compareview-helpers";
 
 // TODO turn into component?
 export function useCompareLargeDrops() {
@@ -81,7 +80,7 @@ export function useCompareLargeDrops() {
     indicatorGroup.append("text").attr("id", "member-variable");
     indicatorGroup.append("text").attr("id", "member-label");
 
-    updateDropsSVG(container, groupsRef.current, {
+    compareViewHelpers.updateDropsSVG(container, groupsRef.current, 0, {
       onHover: (d) => {
         setActiveMinidrop(d.key);
       },

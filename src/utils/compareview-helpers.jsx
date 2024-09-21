@@ -12,9 +12,9 @@ import {
   gradientUpdate,
 } from "utils/render-utils";
 
-function largeDropInit({ nodes, height }) {
+function largeDropInit({ nodes, height, key }) {
   return (s) => {
-    s.attr("class", "large-drop");
+    s.attr("class", "large-drop " + key);
 
     s.append("circle")
       .attr("class", "highlight-circle")
