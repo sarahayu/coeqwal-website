@@ -250,6 +250,7 @@ function MainWaterdropGraphics({
           width={400}
           height={constants.BAR_CHART_HEIGHT}
           colorInterp={constants.INTERP_COLOR}
+          resolution={4}
         />
         <p className="var-scen-label">
           scenario <span className="scen-number">{"0000"}</span>
@@ -277,6 +278,7 @@ function VariationWaterdropGraphics({ variations, goal, setGoal }) {
         width={400}
         height={(constants.BAR_CHART_HEIGHT * 2) / 3}
         colorInterp={constants.INTERP_COLOR}
+        resolution={4}
       />
       <p className="var-scen-label">
         scenario <span className="scen-number">{scen}</span>
@@ -302,6 +304,7 @@ function BucketCreationGraphics({ id, bucketInterper, label }) {
         width={300}
         height={constants.BAR_CHART_HEIGHT}
         colorInterp={constants.INTERP_COLOR}
+        resolution={4}
       />
       <p className="fancy-font objective-label">{label}</p>
     </div>

@@ -65,17 +65,16 @@ function initScripts() {
     forNowLetsFocus: (
       <div className="tut-text-card">
         For now, let's focus on the agriculture group. Here it is as a drop of
-        water. We see here that the lightest color reaches the midpoint of the
-        maximum water possible, meaning that there is a chance 600 TAF of water
-        will be delivered to this group.
+        water. We see here that the lightest color reaches approximately the
+        midpoint of the maximum capacity, meaning that there is a chance 600 TAF
+        of water will be delivered to this group.
       </div>
     ),
     darkerColsIndic: (
       <div className="tut-text-card">
-        The darker colors, however, indicate that it's more likely that less
-        than a quarter of the maximum, or around 300 TAF, will be delivered. As
-        we'll later see, this is not a lot compared to other areas of
-        California.
+        The darker colors, however, indicate that it's more likely that slightly
+        less than 600 TAF of water will be delivered — around 500 TAF. As we'll
+        later see, this is not a lot compared to other areas of California.
       </div>
     ),
     ifChangeReality: (

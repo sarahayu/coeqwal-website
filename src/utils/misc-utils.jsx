@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+
 // when fn is `({ name }) => name`, turns
 //
 //  [
@@ -10,9 +12,6 @@
 //  {
 //    "Zeta": { name: "Zeta", age: 30 },
 //    "Aloy": { name: "Aloy", age: 40 },
-
-import { useCallback, useEffect, useRef, useState } from "react";
-
 //  };
 export function mapBy(objs, fn) {
   const newObjs = Object.groupBy(objs, fn);
