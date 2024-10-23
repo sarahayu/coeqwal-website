@@ -129,9 +129,7 @@ function textUpdate(key, height) {
       .attr("y", (height / 2) * settings.SPREAD_1_2 * 0.9)
       .call(
         generateTSpan(
-          descriptionsData[key]?.display_name ||
-            descriptionsData[key]?.id ||
-            key
+          descriptionsData[key].display_name || descriptionsData[key].id
         )
       );
   };

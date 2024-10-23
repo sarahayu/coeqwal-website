@@ -220,7 +220,7 @@ export default function CompareView() {
               width={300}
               height={200}
               data={objectivesData.FLATTENED_DATA[nodeID].deliveries}
-              domain={[0, baselineMax]}
+              range={[0, baselineMax]}
               goal={appCtx.goals[id]}
               setGoal={(newGoal) => {
                 appCtx.setGoals((g) => {

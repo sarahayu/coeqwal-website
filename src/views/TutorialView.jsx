@@ -188,12 +188,12 @@ function CompareBucketCreationsGraphics({ storyVars }) {
     <div className="tut-graph-wrapper">
       <BucketCreationGraphics
         id={"pag-bar-graph"}
-        label={descriptionsData[constants.PAG_OBJECTIVE]?.display_name}
+        label={descriptionsData[constants.PAG_OBJECTIVE].display_name}
         bucketInterper={storyVars.bucketInterperPAG}
       />
       <BucketCreationGraphics
         id={"prf-bar-graph"}
-        label={descriptionsData[constants.PRF_OBJECTIVE]?.display_name}
+        label={descriptionsData[constants.PRF_OBJECTIVE].display_name}
         bucketInterper={storyVars.bucketInterperPRF}
       />
     </div>
@@ -204,7 +204,7 @@ function CompareScenariosGraphics({ storyVars }) {
   return (
     <div className="tut-drop-graphics-wrapper">
       <MainWaterdropGraphics
-        objectiveLabel={descriptionsData[constants.PAG_OBJECTIVE]?.display_name}
+        objectiveLabel={descriptionsData[constants.PAG_OBJECTIVE].display_name}
         dropInterper={storyVars.dropInterper}
         histData={constants.PAG_DELIVS}
         goal={storyVars.userGoal}

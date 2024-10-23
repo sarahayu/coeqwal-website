@@ -44,7 +44,7 @@ function initWaterdrops(grouping) {
   );
 
   for (let i = 0; i < largeNodesPhys.length; i++) {
-    largeNodesPhys[i].tilt = 0;
+    largeNodesPhys[i].tilt = Math.random() * 50 - 25;
   }
 
   const largeNodesPos = mapBy(largeNodesPhys, ({ id }) => id);
@@ -87,7 +87,7 @@ function initWaterdrops(grouping) {
     const groupRank = objectivesData.DATA_GROUPINGS[grouping][groupID].rank;
     const memberRank = objectivesData.DATA_GROUPINGS[grouping][groupID][id];
 
-    const localTilt = 0;
+    const localTilt = Math.random() * 50 - 25;
     const parentTilt = largeNodesPos[groupRank].tilt;
 
     const { x, y } = smallNodesPos[memberRank];

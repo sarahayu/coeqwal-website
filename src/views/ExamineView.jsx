@@ -339,7 +339,7 @@ export default function ExamineView() {
                   width={300}
                   height={200}
                   data={objectivesData.FLATTENED_DATA[id].deliveries}
-                  domain={[scenMin, baselineMax]}
+                  range={[scenMin, baselineMax]}
                   goal={appCtx.goals[appCtx.activeWaterdrops[0]]}
                   setGoal={(newGoal) => {
                     appCtx.setGoals((g) => {

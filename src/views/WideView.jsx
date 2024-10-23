@@ -291,7 +291,11 @@ export default function WideView() {
     if (searchPrompt === null) return [];
 
     return fuzzysort.go(searchPrompt, appCtx.waterdrops.groups, {
-      keys: [(obj) => obj.key],
+      keys: [
+        (obj) => descriptionsData[obj.key].id,
+        (obj) => descriptionsData[obj.key].display_name,
+        (obj) => descriptionsData[obj.key].desc,
+      ],
       limit: 10,
       all: true,
     });
@@ -333,7 +337,8 @@ export default function WideView() {
             <div className="results" style={{ display: "none" }}>
               {searchResults.map(({ obj: wd }) => (
                 <button key={wd.key} onClick={() => updateActiveDrops(wd)}>
-                  {wd.key}
+                  {descriptionsData[wd.key].display_name ||
+                    descriptionsData[wd.key].id}
                 </button>
               ))}
             </div>

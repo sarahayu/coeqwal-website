@@ -21,7 +21,7 @@ const WATERDROP_ICON = {
 
 export default function DotHistogram({
   data,
-  domain = [0, objectivesData.MAX_DELIVS],
+  range = [0, objectivesData.MAX_DELIVS],
   goal,
   setGoal,
   width = 600,
@@ -33,13 +33,12 @@ export default function DotHistogram({
 
   const svgSelector = useRef();
   const circles = useMemo(
-    () =>
-      getQuantileBins(data, domain, data.length / NUM_CIRCLES, width, height),
+    () => quantileBins(width, height, data.length / NUM_CIRCLES, range)(data),
     [data]
   );
 
   const dataRange = [0, data.length];
-  const x = d3.scaleLinear().domain(domain).range([0, width]);
+  const x = d3.scaleLinear().domain(range).range([0, width]);
   const y = d3.scaleLinear().domain(dataRange).range([height, 0]);
   const count = circles.filter((d) => d[0] > goal).length;
 
@@ -58,7 +57,7 @@ export default function DotHistogram({
       .call(
         d3
           .axisBottom()
-          .scale(d3.scaleLinear().domain(domain).range([0, width]))
+          .scale(d3.scaleLinear().domain(range).range([0, width]))
           .tickFormat(d3.format(".2s"))
       )
       .call((s) => {
@@ -73,7 +72,7 @@ export default function DotHistogram({
 
     razorElement.current.style.transform = `translateX(${d3
       .scaleLinear()
-      .domain(domain)
+      .domain(range)
       .range([MARGIN.left, width + MARGIN.left])
       .clamp(true)(goal)}px)`;
 
@@ -102,7 +101,7 @@ export default function DotHistogram({
           d3
             .scaleLinear()
             .domain([MARGIN.left, width + MARGIN.left])
-            .range(domain)
+            .range(range)
             .clamp(true)(e.offsetX)
         );
       }
@@ -129,7 +128,7 @@ export default function DotHistogram({
 
     razorElement.current.style.transform = `translateX(${d3
       .scaleLinear()
-      .domain(domain)
+      .domain(range)
       .range([MARGIN.left, width + MARGIN.left])
       .clamp(true)(goal)}px)`;
   }, [goal, circles]);
