@@ -13,7 +13,7 @@ async function initObjectivesData() {
   const BASELINE_SCEN = "expl0000";
 
   const OBJECTIVES_DATA = await (async function load() {
-    const objs = await (await fetch("./objectives.json")).json();
+    const objs = await (await fetch("./objectives_v3.json")).json();
 
     for (const obj of objs) {
       // shuffle so clusters of identical scenario results don't get processed deterministically
@@ -33,19 +33,7 @@ async function initObjectivesData() {
     return mapBy(objs, ({ obj }) => obj);
   })();
 
-  const OBJECTIVE_IDS = [
-    "DEL_NOD_AG_TOTAL",
-    "DEL_SJV_AG_TOTAL",
-    "DEL_NOD_MI_TOTAL",
-    "DEL_SJV_MI_TOTAL",
-    "DEL_SOCAL_MI_TOTAL",
-    "CVP_SWP_EXPORTS",
-    "NDO",
-    "SAC_IN",
-    "SJR_IN",
-    "STO_NOD_TOTAL",
-    "STO_SOD_TOTAL",
-  ];
+  const OBJECTIVE_IDS = Object.keys(OBJECTIVES_DATA);
 
   const OBJECTIVE_GOALS_MAP = (function initDefaults() {
     const goalMap = {};
