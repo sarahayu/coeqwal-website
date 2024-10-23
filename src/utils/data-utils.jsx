@@ -16,11 +16,13 @@ export function createInterps(obj_name, scen_name, data, maxDelivs) {
     .clamp(true);
 }
 
-export function createInterpsFromDelivs(delivs, maxDelivs) {
+export function createInterpsFromDelivs(delivs, minDelivs, maxDelivs) {
   return d3
     .scaleLinear()
     .domain(ticksExact(0, 1, delivs.length))
-    .range(delivs.map((v) => Math.min(1, v / maxDelivs)))
+    .range(
+      delivs.map((v) => Math.min(1, (v - minDelivs) / (maxDelivs - minDelivs)))
+    )
     .clamp(true);
 }
 

@@ -178,8 +178,9 @@ export default function ExamineView() {
       .attr("font-size", labelFontSize)
       .call(
         generateTSpan(
-          descriptionsData[appCtx.activeWaterdrops[0]].display_name ||
-            descriptionsData[appCtx.activeWaterdrops[0]].id,
+          descriptionsData[appCtx.activeWaterdrops[0]]?.display_name ||
+            descriptionsData[appCtx.activeWaterdrops[0]]?.id ||
+            appCtx.activeWaterdrops[0],
           1.2
         )
       )
@@ -316,37 +317,44 @@ export default function ExamineView() {
     return (
       <>
         {panels.map(
-          ({ text, x, y, id, offsetX, offsetY, panelKey, preview }) => (
-            <div
-              className={`panel examine-panel ${preview ? "preview" : ""}`}
-              id={`p${id}`}
-              key={preview ? -1 : id}
-              style={getPanelStyle({ x, y, offsetX, offsetY })}
-              onMouseDown={(e) => !preview && onPanelDragStart(e, { id })}
-              onMouseEnter={() => !preview && hoverDrop({ id })}
-              onMouseLeave={() => !preview && unhoverDrop({ id })}
-            >
-              <div className="panel-tab">
-                scenario <span>{text}</span>
+          ({ text, x, y, id, offsetX, offsetY, panelKey, preview }) => {
+            const { objective, scenario } = objectivesData.FLATTENED_DATA[id];
+
+            const [scenMin, baselineMax] = objectivesData.MIN_MAXES[objective];
+
+            return (
+              <div
+                className={`panel examine-panel ${preview ? "preview" : ""}`}
+                id={`p${id}`}
+                key={preview ? -1 : id}
+                style={getPanelStyle({ x, y, offsetX, offsetY })}
+                onMouseDown={(e) => !preview && onPanelDragStart(e, { id })}
+                onMouseEnter={() => !preview && hoverDrop({ id })}
+                onMouseLeave={() => !preview && unhoverDrop({ id })}
+              >
+                <div className="panel-tab">
+                  scenario <span>{text}</span>
+                </div>
+                <DotHistogram
+                  width={300}
+                  height={200}
+                  data={objectivesData.FLATTENED_DATA[id].deliveries}
+                  domain={[scenMin, baselineMax]}
+                  goal={appCtx.goals[appCtx.activeWaterdrops[0]]}
+                  setGoal={(newGoal) => {
+                    appCtx.setGoals((g) => {
+                      g[appCtx.activeWaterdrops[0]] = newGoal;
+                      return { ...g };
+                    });
+                  }}
+                />
+                <SceneSettingSubcard
+                  settings={deserialize(text)}
+                  setColorSetting={setColorSetting}
+                />
               </div>
-              <DotHistogram
-                width={300}
-                height={200}
-                data={objectivesData.FLATTENED_DATA[id].deliveries}
-                goal={appCtx.goals[appCtx.activeWaterdrops[0]]}
-                setGoal={(newGoal) => {
-                  appCtx.setGoals((g) => {
-                    g[appCtx.activeWaterdrops[0]] = newGoal;
-                    return { ...g };
-                  });
-                }}
-              />
-              <SceneSettingSubcard
-                settings={deserialize(text)}
-                setColorSetting={setColorSetting}
-              />
-            </div>
-          )
+            );
+          }
         )}
         {hoveredCard && (
           <ConnectLine connectLine={drawLineConnect(hoveredCard)} />

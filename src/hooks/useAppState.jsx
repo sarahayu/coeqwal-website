@@ -63,7 +63,9 @@ export default function useAppState() {
       );
     });
 
-    setState({ state: "TutorialView" });
+    resetCamera();
+
+    setState({ state: "WideView" });
   }, []);
 
   const getOutlineOpacity = useCallback(

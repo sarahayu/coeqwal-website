@@ -10,18 +10,16 @@ async function initObjectivesData() {
   const MAX_DELIVS = 1200;
   const SCENARIO_KEY_STRING = "scens";
   const DELIV_KEY_STRING = "delivs";
+  const BASELINE_SCEN = "expl0000";
 
   const OBJECTIVES_DATA = await (async function load() {
-    const objs = await (await fetch("./objectives.json")).json();
+    const objs = await (await fetch("./objectives_v3.json")).json();
 
     for (const obj of objs) {
       // shuffle so clusters of identical scenario results don't get processed deterministically
       for (const scen of shuffle(obj[SCENARIO_KEY_STRING])) {
         // data cleanup, clamping
-        const unord = scen[DELIV_KEY_STRING].map((v) =>
-          clamp(v, 0, MAX_DELIVS)
-        );
-
+        const unord = scen[DELIV_KEY_STRING];
         scen[DELIV_KEY_STRING] = unord.sort((a, b) => b - a);
       }
       obj[SCENARIO_KEY_STRING] = mapBy(
@@ -63,6 +61,32 @@ async function initObjectivesData() {
     }
 
     return map;
+  })();
+
+  const MIN_MAXES = (function () {
+    const minmaxes = {};
+
+    for (const objective of OBJECTIVE_IDS) {
+      const baselineMax = d3.max(
+        OBJECTIVES_DATA[objective][SCENARIO_KEY_STRING][BASELINE_SCEN][
+          DELIV_KEY_STRING
+        ]
+      );
+
+      const scenariosMin = d3.min(
+        SCENARIO_IDS.map((scenario) =>
+          d3.min(
+            OBJECTIVES_DATA[objective][SCENARIO_KEY_STRING][scenario][
+              DELIV_KEY_STRING
+            ]
+          )
+        )
+      );
+
+      minmaxes[objective] = [scenariosMin, baselineMax];
+    }
+
+    return minmaxes;
   })();
 
   // Flattening hierarchical data makes it more flexible for classifying
@@ -143,11 +167,13 @@ async function initObjectivesData() {
     MAX_DELIVS,
     SCENARIO_KEY_STRING,
     DELIV_KEY_STRING,
+    BASELINE_SCEN,
     OBJECTIVES_DATA,
     OBJECTIVE_IDS,
     OBJECTIVE_GOALS_MAP,
     SCENARIO_IDS,
     KEY_SETTINGS_MAP,
+    MIN_MAXES,
     FLATTENED_DATA,
     DATA_GROUPINGS,
   };
