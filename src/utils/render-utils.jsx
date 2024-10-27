@@ -234,6 +234,8 @@ export function generateTSpan(text, lineHeight = 1.2) {
     s.selectAll("*").remove();
     const lines = typeof text === "string" ? wrap(text).split("\n") : text;
 
+    console.log(s);
+
     const x = s.attr("x");
 
     lines.forEach((line) => {

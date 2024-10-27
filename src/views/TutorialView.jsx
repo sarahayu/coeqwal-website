@@ -14,13 +14,24 @@ import { hideElems } from "utils/render-utils";
 import { constants } from "utils/tutorialview-utils";
 import { useDataStory } from "hooks/useDataStory";
 
-import { descriptionsData } from "data/descriptions-data";
+import { descriptionsData } from "data/descriptions-tutorial-data";
 import { spatialData } from "data/spatial-data";
+import { initWaterdrops } from "utils/waterdrop-utils";
+import { objectivesData } from "data/objectives-tutorial-data";
+
+const tutorialWaterdrops = initWaterdrops(
+  objectivesData,
+  descriptionsData,
+  "objective"
+);
 
 export default function TutorialView() {
   const appCtx = useContext(AppContext);
 
-  const { hookAnimations, getSlidesInRange, storyVars } = useDataStory(appCtx);
+  const { hookAnimations, getSlidesInRange, storyVars } = useDataStory(
+    tutorialWaterdrops,
+    appCtx.camera
+  );
 
   useLayoutEffect(
     function enterState() {

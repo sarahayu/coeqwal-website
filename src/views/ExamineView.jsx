@@ -7,7 +7,6 @@ import SceneSettingSubcard from "components/SceneSettingSubcard";
 import { objectivesData } from "data/objectives-data";
 import { settings } from "settings";
 
-import { descriptionsData } from "data/descriptions-data";
 import { arrRemove, isState } from "utils/misc-utils";
 import {
   generateTSpan,
@@ -176,14 +175,7 @@ export default function ExamineView() {
       .attr("opacity", 0)
       .attr("text-anchor", "middle")
       .attr("font-size", labelFontSize)
-      .call(
-        generateTSpan(
-          descriptionsData[appCtx.activeWaterdrops[0]]?.display_name ||
-            descriptionsData[appCtx.activeWaterdrops[0]]?.id ||
-            appCtx.activeWaterdrops[0],
-          1.2
-        )
-      )
+      .call(generateTSpan(curMinidropsRef.current.display_name, 1.2))
       .transition()
       .attr("opacity", 1);
   }

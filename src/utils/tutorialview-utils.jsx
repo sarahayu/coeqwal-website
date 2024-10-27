@@ -2,7 +2,7 @@ import * as d3 from "d3";
 
 import { ticksExact } from "bucket-lib/utils";
 
-import { objectivesData } from "data/objectives-data";
+import { objectivesData } from "data/objectives-tutorial-data";
 import { percentToRatioFilled } from "./math-utils";
 
 function initConstants() {

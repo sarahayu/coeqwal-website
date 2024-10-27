@@ -4,7 +4,7 @@ import { AppContext } from "AppContext";
 
 import WideView from "views/WideView";
 import ExamineView from "views/ExamineView";
-// import TutorialView from "views/TutorialView";
+import TutorialView from "views/TutorialView";
 import CompareView from "views/CompareView";
 
 import useAppState from "hooks/useAppState";
@@ -20,7 +20,7 @@ export default function App() {
           <g className="svg-trans"></g>
         </svg>
       </div>
-      {/* <TutorialView /> */}
+      <TutorialView />
       <WideView />
       <ExamineView />
       <CompareView />

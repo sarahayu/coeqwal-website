@@ -5,7 +5,7 @@ import { useDataStoryVars } from "hooks/useDataStoryVars";
 import { animations as anims } from "utils/data-story-anims";
 import { scripts } from "utils/story-scripts";
 
-export function useDataStory(appCtx) {
+export function useDataStory(waterdrops, camera) {
   /*
     slides = [
         name: string,
@@ -22,7 +22,7 @@ export function useDataStory(appCtx) {
 
   const hookAnimations = useCallback(
     function () {
-      largeDropComparer.initComparer(appCtx.waterdrops, appCtx.camera);
+      largeDropComparer.initComparer(waterdrops, camera);
       const context = {
         deps: {
           ...storyVars,
@@ -126,7 +126,7 @@ export function useDataStory(appCtx) {
 
       setSlides(_slides);
     },
-    [appCtx.waterdrops, appCtx.camera]
+    [waterdrops, camera]
   );
 
   const getFromTo = useCallback(

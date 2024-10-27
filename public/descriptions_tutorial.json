@@ -1,0 +1,12 @@
+[
+  {
+    "id": "DEL_CVP_PAG_N",
+    "display_name": "Agriculture North Delta (CVP)",
+    "desc": "Central Valley Project North of Delta Agriculture Deliveries"
+  },
+  {
+    "id": "DEL_CVP_PRF_S",
+    "display_name": "Refuge South Delta (CVP)",
+    "desc": "Central Valley Project Refuge Deliveries - South of Delta"
+  }
+]

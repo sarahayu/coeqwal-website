@@ -2,12 +2,19 @@ import * as d3 from "d3";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { objectivesData } from "data/objectives-data";
 import { threeResources } from "three-resources";
-import { waterdrops } from "utils/waterdrop-utils";
+
+import { objectivesData } from "data/objectives-data";
+import { descriptionsData } from "data/descriptions-data";
+import { initWaterdrops } from "utils/waterdrop-utils";
 
 const appWidth = window.innerWidth,
   appHeight = window.innerHeight;
+const waterdrops = initWaterdrops(
+  objectivesData,
+  descriptionsData,
+  "objective"
+);
 
 export default function useAppState() {
   const [state, setState] = useState({});
@@ -63,9 +70,9 @@ export default function useAppState() {
       );
     });
 
-    resetCamera();
+    // resetCamera();
 
-    setState({ state: "WideView" });
+    setState({ state: "TutorialView" });
   }, []);
 
   const getOutlineOpacity = useCallback(

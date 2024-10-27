@@ -337,8 +337,7 @@ export default function WideView() {
             <div className="results" style={{ display: "none" }}>
               {searchResults.map(({ obj: wd }) => (
                 <button key={wd.key} onClick={() => updateActiveDrops(wd)}>
-                  {descriptionsData[wd.key].display_name ||
-                    descriptionsData[wd.key].id}
+                  {wd.display_name}
                 </button>
               ))}
             </div>

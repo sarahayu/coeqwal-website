@@ -1,6 +1,5 @@
 import * as d3 from "d3";
 
-import { descriptionsData } from "data/descriptions-data";
 import { spatialData } from "data/spatial-data";
 import { settings } from "settings";
 
@@ -43,9 +42,7 @@ function interactorsUpdate(d) {
 function textUpdate(d) {
   return function (s) {
     s.selectAll("*").remove();
-    const lines = wrap(
-      descriptionsData[d.key].display_name || descriptionsData[d.key].id
-    ).split("\n");
+    const lines = wrap(d.display_name).split("\n");
 
     lines.forEach((line, i) => {
       s.append("tspan")

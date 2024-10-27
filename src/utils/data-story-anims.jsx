@@ -1,8 +1,7 @@
 import * as d3 from "d3";
 import { constants } from "utils/tutorialview-utils";
 
-import { objectivesData } from "data/objectives-data";
-import yearlyData from "data/yearly.json";
+import { objectivesData } from "data/objectives-tutorial-data";
 import { hideElems, showElems } from "utils/render-utils";
 
 function initAllAnims() {
@@ -98,17 +97,19 @@ function initAllAnims() {
             `translate(${BAR_CHART_MARGIN.left},${BAR_CHART_MARGIN.top})`
           );
 
-        const dataDescending = yearlyData[constants.PAG_OBJECTIVE]
+        const dataDescending = objectivesData.OBJECTIVES_DATA[
+          constants.PAG_OBJECTIVE
+        ][objectivesData.BASELINE_YRLY_KEY_STRING]
           .map((val, placeFromLeft) => ({
             val,
             placeFromLeft,
             year: placeFromLeft + 1,
           }))
-          .sort((a, b) => b.val - a.val);
+          .sort(d3.descending);
 
         const x = d3
           .scaleBand()
-          .domain(dataDescending.map(({ year }) => year).sort((a, b) => a - b))
+          .domain(dataDescending.map(({ year }) => year).sort(d3.ascending))
           .range([0, constants.BAR_CHART_WIDTH])
           .padding(0.4);
         const y = d3
@@ -165,17 +166,19 @@ function initAllAnims() {
             `translate(${BAR_CHART_MARGIN.left},${BAR_CHART_MARGIN.top})`
           );
 
-        const dataDescending = yearlyData[constants.PRF_OBJECTIVE]
+        const dataDescending = objectivesData.OBJECTIVES_DATA[
+          constants.PRF_OBJECTIVE
+        ][objectivesData.BASELINE_YRLY_KEY_STRING]
           .map((val, placeFromLeft) => ({
             val,
             placeFromLeft,
             year: placeFromLeft + 1,
           }))
-          .sort((a, b) => b.val - a.val);
+          .sort(d3.descending);
 
         const x = d3
           .scaleBand()
-          .domain(dataDescending.map(({ year }) => year).sort((a, b) => a - b))
+          .domain(dataDescending.map(({ year }) => year).sort(d3.ascending))
           .range([0, constants.BAR_CHART_WIDTH])
           .padding(0.4);
         const y = d3

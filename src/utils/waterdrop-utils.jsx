@@ -1,17 +1,12 @@
-import * as d3 from "d3";
 import { ticksExact } from "bucket-lib/utils";
 import { settings } from "settings";
-
-import { objectivesData } from "data/objectives-data";
 
 import { calcDomLev, createInterpsFromDelivs } from "utils/data-utils";
 import { placeDropsUsingPhysics, rotatePoint } from "utils/math-utils";
 import { mapBy } from "utils/misc-utils";
 
-const BASELINE_SCENARIO = "expl0000";
-
 // TODO optimize!!
-function initWaterdrops(grouping) {
+function initWaterdrops(objectivesData, descriptionsData, grouping) {
   console.time("init waterdrops");
   const groupKeys =
     grouping === "objective"
@@ -126,6 +121,7 @@ function initWaterdrops(grouping) {
       key: groupKey,
       height: smallNodesPhys.height,
       nodes: groupToNodes[groupKey],
+      display_name: descriptionsData[groupKey].display_name || groupKey,
     });
   }
 
@@ -138,4 +134,4 @@ function initWaterdrops(grouping) {
   };
 }
 
-export const waterdrops = initWaterdrops("objective");
+export { initWaterdrops };

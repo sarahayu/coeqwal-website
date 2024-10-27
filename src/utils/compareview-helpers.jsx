@@ -2,7 +2,6 @@ import * as d3 from "d3";
 
 import { settings } from "settings";
 
-import { descriptionsData } from "data/descriptions-data";
 import { clipEnds, dropCenterCorrection } from "utils/math-utils";
 import {
   DROPLET_SHAPE,
@@ -38,7 +37,10 @@ function largeDropInit({ nodes, height, key }) {
   };
 }
 
-function largeDropUpdate({ nodes, key, height }, transitionDelay) {
+function largeDropUpdate(
+  { nodes, key, height, display_name },
+  transitionDelay
+) {
   return (s) => {
     const getStartDropLoc = ({ x, y, tilt }) =>
       `translate(${x}, ${y}) rotate(${tilt})`;
@@ -49,7 +51,7 @@ function largeDropUpdate({ nodes, key, height }, transitionDelay) {
 
     const baselinePos = {};
 
-    s.call(textUpdate(key, height))
+    s.call(textUpdate(display_name, height))
       .selectAll(".small-drop")
       .data(nodes)
       .attr("display", "initial")
@@ -122,16 +124,12 @@ function smallDropUpdate({ key, levs, maxLev, x, y }, baselinePos) {
   };
 }
 
-function textUpdate(key, height) {
+function textUpdate(display_name, height) {
   return (s) => {
     s.select("text")
       .attr("x", 0)
       .attr("y", (height / 2) * settings.SPREAD_1_2 * 0.9)
-      .call(
-        generateTSpan(
-          descriptionsData[key].display_name || descriptionsData[key].id
-        )
-      );
+      .call(generateTSpan(display_name));
   };
 }
 

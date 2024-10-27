@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { SETT_NUM_OPTS, deserialize } from "utils/data-utils";
 
-import { clamp, shuffle } from "utils/math-utils";
+import { shuffle } from "utils/math-utils";
 import { mapBy } from "utils/misc-utils";
 
 const SCEN_DIVISOR = 1; // debugging purposes, don't render all scenarios to speed things up
@@ -10,16 +10,22 @@ async function initObjectivesData() {
   const MAX_DELIVS = 1200;
   const SCENARIO_KEY_STRING = "scens";
   const DELIV_KEY_STRING = "delivs";
+  const BASELINE_YRLY_KEY_STRING = "baseline_yearly";
   const BASELINE_SCEN = "expl0000";
 
   const OBJECTIVES_DATA = await (async function load() {
-    const objs = await (await fetch("./objectives_v3.json")).json();
+    const objs = await (await fetch("./objectives_tutorial.json")).json();
 
     for (const obj of objs) {
       // shuffle so clusters of identical scenario results don't get processed deterministically
       for (const scen of shuffle(obj[SCENARIO_KEY_STRING])) {
+        // save the baseline yearly data, don't order it
+        if (scen["name"] === BASELINE_SCEN) {
+          obj[BASELINE_YRLY_KEY_STRING] = Array.from(scen[DELIV_KEY_STRING]);
+        }
+
         // sort data since we'll be using ordered data for all our vizes
-        scen[DELIV_KEY_STRING].sort(d3.descending);
+        scen[DELIV_KEY_STRING] = scen[DELIV_KEY_STRING].sort(d3.descending);
       }
       obj[SCENARIO_KEY_STRING] = mapBy(
         obj[SCENARIO_KEY_STRING],
@@ -27,7 +33,7 @@ async function initObjectivesData() {
       );
     }
 
-    console.log("DATA: loading objectives data");
+    console.log("DATA: loading objectives tutorial data");
 
     return mapBy(objs, ({ obj }) => obj);
   })();
@@ -167,6 +173,7 @@ async function initObjectivesData() {
     MAX_DELIVS,
     SCENARIO_KEY_STRING,
     DELIV_KEY_STRING,
+    BASELINE_YRLY_KEY_STRING,
     BASELINE_SCEN,
     OBJECTIVES_DATA,
     OBJECTIVE_IDS,
