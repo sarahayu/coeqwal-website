@@ -36,8 +36,6 @@ export default function WideView() {
   const activeDropsRef = useRef([]);
 
   useEffect(function initialize() {
-    if (!appCtx.waterdrops) return;
-
     initSVGGraphics();
 
     const cleanup = registerEventListeners();
@@ -98,7 +96,7 @@ export default function WideView() {
 
     const newCamPos = [
       x,
-      y - dropCenterCorrection({ height }),
+      y,
       appCtx.camera.getZFromFarHeight(height * settings.SPREAD_1_2 * 1.5),
     ];
 
@@ -230,8 +228,8 @@ export default function WideView() {
     }
 
     const fontSize =
-      (20 / appCtx.camera.height) *
-      appCtx.camera.getZFromFarHeight(appCtx.waterdrops.height);
+      (40 * appCtx.camera.getZFromFarHeight(appCtx.waterdrops.height)) /
+      appCtx.camera.height;
     container
       .select(".instruction-text")
       .attr("y", -fontSize * 5)
@@ -379,17 +377,17 @@ function ActionButtons({
       compareBtn = (
         <>
           <button
-            onClick={handleClickDeselectAll}
-            className="fancy-font supplement-btn"
-          >
-            <span>deselect all</span>
-          </button>
-          <button
             onClick={handleClickCompare}
             className="wide-view-action-btn fancy-font"
           >
             <BiNetworkChart />
             <span>compare</span>
+          </button>
+          <button
+            onClick={handleClickDeselectAll}
+            className="fancy-font supplement-btn"
+          >
+            <span>deselect all</span>
           </button>
         </>
       );

@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import React from "react";
-import { SETT_NAME_FULL, SETT_VAL_STEPS } from "utils/data-utils";
+import { SETT_DESC, SETT_NAME_FULL, SETT_VAL_STEPS } from "utils/data-utils";
 
 export default function SceneSettingStickers({ settings, setColorSetting }) {
   return (
@@ -11,6 +11,7 @@ export default function SceneSettingStickers({ settings, setColorSetting }) {
           onMouseEnter={() => setColorSetting(i)}
           onMouseLeave={() => setColorSetting(null)}
           key={i}
+          title={SETT_DESC[i]}
         >
           <span>{SETT_NAME_FULL[i]}</span>
           <span>{SETT_VAL_STEPS[i][v]}</span>

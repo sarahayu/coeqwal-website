@@ -4,8 +4,6 @@ import { SETT_NUM_OPTS, deserialize } from "utils/data-utils";
 import { shuffle } from "utils/math-utils";
 import { mapBy } from "utils/misc-utils";
 
-const SCEN_DIVISOR = 1; // debugging purposes, don't render all scenarios to speed things up
-
 async function initObjectivesData() {
   const MAX_DELIVS = 1200;
   const SCENARIO_KEY_STRING = "scens";
@@ -14,6 +12,8 @@ async function initObjectivesData() {
   const BASELINE_SCEN = "expl0000";
 
   const OBJECTIVES_DATA = await (async function load() {
+    console.log("DATA: loading objectives tutorial data");
+
     const objs = await (await fetch("./objectives_tutorial.json")).json();
 
     for (const obj of objs) {
@@ -33,8 +33,6 @@ async function initObjectivesData() {
       );
     }
 
-    console.log("DATA: loading objectives tutorial data");
-
     return mapBy(objs, ({ obj }) => obj);
   })();
 
@@ -47,12 +45,8 @@ async function initObjectivesData() {
     return goalMap;
   })();
 
-  const _SCENARIO_IDS = Object.keys(
+  const SCENARIO_IDS = Object.keys(
     Object.values(OBJECTIVES_DATA)[0][SCENARIO_KEY_STRING]
-  );
-
-  const SCENARIO_IDS = _SCENARIO_IDS.filter(
-    (s, i) => i % SCEN_DIVISOR === 0 || s === "expl0000"
   );
 
   const KEY_SETTINGS_MAP = (function preprocessData() {

@@ -4,7 +4,7 @@ import { SETT_NUM_OPTS, deserialize } from "utils/data-utils";
 import { clamp, shuffle } from "utils/math-utils";
 import { mapBy } from "utils/misc-utils";
 
-const SCEN_DIVISOR = 1; // debugging purposes, don't render all scenarios to speed things up
+const SCEN_DIVISOR = 20; // debugging purposes, don't render all scenarios to speed things up
 
 async function initObjectivesData() {
   const MAX_DELIVS = 1200;
@@ -13,21 +13,35 @@ async function initObjectivesData() {
   const BASELINE_SCEN = "expl0000";
 
   const OBJECTIVES_DATA = await (async function load() {
+    console.log("DATA: loading objectives data");
+
     const objs = await (await fetch("./objectives_v3.json")).json();
+
+    const chosenScenarios = objs[0][SCENARIO_KEY_STRING].filter(
+      (s, i) => i % SCEN_DIVISOR === 0 || s === "expl0000"
+    ).map(({ name }) => name);
 
     for (const obj of objs) {
       // shuffle so clusters of identical scenario results don't get processed deterministically
-      for (const scen of shuffle(obj[SCENARIO_KEY_STRING])) {
-        // sort data since we'll be using ordered data for all our vizes
-        scen[DELIV_KEY_STRING].sort(d3.descending);
+      const shuffledScens = shuffle(obj[SCENARIO_KEY_STRING]);
+
+      // iterate backwards to remove unneeded scenarios
+      for (let i = shuffledScens.length - 1; i >= 0; i--) {
+        const scen = shuffledScens[i];
+
+        if (chosenScenarios.includes(scen.name)) {
+          // sort data since we'll be using ordered data for all our vizes
+          scen[DELIV_KEY_STRING].sort(d3.descending);
+        } else {
+          shuffledScens.splice(i, 1);
+        }
       }
+
       obj[SCENARIO_KEY_STRING] = mapBy(
         obj[SCENARIO_KEY_STRING],
         ({ name }) => name
       );
     }
-
-    console.log("DATA: loading objectives data");
 
     return mapBy(objs, ({ obj }) => obj);
   })();
@@ -41,12 +55,8 @@ async function initObjectivesData() {
     return goalMap;
   })();
 
-  const _SCENARIO_IDS = Object.keys(
+  const SCENARIO_IDS = Object.keys(
     Object.values(OBJECTIVES_DATA)[0][SCENARIO_KEY_STRING]
-  );
-
-  const SCENARIO_IDS = _SCENARIO_IDS.filter(
-    (s, i) => i % SCEN_DIVISOR === 0 || s === "expl0000"
   );
 
   const KEY_SETTINGS_MAP = (function preprocessData() {
@@ -140,7 +150,15 @@ async function initObjectivesData() {
         objScens.push({
           key,
           sorted: sortedObjScens,
-          mean: d3.mean(ids.map((id) => flattenedData[id].deliveries).flat()),
+          mean: d3.mean(
+            ids
+              .map((id) => {
+                const deliveries = flattenedData[id].deliveries;
+                const maxVal = MIN_MAXES[flattenedData[id].objective][1];
+                return deliveries.map((delivery) => delivery / maxVal);
+              })
+              .flat()
+          ),
         });
       }
 

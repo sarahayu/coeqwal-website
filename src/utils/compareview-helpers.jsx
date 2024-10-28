@@ -129,7 +129,7 @@ function textUpdate(display_name, height) {
     s.select("text")
       .attr("x", 0)
       .attr("y", (height / 2) * settings.SPREAD_1_2 * 0.9)
-      .call(generateTSpan(display_name));
+      .call(generateTSpan(display_name, 1.2, 30));
   };
 }
 

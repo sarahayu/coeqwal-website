@@ -263,7 +263,7 @@ input::-moz-focus-inner {
   height: 100%;
   top: 0;
   position: absolute;
-  font-size: 0.7rem;
+  font-size: 1rem;
   border: none;
   border-right: 3px dashed #f00;
   color: gray;
@@ -746,17 +746,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 .go-back-btn {
   position: absolute;
   bottom: 1rem;
-  left: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
   background: none;
   outline: 0;
   border: 0;
-  font-size: 4rem;
+  font-size: 8rem;
   cursor: pointer;
-  transition: 0.2s transform;
+  transition: 0.2s translate;
 }
 
 .go-back-btn:hover {
-  transform: translateX(-0.5em);
+  translate: -0.5em 0;
 }
 
 .circlet {
@@ -791,15 +792,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 .action-btn-wrapper {
   position: absolute;
   bottom: 2rem;
-  right: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   gap: 1.5rem;
   align-items: end;
+  width: max-content;
 }
 
 .wide-view-action-btn {
   color: #333;
-  font-size: 2rem;
+  font-size: 3rem;
   cursor: pointer;
   padding: 0.5em 1em;
   border: none;
@@ -824,7 +827,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .supplement-btn {
   color: #333;
-  font-size: 1rem;
+  font-size: 1.4rem;
   cursor: pointer;
   padding: 0.8em 1.2em;
   border: none;
@@ -857,9 +860,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 #infobox {
+  font-size: 1.5rem;
   position: absolute;
   top: 1em;
-  right: 1em;
+  left: calc(50% + 30vh);
   display: flex;
   flex-direction: column;
   width: min-content;
@@ -887,14 +891,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   padding: 0.5em 1em;
   border-radius: 100vh;
   opacity: 0.5;
-  font-size: 0.8rem;
+  font-size: 0.8em;
 }
 
 .searchbox .results {
   display: flex;
   flex-direction: column;
   position: absolute;
-  font-size: 0.8rem;
+  font-size: 0.8em;
   border-radius: 1em;
   overflow-y: hidden;
   width: 100%;
@@ -934,16 +938,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 .panel {
   cursor: move;
   background-color: white;
-  padding: 1rem;
+  padding: 1.5rem;
   position: absolute;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
     rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 
-  height: 200px;
+  height: 320px;
   width: min-content;
   display: flex;
   gap: 1rem;
   flex-direction: column;
+  font-size: 1.2rem;
 }
 
 .panel > .dot-histogram-wrapper {
@@ -962,7 +967,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .examine-panel > .dot-histogram-wrapper {
-  flex-basis: 160px;
+  flex-basis: 240px;
   flex-grow: 0;
   flex-shrink: 0;
 }
@@ -1018,14 +1023,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   bottom: 100%;
   background: white;
   padding: 0.2em 1em 0 1em;
-  font-size: 0.8rem;
+  font-size: 1.2rem;
   border-radius: 0.5em 0.5em 0 0;
 }
 
 .panel-tab span {
   font-weight: bold;
   color: orange;
-  font-size: 1.5em;
+  font-size: 2em;
 }
 
 .panel line,
@@ -1036,6 +1041,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .panel text {
   fill: #bbbbbb;
+  font-size: 0.9rem;
 }
 
 .tutorial-view {
@@ -1289,7 +1295,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .scrollama-compare-scenobjs .dot-histogram-wrapper text {
-  font-size: 0.5rem;
+  font-size: 0.9rem;
 }
 
 .tut-comparer-graphics-wrapper {
@@ -1303,7 +1309,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .scen-settings {
   flex-grow: 1;
-  font-size: 0.7rem;
+  font-size: 1rem;
   font-family: sans-serif;
   color: #333;
   cursor: initial;

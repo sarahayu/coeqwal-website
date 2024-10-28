@@ -66,8 +66,11 @@ export function isState(stateInfo, stateName) {
   return stateInfo && stateInfo.state === stateName;
 }
 
-export function wrap(s) {
-  return s.replace(/(?![^\n]{1,15}$)([^\n]{1,15})\s/g, "$1\n");
+export function wrap(s, len = 15) {
+  return s.replace(
+    new RegExp(`(?![^\\n]{1,${len}}$)([^\\n]{1,${len}})\\s`, "g"),
+    "$1\n"
+  );
 }
 
 export function genUUID() {

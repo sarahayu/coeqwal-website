@@ -260,7 +260,6 @@ function MainWaterdropGraphics({
           levelInterp={dropInterper}
           width={400}
           height={constants.BAR_CHART_HEIGHT}
-          colorInterp={constants.INTERP_COLOR}
           resolution={4}
         />
         <p className="var-scen-label">
@@ -288,7 +287,6 @@ function VariationWaterdropGraphics({ variations, goal, setGoal }) {
         levelInterp={interper}
         width={400}
         height={(constants.BAR_CHART_HEIGHT * 2) / 3}
-        colorInterp={constants.INTERP_COLOR}
         resolution={4}
       />
       <p className="var-scen-label">
@@ -314,7 +312,6 @@ function BucketCreationGraphics({ id, bucketInterper, label }) {
         levelInterp={bucketInterper}
         width={300}
         height={constants.BAR_CHART_HEIGHT}
-        colorInterp={constants.INTERP_COLOR}
         resolution={4}
       />
       <p className="fancy-font objective-label">{label}</p>

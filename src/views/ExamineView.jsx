@@ -133,10 +133,7 @@ export default function ExamineView() {
 
   function positionTexts() {
     const instrFontSize =
-      (16 / appCtx.camera.height) *
-      appCtx.camera.getZFromFarHeight(
-        curMinidropsRef.current.height * settings.SPREAD_1_2 * 1.5
-      );
+      (curMinidropsRef.current.height * settings.SPREAD_1_2) / 20;
 
     d3.select("#examine-group .instruction-text")
       .attr(
@@ -160,10 +157,7 @@ export default function ExamineView() {
       });
 
     const labelFontSize =
-      (20 / appCtx.camera.height) *
-      appCtx.camera.getZFromFarHeight(
-        curMinidropsRef.current.height * settings.SPREAD_1_2 * 1.5
-      );
+      (curMinidropsRef.current.height * settings.SPREAD_1_2) / 15;
 
     d3.select("#examine-group .large-drop-label")
       .attr("x", curMinidropsRef.current.x)
@@ -175,7 +169,7 @@ export default function ExamineView() {
       .attr("opacity", 0)
       .attr("text-anchor", "middle")
       .attr("font-size", labelFontSize)
-      .call(generateTSpan(curMinidropsRef.current.display_name, 1.2))
+      .call(generateTSpan(curMinidropsRef.current.display_name, 1.2, 30))
       .transition()
       .attr("opacity", 1);
   }
@@ -328,8 +322,8 @@ export default function ExamineView() {
                   scenario <span>{text}</span>
                 </div>
                 <DotHistogram
-                  width={300}
-                  height={200}
+                  width={480}
+                  height={320}
                   data={objectivesData.FLATTENED_DATA[id].deliveries}
                   range={[scenMin, baselineMax]}
                   goal={appCtx.goals[appCtx.activeWaterdrops[0]]}

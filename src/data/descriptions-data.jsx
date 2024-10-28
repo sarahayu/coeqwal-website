@@ -1,9 +1,11 @@
 import { mapBy } from "utils/misc-utils";
 
 async function initDescriptionsData() {
+  console.log("DATA: loading descriptions data");
+
   const objs = await (await fetch("./descriptions.json")).json();
 
-  console.log("DATA: loading descriptions data");
+  // any data preprocessing goes here. none for now.
 
   return mapBy(objs, ({ id }) => id);
 }

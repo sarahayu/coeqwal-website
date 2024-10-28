@@ -217,8 +217,8 @@ export default function CompareView() {
             onMouseDown={(e) => onPanelDragStart(e, { id })}
           >
             <DotHistogram
-              width={300}
-              height={200}
+              width={480}
+              height={320}
               data={objectivesData.FLATTENED_DATA[nodeID].deliveries}
               range={[0, baselineMax]}
               goal={appCtx.goals[id]}

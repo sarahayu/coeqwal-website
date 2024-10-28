@@ -89,11 +89,17 @@ let lastDetNodesLen;
 
 export function radsToDropWidth(nodes) {
   const AREA = d3.sum(nodes.map((r) => r ** 2 * 3.14));
-  return Math.floor((Math.sqrt(AREA / 3.14) * 2) / 2);
+  return Math.floor(Math.sqrt(AREA / 3.14));
 }
 
 // assuming nodes is already ordered and first nodes are going to be put on the bottom
-export function placeDropsUsingPhysics(x, y, nodes, reuse = false) {
+export function placeDropsUsingPhysics(
+  x,
+  y,
+  nodes,
+  packingFactor = 1,
+  reuse = false
+) {
   if (reuse && DET_CACHE && nodes.length === lastDetNodesLen) return DET_CACHE;
 
   // first generate random points within water droplet. we can stop here, but points might not be the most uniformly distributed
@@ -105,7 +111,7 @@ export function placeDropsUsingPhysics(x, y, nodes, reuse = false) {
         generateRandoPoints(generateWaterdrop(1), (lastNodesLen = nodes.length))
       );
 
-  const WIDTH_AREA = radsToDropWidth(nodes.map(({ r }) => r));
+  const WIDTH_AREA = radsToDropWidth(nodes.map(({ r }) => r)) / packingFactor;
 
   const randoPoints = RANDO_CACHE[
     Math.floor(Math.random() * RANDO_CACHE.length)

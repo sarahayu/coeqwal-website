@@ -74,8 +74,8 @@ function getFontSize(d, transformZoom, cameraHeight, waterdropsHeight) {
 }
 
 function drawMinimapSVG() {
-  const width = 200,
-    height = 250;
+  const width = 250,
+    height = 300;
 
   const minimap = d3
     .select("#minimap")

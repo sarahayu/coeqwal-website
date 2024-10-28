@@ -35,11 +35,12 @@ function initWaterdrops(objectivesData, descriptionsData, grouping) {
     groupKeys.map((p, idx) => ({
       r: largeDropRad,
       id: idx,
-    }))
+    })),
+    0.8
   );
 
   for (let i = 0; i < largeNodesPhys.length; i++) {
-    largeNodesPhys[i].tilt = Math.random() * 50 - 25;
+    largeNodesPhys[i].tilt = Math.random() * 40 - 20;
   }
 
   const largeNodesPos = mapBy(largeNodesPhys, ({ id }) => id);

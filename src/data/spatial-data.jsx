@@ -2,9 +2,11 @@ import { mapBy } from "utils/misc-utils";
 
 async function initSpatialData() {
   const SPATIAL_DATA = await (async function load() {
+    console.log("DATA: loading callite spatial data");
+
     const objs = await (await fetch("./callite_spatial.json")).json();
 
-    console.log("DATA: loading callite spatial data");
+    // any data preprocessing goes here. none for now.
 
     return objs;
   })();
@@ -17,9 +19,11 @@ async function initSpatialData() {
   })();
 
   const CALIFORNIA_OUTLINE = await (async function load() {
+    console.log("DATA: loading california spatial data");
+
     const objs = await (await fetch("./california.json")).json();
 
-    console.log("DATA: loading california spatial data");
+    // any data preprocessing goes here. none for now.
 
     return objs;
   })();

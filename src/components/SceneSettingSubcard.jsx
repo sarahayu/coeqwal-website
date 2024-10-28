@@ -4,6 +4,7 @@ import {
   SETT_NAME_SHORT,
   SETT_NAME_FULL,
   SETT_VAL_STEPS,
+  SETT_DESC,
 } from "utils/data-utils";
 
 export default function SceneSettingSubcard({ settings, setColorSetting }) {
@@ -32,6 +33,7 @@ export default function SceneSettingSubcard({ settings, setColorSetting }) {
               onMouseEnter={() => setColorSetting(i)}
               onMouseLeave={() => setColorSetting(null)}
               key={i}
+              title={SETT_DESC[i]}
             >
               <span>{SETT_NAME_FULL[i]}</span>
               <span>{SETT_VAL_STEPS[i][v]}</span>

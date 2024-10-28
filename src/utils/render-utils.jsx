@@ -229,12 +229,10 @@ export function screenToWorld(x, y, camTransform) {
   ];
 }
 
-export function generateTSpan(text, lineHeight = 1.2) {
+export function generateTSpan(text, lineHeight = 1.2, len = 15) {
   return (s) => {
     s.selectAll("*").remove();
-    const lines = typeof text === "string" ? wrap(text).split("\n") : text;
-
-    console.log(s);
+    const lines = typeof text === "string" ? wrap(text, len).split("\n") : text;
 
     const x = s.attr("x");
 
