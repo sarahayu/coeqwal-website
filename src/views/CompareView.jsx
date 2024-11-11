@@ -10,9 +10,10 @@ import { settings } from "settings";
 import { avgCoords } from "utils/math-utils";
 import { isState } from "utils/misc-utils";
 import { hideElems, removeElems, showElems } from "utils/render-utils";
-import { deserialize } from "utils/data-utils";
+import { createInterpsFromDelivs, deserialize } from "utils/data-utils";
 import { helpers } from "utils/compareview-helpers";
 import { useDragPanels } from "hooks/useDragPanels";
+import DropletGlyph from "components/DropletGlyph";
 
 export default function CompareView() {
   const appCtx = useContext(AppContext);
@@ -70,12 +71,15 @@ export default function CompareView() {
           }
         );
 
-        hideElems(".large-gray-text", container);
+        hideElems(
+          ".large-gray-text, .baseline-pointer, .circlet, .comp-line, .highlight-circle",
+          container
+        );
 
         setTimeout(() => {
           setActiveMinidrop({ key: groupsRef.current.groups[0].nodes[0].key });
           showElems(
-            "#member-variable, #member-label, .large-gray-text",
+            "#member-variable, #member-label, .large-gray-text, .baseline-pointer, .circlet, .comp-line, .highlight-circle",
             container
           );
           showElems(".comp-settings", d3, "flex");
@@ -92,7 +96,10 @@ export default function CompareView() {
         return function exitState() {
           removeElems(".large-drop, .circlet, .comp-line", container);
 
-          hideElems("#member-variable, #member-label", container);
+          hideElems(
+            "#member-variable, #member-label, .baseline-pointer",
+            container
+          );
           hideElems(".comp-settings");
 
           setPanels([]);
@@ -162,8 +169,7 @@ export default function CompareView() {
         }
 
         const [x, y, isLeft] = getIdealGroupPos(
-          groupsRef.current.groupPositions[i],
-          centerRef.current
+          groupsRef.current.groupPositions[i]
         );
 
         return {
@@ -180,16 +186,17 @@ export default function CompareView() {
     };
   }
 
-  function getIdealGroupPos([x, y], [centerX, centerY]) {
+  function getIdealGroupPos({ x, y, isLeft }) {
     let newX = x,
       newY = y;
 
-    const correctionX = groupsRef.current.groups[0].height * 2;
+    const correctionX =
+      groupsRef.current.groups[0].height * settings.SPREAD_1_2;
 
-    if (newX < centerX) newX -= correctionX;
+    if (isLeft) newX -= correctionX;
     else newX += correctionX;
 
-    return [newX, newY, newX < centerX];
+    return [newX, newY, isLeft];
   }
 
   return (
@@ -201,13 +208,11 @@ export default function CompareView() {
         />
       )}
       {panels.map(({ x, y, id, isLeft, offsetX, offsetY, nodeID }, i) => {
-        const { objective, scenario } = objectivesData.FLATTENED_DATA[nodeID];
+        const { objective } = objectivesData.FLATTENED_DATA[nodeID];
+        const delivs = objectivesData.FLATTENED_DATA[nodeID].deliveries;
 
-        const baselineMax = d3.max(
-          objectivesData.OBJECTIVES_DATA[objective][
-            objectivesData.SCENARIO_KEY_STRING
-          ][scenario][objectivesData.DELIV_KEY_STRING]
-        );
+        const [delivMin, delivMax] = objectivesData.MIN_MAXES[objective];
+        const interper = createInterpsFromDelivs(delivs, delivMin, delivMax);
 
         return (
           <div
@@ -216,19 +221,26 @@ export default function CompareView() {
             style={getPanelStyle({ x, y, offsetX, offsetY })}
             onMouseDown={(e) => onPanelDragStart(e, { id })}
           >
-            <DotHistogram
-              width={480}
-              height={320}
-              data={objectivesData.FLATTENED_DATA[nodeID].deliveries}
-              range={[0, baselineMax]}
-              goal={appCtx.goals[id]}
-              setGoal={(newGoal) => {
-                appCtx.setGoals((g) => {
-                  g[id] = newGoal;
-                  return { ...g };
-                });
-              }}
-            />
+            <div className="panel-main-container">
+              <DotHistogram
+                width={420}
+                height={280}
+                data={delivs}
+                range={[delivMin, delivMax]}
+                goal={appCtx.goals[id]}
+                setGoal={(newGoal) => {
+                  appCtx.setGoals((g) => {
+                    g[id] = newGoal;
+                    return { ...g };
+                  });
+                }}
+              />
+              <DropletGlyph
+                levelInterp={interper}
+                height={200}
+                resolution={4}
+              />
+            </div>
           </div>
         );
       })}

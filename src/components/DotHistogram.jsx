@@ -2,7 +2,6 @@ import * as d3 from "d3";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { quantileBins } from "bucket-lib/quantile-bins";
 
-import { objectivesData } from "data/objectives-data";
 import { clamp } from "utils/math-utils";
 
 const NUM_CIRCLES = 20;
@@ -21,7 +20,7 @@ const WATERDROP_ICON = {
 
 export default function DotHistogram({
   data,
-  range = [0, objectivesData.MAX_DELIVS],
+  range = [0, d3.max(data)],
   goal,
   setGoal,
   width = 600,

@@ -21,9 +21,16 @@ function largeDropInit({ nodes, height, key }) {
       .attr("fill", "yellow")
       .attr("r", settings.LOD_1_RAD_PX * 2);
 
+    s.append("g")
+      .attr("class", "baseline-pointer")
+      .call(function (s) {
+        s.append("path");
+        s.append("text").text("baseline");
+      });
+
     s.append("text")
       .style("font-size", (height * settings.SPREAD_1_2) / 15)
-      .attr("class", "fancy-font large-gray-text")
+      .attr("class", "drop-label fancy-font large-gray-text")
       .attr("text-anchor", "middle");
 
     s.selectAll(".small-drop")
@@ -38,7 +45,8 @@ function largeDropInit({ nodes, height, key }) {
 }
 
 function largeDropUpdate(
-  { nodes, key, height, display_name },
+  { nodes, height, display_name },
+  { isLeft, isBottom },
   transitionDelay
 ) {
   return (s) => {
@@ -68,7 +76,6 @@ function largeDropUpdate(
       .attr("cx", baselinePos.x)
       .attr(
         "cy",
-
         baselinePos.y - dropCenterCorrection({ rad: settings.LOD_1_RAD_PX })
       )
       .transition()
@@ -77,9 +84,40 @@ function largeDropUpdate(
       .attr("cx", baselinePos.x * settings.SPREAD_1_2)
       .attr(
         "cy",
-
         baselinePos.y * settings.SPREAD_1_2 -
           dropCenterCorrection({ rad: settings.LOD_1_RAD_PX })
+      );
+
+    const circlePosX = baselinePos.x * settings.SPREAD_1_2,
+      circlePosY =
+        baselinePos.y * settings.SPREAD_1_2 -
+        dropCenterCorrection({ rad: settings.LOD_1_RAD_PX });
+
+    const textPosX = ((height * settings.SPREAD_1_2) / 2) * (isLeft ? -1 : 1),
+      textPosY = ((height * settings.SPREAD_1_2) / 2) * (isBottom ? 1 : -1);
+
+    const fontSize = height / 20;
+    const lineWidth = height / 100;
+
+    s.select(".baseline-pointer path")
+      .attr(
+        "d",
+        d3
+          .line()
+          .x((d) => d[0])
+          .y((d) => d[1])([
+          [circlePosX, circlePosY],
+          [textPosX, textPosY],
+        ])
+      )
+      .attr("stroke-width", lineWidth);
+    s.select(".baseline-pointer text")
+      .attr("class", "fancy-font")
+      .attr("font-size", fontSize)
+      .attr("text-anchor", isLeft ? "end" : "start")
+      .attr(
+        "transform",
+        `translate(${textPosX + fontSize * (isLeft ? -1 : 1)}, ${textPosY})`
       );
   };
 }
@@ -126,7 +164,7 @@ function smallDropUpdate({ key, levs, maxLev, x, y }, baselinePos) {
 
 function textUpdate(display_name, height) {
   return (s) => {
-    s.select("text")
+    s.select(".drop-label")
       .attr("x", 0)
       .attr("y", (height / 2) * settings.SPREAD_1_2 * 0.9)
       .call(generateTSpan(display_name, 1.2, 30));
@@ -142,7 +180,7 @@ function updateDropsSVG(
   const getStartGroupLoc = ({ x, y, tilt }) =>
     `translate(${x}, ${y}) rotate(${tilt})`;
   const getEndGroupLoc = (_, i) =>
-    `translate(${waterdropGroups.groupPositions[i][0]}, ${waterdropGroups.groupPositions[i][1]})`;
+    `translate(${waterdropGroups.groupPositions[i].x}, ${waterdropGroups.groupPositions[i].y})`;
 
   container
     .selectAll(".large-drop")
@@ -153,10 +191,16 @@ function updateDropsSVG(
       });
     })
     .attr("transform", getStartGroupLoc)
-    .each(function (node) {
+    .each(function (node, i) {
       const drops = d3
         .select(this)
-        .call(largeDropUpdate(node, transitionDelay))
+        .call(
+          largeDropUpdate(
+            node,
+            waterdropGroups.groupPositions[i],
+            transitionDelay
+          )
+        )
         .selectAll(".small-drop");
 
       if (onClick) {
@@ -186,7 +230,7 @@ function updateDropsSVG(
 
 function updateColorDrops(container, waterdropGroups, opacFn, color) {
   const getGroupLoc = (_, i) =>
-    `translate(${waterdropGroups.groupPositions[i][0]}, ${waterdropGroups.groupPositions[i][1]})`;
+    `translate(${waterdropGroups.groupPositions[i].x}, ${waterdropGroups.groupPositions[i].y})`;
 
   container
     .selectAll(".color-drop-group")
@@ -223,10 +267,17 @@ function getWaterdropGroups(keyArr, waterdrops, center) {
 
   for (let i = 0, n = groups.length; i < n; i++) {
     const angle = ((Math.PI * 2) / n) * (i - 0.5) - Math.PI / 2;
-    groupPositions.push([
-      center[0] + Math.cos(angle) * rad,
-      center[1] + Math.sin(angle) * rad,
-    ]);
+    const x = center[0] + Math.cos(angle) * rad,
+      y = center[1] + Math.sin(angle) * rad,
+      isLeft = x < center[0],
+      isBottom = y > center[1];
+
+    groupPositions.push({
+      x,
+      y,
+      isLeft,
+      isBottom,
+    });
   }
 
   return {
@@ -247,9 +298,9 @@ function calcLinesAndPositions(groupsObj, activeMinidropKey) {
     nodes.push(node);
 
     positions.push([
-      node.x * settings.SPREAD_1_2 + groupPos[0],
+      node.x * settings.SPREAD_1_2 + groupPos.x,
       node.y * settings.SPREAD_1_2 +
-        groupPos[1] -
+        groupPos.y -
         dropCenterCorrection({ rad: settings.LOD_1_RAD_PX }),
     ]);
   }
@@ -302,6 +353,7 @@ function updateScenIndicatorsSVG(positions, lines) {
     .call(circlet)
     .attr("display", "initial")
     .attr("r", settings.LOD_1_RAD_PX * 1.5)
+    .raise()
     .transition()
     .duration(100)
     .attr("cx", (d) => d[0])
@@ -312,6 +364,7 @@ function updateScenIndicatorsSVG(positions, lines) {
     .data(lines)
     .join("path")
     .attr("class", "comp-line")
+    .raise()
     .transition()
     .duration(100)
     .attr("d", (d) => d3.line()(d));

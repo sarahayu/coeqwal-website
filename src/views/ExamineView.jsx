@@ -14,11 +14,12 @@ import {
   removeElems,
   showElems,
 } from "utils/render-utils";
-import { deserialize } from "utils/data-utils";
-import { clipEnds, dist } from "utils/math-utils";
+import { createInterpsFromDelivs, deserialize } from "utils/data-utils";
+import { clipEnds, dist, percentToRatioFilled } from "utils/math-utils";
 import { radToDeg } from "three/src/math/MathUtils";
 import { helpers } from "utils/examineview-helpers";
 import { useDragPanels } from "hooks/useDragPanels";
+import DropletGlyph from "components/DropletGlyph";
 
 export default function ExamineView() {
   const appCtx = useContext(AppContext);
@@ -40,9 +41,19 @@ export default function ExamineView() {
       .append("g")
       .attr("id", "examine-group");
 
-    svgGroup.append("circle").attr("class", "highlight-circle");
+    svgGroup
+      .append("circle")
+      .attr("class", "highlight-circle")
+      .attr("opacity", 0);
 
-    svgGroup.append("path").attr("class", "connect-line");
+    svgGroup
+      .append("g")
+      .attr("class", "baseline-pointer")
+      .call(function (s) {
+        s.append("path");
+        s.append("text").text("baseline");
+      })
+      .attr("opacity", 0);
 
     svgGroup
       .append("text")
@@ -76,7 +87,7 @@ export default function ExamineView() {
           }
         );
 
-        setTimeout(positionTexts, transitionDuration * 1.2);
+        setTimeout(showAdditionalInfo, transitionDuration * 1.2);
 
         appCtx.setGoBack(() => () => {
           const transitionDuration = appCtx.resetCamera();
@@ -91,7 +102,7 @@ export default function ExamineView() {
           removeElems(".small-drop, .circlet", container);
           hideElems("#examine-group");
           d3.selectAll(
-            "#examine-group .instruction-text, #examine-group .large-drop-label"
+            "#examine-group .instruction-text, #examine-group .large-drop-label, #examine-group .highlight-circle, #examine-group .baseline-pointer"
           ).attr("opacity", 0);
 
           setPanels([]);
@@ -131,7 +142,7 @@ export default function ExamineView() {
     [colorSetting]
   );
 
-  function positionTexts() {
+  function showAdditionalInfo() {
     const instrFontSize =
       (curMinidropsRef.current.height * settings.SPREAD_1_2) / 20;
 
@@ -170,6 +181,13 @@ export default function ExamineView() {
       .attr("text-anchor", "middle")
       .attr("font-size", labelFontSize)
       .call(generateTSpan(curMinidropsRef.current.display_name, 1.2, 30))
+      .transition()
+      .attr("opacity", 1);
+
+    d3.selectAll(
+      "#examine-group .highlight-circle, #examine-group .baseline-pointer"
+    )
+      .attr("opacity", 0)
       .transition()
       .attr("opacity", 1);
   }
@@ -305,8 +323,14 @@ export default function ExamineView() {
         {panels.map(
           ({ text, x, y, id, offsetX, offsetY, panelKey, preview }) => {
             const { objective, scenario } = objectivesData.FLATTENED_DATA[id];
+            const delivs = objectivesData.FLATTENED_DATA[id].deliveries;
 
-            const [scenMin, baselineMax] = objectivesData.MIN_MAXES[objective];
+            const [delivMin, delivMax] = objectivesData.MIN_MAXES[objective];
+            const interper = createInterpsFromDelivs(
+              delivs,
+              delivMin,
+              delivMax
+            );
 
             return (
               <div
@@ -321,19 +345,26 @@ export default function ExamineView() {
                 <div className="panel-tab">
                   scenario <span>{text}</span>
                 </div>
-                <DotHistogram
-                  width={480}
-                  height={320}
-                  data={objectivesData.FLATTENED_DATA[id].deliveries}
-                  range={[scenMin, baselineMax]}
-                  goal={appCtx.goals[appCtx.activeWaterdrops[0]]}
-                  setGoal={(newGoal) => {
-                    appCtx.setGoals((g) => {
-                      g[appCtx.activeWaterdrops[0]] = newGoal;
-                      return { ...g };
-                    });
-                  }}
-                />
+                <div className="panel-main-container">
+                  <DotHistogram
+                    width={480}
+                    height={320}
+                    data={delivs}
+                    range={[delivMin, delivMax]}
+                    goal={appCtx.goals[appCtx.activeWaterdrops[0]]}
+                    setGoal={(newGoal) => {
+                      appCtx.setGoals((g) => {
+                        g[appCtx.activeWaterdrops[0]] = newGoal;
+                        return { ...g };
+                      });
+                    }}
+                  />
+                  <DropletGlyph
+                    levelInterp={interper}
+                    height={200}
+                    resolution={4}
+                  />
+                </div>
                 <SceneSettingSubcard
                   settings={deserialize(text)}
                   setColorSetting={setColorSetting}

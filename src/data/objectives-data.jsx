@@ -4,7 +4,7 @@ import { SETT_NUM_OPTS, deserialize } from "utils/data-utils";
 import { clamp, shuffle } from "utils/math-utils";
 import { mapBy } from "utils/misc-utils";
 
-const SCEN_DIVISOR = 20; // debugging purposes, don't render all scenarios to speed things up
+const SCEN_DIVISOR = 1; // debugging purposes, don't render all scenarios to speed things up
 
 async function initObjectivesData() {
   const MAX_DELIVS = 1200;
@@ -48,10 +48,11 @@ async function initObjectivesData() {
 
   const OBJECTIVE_IDS = Object.keys(OBJECTIVES_DATA);
 
+  // set default goals to 0TAF, we may want to change this on a per-objective basis
   const OBJECTIVE_GOALS_MAP = (function initDefaults() {
     const goalMap = {};
     for (let i = 0; i < OBJECTIVE_IDS.length; i++)
-      goalMap[OBJECTIVE_IDS[i]] = 200;
+      goalMap[OBJECTIVE_IDS[i]] = 0;
     return goalMap;
   })();
 
@@ -93,6 +94,7 @@ async function initObjectivesData() {
       );
 
       minmaxes[objective] = [scenariosMin, baselineMax];
+      // minmaxes[objective] = [0, baselineMax];
     }
 
     return minmaxes;

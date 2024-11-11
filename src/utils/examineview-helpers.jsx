@@ -113,25 +113,46 @@ function updateSmallDropSVG(
     .duration(1000)
     .attr("transform", getEndLoc);
 
+  const circlePosX = waterdropGroup.x + baselinePos.x * settings.SPREAD_1_2,
+    circlePosY =
+      waterdropGroup.y +
+      baselinePos.y * settings.SPREAD_1_2 -
+      dropCenterCorrection({ rad: settings.LOD_1_RAD_PX });
+
+  const textPosX =
+      waterdropGroup.x + (waterdropGroup.height * settings.SPREAD_1_2) / 2,
+    textPosY =
+      waterdropGroup.y - (waterdropGroup.height * settings.SPREAD_1_2) / 2;
+
+  const fontSize = waterdropGroup.height / 20;
+  const lineWidth = waterdropGroup.height / 100;
+
   container
     .select(".highlight-circle")
     .attr("stroke", "none")
     .attr("fill", "yellow")
     .attr("r", settings.LOD_1_RAD_PX * 2)
-    .attr("cx", waterdropGroup.x + baselinePos.x)
+    .attr("cx", circlePosX)
+    .attr("cy", circlePosY);
+
+  container
+    .select(".baseline-pointer path")
     .attr(
-      "cy",
-      waterdropGroup.y +
-        baselinePos.y -
-        dropCenterCorrection({ rad: settings.LOD_1_RAD_PX })
+      "d",
+      d3
+        .line()
+        .x((d) => d[0])
+        .y((d) => d[1])([
+        [circlePosX, circlePosY],
+        [textPosX, textPosY],
+      ])
     )
-    .attr("cx", waterdropGroup.x + baselinePos.x * settings.SPREAD_1_2)
-    .attr(
-      "cy",
-      waterdropGroup.y +
-        baselinePos.y * settings.SPREAD_1_2 -
-        dropCenterCorrection({ rad: settings.LOD_1_RAD_PX })
-    );
+    .attr("stroke-width", lineWidth);
+  container
+    .select(".baseline-pointer text")
+    .attr("class", "fancy-font")
+    .attr("font-size", fontSize)
+    .attr("transform", `translate(${textPosX + fontSize}, ${textPosY})`);
 }
 
 function updateColorDrops(container, waterdropGroup, opacFn, color) {

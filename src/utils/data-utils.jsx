@@ -2,20 +2,6 @@ import * as d3 from "d3";
 
 import { ticksExact } from "bucket-lib/utils";
 
-import { objectivesData } from "data/objectives-data";
-
-export function createInterps(obj_name, scen_name, data, maxDelivs) {
-  const delivs =
-    data[obj_name][objectivesData.SCENARIO_KEY_STRING][scen_name][
-      objectivesData.DELIV_KEY_STRING
-    ];
-  return d3
-    .scaleLinear()
-    .domain(ticksExact(0, 1, delivs.length))
-    .range(delivs.map((v) => Math.min(1, v / maxDelivs)))
-    .clamp(true);
-}
-
 export function createInterpsFromDelivs(delivs, minDelivs, maxDelivs) {
   return d3
     .scaleLinear()

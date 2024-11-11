@@ -943,7 +943,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
     rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 
-  height: 320px;
   width: min-content;
   display: flex;
   gap: 1rem;
@@ -951,7 +950,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   font-size: 1.2rem;
 }
 
-.panel > .dot-histogram-wrapper {
+.panel-main-container {
+  position: relative;
+}
+
+.panel-main-container .waterdrop-wrapper {
+  position: absolute;
+  top: 100%;
+  left: 100%;
+  transform: translate(-10%, -50%);
+}
+
+.panel .dot-histogram-wrapper {
   display: flex;
   align-items: end;
   position: relative;
@@ -966,10 +976,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   transition: left 0.1s, top 0.1s;
 }
 
-.examine-panel > .dot-histogram-wrapper {
-  flex-basis: 240px;
-  flex-grow: 0;
-  flex-shrink: 0;
+.examine-panel .dot-histogram-wrapper {
+  height: 240px;
+}
+
+.compare-panel .dot-histogram-wrapper {
+  height: 280px;
 }
 
 .compare-panel {
@@ -1450,7 +1462,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .scen-settings .full-card > span:nth-child(2) {
-  font-size: 2rem;
+  font-size: 3em;
 }
 
 .scen-settings .sett-dot-wrapper {
@@ -1469,7 +1481,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   display: flex;
   flex-direction: row;
   gap: 1rem;
-  font-size: 0.5rem;
+  font-size: 1rem;
 }
 
 .connect-line {
@@ -1536,4 +1548,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
   margin-top: calc(-1 * var(--map-svg-height) + 50vh);
   transform: translateY(-50%);
+}
+
+.baseline-pointer path {
+  stroke: yellow;
+  stroke-linecap: round;
+}
+
+.baseline-pointer text {
+  letter-spacing: 0.1em;
+  font-style: italic;
+  opacity: 0.6;
 }

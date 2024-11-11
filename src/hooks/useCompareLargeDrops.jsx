@@ -73,18 +73,18 @@ export function useCompareLargeDrops() {
           .scale(camFirstDrop.k)
       );
 
+    compareViewHelpers.updateDropsSVG(container, groupsRef.current, 0, {
+      onHover: (d) => {
+        setActiveMinidrop(d.key);
+      },
+    });
+
     const indicatorGroup = container
       .append("g")
       .attr("class", "indicator-group");
 
     indicatorGroup.append("text").attr("id", "member-variable");
     indicatorGroup.append("text").attr("id", "member-label");
-
-    compareViewHelpers.updateDropsSVG(container, groupsRef.current, 0, {
-      onHover: (d) => {
-        setActiveMinidrop(d.key);
-      },
-    });
 
     setActiveMinidrop(constants.DEFAULT_SCENARIO);
     hideElems(
@@ -141,6 +141,9 @@ export function useCompareLargeDrops() {
       .transition()
       .duration(100)
       .attr("d", (d) => d3.line()(d));
+
+    // TODO why do i have to do this in order for circlets to appear on top of waterdrops?
+    d3.select("#comparer-graphics .indicator-group").raise();
   }
 
   function showOtherDrop() {
