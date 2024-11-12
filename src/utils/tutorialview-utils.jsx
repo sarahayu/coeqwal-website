@@ -1,9 +1,8 @@
 import * as d3 from "d3";
 
-import { ticksExact } from "bucket-lib/utils";
+import { ticksExact, levelToDropletLevel } from "bucket-lib/utils";
 
 import { objectivesData } from "data/objectives-tutorial-data";
-import { percentToRatioFilled } from "./math-utils";
 
 function initConstants() {
   const BAR_CHART_WIDTH = 500,
@@ -47,7 +46,7 @@ function initConstants() {
 
   const VARIATIONS_INTERPERS = VARIATIONS_DELIVS.map(
     (varDelivs) => (val) =>
-      percentToRatioFilled(
+      levelToDropletLevel(
         d3
           .scaleLinear()
           .domain(ticksExact(0, 1, varDelivs.length))
@@ -73,7 +72,7 @@ function initConstants() {
       .clamp(true)(val);
 
   const PAG_INTERPER_DROP = (val) =>
-    percentToRatioFilled(
+    levelToDropletLevel(
       d3
         .scaleLinear()
         .domain(ticksExact(0, 1, PAG_DELIVS.length))

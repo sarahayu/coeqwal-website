@@ -37,14 +37,21 @@ function initScripts() {
       <div className="tut-text-card">
         What we get are buckets of water showing which water levels are most
         likely, with the darker areas being the most likely water levels.
+        <span className="supplement-card-info">
+          Visuals made using{" "}
+          <a href="https://sarahayu.github.io/bucket-glyph/" target="_blank">
+            Bucket-Glyph
+          </a>
+        </span>
       </div>
     ),
     comparingTheTwo: (
       <div className="tut-text-card">
-        Comparing the two, we see that the maximum water level for the refuge
-        group is more than the agriculture group. Additionally, the refuge
-        group's water level is more consistent than that of the agriculture
-        group, with 1/3 maximum capacity being the most likely water level.
+        Comparing the two, we see that the maximum water level for the
+        agriculture group is more than the refuge group. Additionally, the
+        refuge group's water level is more consistent than that of the
+        agriculture group, with the most likely water levels hovering at around
+        1/3 maximum capacity.
       </div>
     ),
     butTheAgGroup: (

@@ -1,15 +1,18 @@
 import * as d3 from "d3";
 import * as THREE from "three";
-import { interpolateWatercolorBlue } from "bucket-lib/utils";
+import {
+  interpolateWatercolorBlue,
+  levelToDropletLevel,
+} from "bucket-lib/utils";
 import { settings } from "settings";
-import { copyCoords, sortBy } from "./misc-utils";
-import { rotatePoints, toRadians } from "./math-utils";
+import { copyCoords, sortBy } from "utils/misc-utils";
+import { rotatePoints, toRadians } from "utils/math-utils";
 import {
   waterdropDeltaOutline,
   waterdropDelta,
   worldToScreen,
   screenToWorld,
-} from "./render-utils";
+} from "utils/render-utils";
 
 export function mouseToThree(mouseX, mouseY, width, height) {
   return {
@@ -77,8 +80,8 @@ export class WaterdropMesh {
         const l2 = levs[k];
 
         const meshCoords = waterdropDelta(
-          l1 / maxLev,
-          l2 / maxLev,
+          levelToDropletLevel(l1 / maxLev),
+          levelToDropletLevel(l2 / maxLev),
           settings.LOD_1_RAD_PX * 2
         );
         const color = new THREE.Color(

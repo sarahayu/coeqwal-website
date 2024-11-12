@@ -48,7 +48,7 @@ export default function DropletGlyph({
       const glyph = bucketGlyph(innerWidth, innerHeight, levelToDropletLevel);
 
       const liquids = svgElement.current
-        .select(".graph-area")
+        .select(".masked-area")
         .selectAll(".bucket-box")
         .data(glyph(liquidLevels))
         .join("rect")

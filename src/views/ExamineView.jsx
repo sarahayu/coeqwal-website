@@ -15,7 +15,7 @@ import {
   showElems,
 } from "utils/render-utils";
 import { createInterpsFromDelivs, deserialize } from "utils/data-utils";
-import { clipEnds, dist, percentToRatioFilled } from "utils/math-utils";
+import { clipEnds, dist } from "utils/math-utils";
 import { radToDeg } from "three/src/math/MathUtils";
 import { helpers } from "utils/examineview-helpers";
 import { useDragPanels } from "hooks/useDragPanels";
@@ -157,7 +157,10 @@ export default function ExamineView() {
       .attr("text-anchor", "end")
       .attr("font-size", instrFontSize)
       .call(
-        generateTSpan(["click to show panels.", "you can drag panels."], 1.6)
+        generateTSpan(
+          ["click to keep panels open.", "you can drag panels."],
+          1.6
+        )
       )
       .call((s) => {
         s.transition().attr("opacity", 1);

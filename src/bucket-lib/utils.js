@@ -73,6 +73,22 @@ function bucketPath(width, height, filled = 1.0, taper = 0.8) {
   return getPath(drawBucketMask);
 }
 
+function collideOffsetter(data, size) {
+  const isTooClose = (i) => {
+    if (i == 0) return false;
+    return Math.abs(data[i - 1].y - data[i].y) < size;
+  };
+
+  let curXOffset = 0;
+
+  const xOffset = (i) => {
+    if (isTooClose(i)) return ++curXOffset * -3;
+    return (curXOffset = 0);
+  };
+
+  return xOffset;
+}
+
 export {
   distributeQuantiles,
   interpolateWatercolorBlue,
@@ -80,4 +96,5 @@ export {
   WATERDROP_ICON,
   ticksExact,
   bucketPath,
+  collideOffsetter,
 };

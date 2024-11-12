@@ -266,6 +266,10 @@ function MainWaterdropGraphics({
           scenario <span className="scen-number">{"0000"}</span>
         </p>
         <p className="fancy-font objective-label">{objectiveLabel}</p>
+        <p className="volume-not-height">
+          Water supply represented by volume of water inside droplet, not height
+          of water level
+        </p>
       </div>
       <div className="main-histogram">
         <DotHistogram

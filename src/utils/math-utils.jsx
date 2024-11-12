@@ -173,15 +173,6 @@ export function placeDropsUsingPhysics(
   return retVal;
 }
 
-export function percentToRatioFilled(p) {
-  p -= 0.0088;
-  return clamp(
-    (3.1304 * p ** 3 - 4.2384 * p ** 2 + 3.3471 * p + 0.0298) / 2.2326,
-    0,
-    1
-  );
-}
-
 export function toRadians(a) {
   return (a * Math.PI) / 180;
 }

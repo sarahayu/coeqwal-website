@@ -556,7 +556,9 @@ function initAllAnims() {
         .style("display", "initial")
         .classed("hasarrow", true);
 
-      hideElems(".main-waterdrop .objective-label");
+      hideElems(
+        ".main-waterdrop .objective-label, .main-waterdrop .volume-not-height"
+      );
     }
 
     function animUndo() {
@@ -564,7 +566,9 @@ function initAllAnims() {
         .style("display", "none")
         .classed("hasarrow", false);
 
-      showElems(".main-waterdrop .objective-label");
+      showElems(
+        ".main-waterdrop .objective-label, .main-waterdrop .volume-not-height"
+      );
     }
 
     return {

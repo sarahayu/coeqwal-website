@@ -48,8 +48,8 @@ export function useCompareLargeDrops() {
       k,
     };
 
-    x = -(groupsRef.current.groupPositions[0][0] * k) + camera.width / 2;
-    y = groupsRef.current.groupPositions[0][1] * k + camera.height / 2;
+    x = -(groupsRef.current.groupPositions[0].x * k) + camera.width / 2;
+    y = groupsRef.current.groupPositions[0].y * k + camera.height / 2;
 
     const camFirstDrop = {
       x,

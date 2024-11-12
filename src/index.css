@@ -968,6 +968,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   min-height: 0;
 }
 
+.panel .waterdrop-wrapper {
+  pointer-events: none;
+}
+
 .examine-panel {
   height: min-content;
 }
@@ -1062,7 +1066,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   width: 100%;
   background-color: #efefef;
   isolation: isolate;
-  line-height: 1.5;
+  line-height: 1.8;
+  font-size: 1.4em;
 }
 
 .scrollama {
@@ -1092,7 +1097,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 .objective-label {
   text-align: center;
   color: gray;
-  font-size: 1.1rem;
+  font-size: 1.1em;
 }
 
 .tut-graph > p {
@@ -1101,8 +1106,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .tut-text-card {
-  padding: 2rem;
-  max-width: 30vw;
+  padding: 2em;
+  max-width: 40vw;
   margin-inline: auto;
   position: relative;
   isolation: isolate;
@@ -1146,6 +1151,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   padding: 2rem;
   background-color: rgba(255, 255, 255, 0.8);
   border-radius: 1em;
+}
+
+.supplement-card-info {
+  display: block;
+  text-align: right;
+  color: gray;
+  font-size: 0.7em;
+  font-style: italic;
+  margin-top: 1em;
 }
 
 .skip-btn {
@@ -1232,6 +1246,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   background-color: lightgray;
 }
 
+.main-waterdrop {
+  position: relative;
+}
+
 .main-waterdrop p:nth-of-type(1),
 .vardrop p:nth-of-type(1) {
   display: block;
@@ -1241,6 +1259,27 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .main-waterdrop p:nth-of-type(2) {
   margin-top: 1em;
+}
+
+.main-waterdrop .volume-not-height {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  color: gray;
+  font-style: italic;
+  width: 40ch;
+  line-height: 1.8;
+
+  --indentation: 5ch;
+  text-indent: calc(-1 * var(--indentation));
+  padding-left: var(--indentation);
+}
+
+.main-waterdrop .volume-not-height::before {
+  content: "*";
+  position: absolute;
+  top: 0;
+  left: calc(var(--indentation) - 2ch);
 }
 
 .tut-drop-graphics-wrapper .scen-number {
@@ -1524,7 +1563,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .scrollama-locations {
-  --width: min(45rem, 100%);
+  --width: min(50rem, 100%);
 }
 
 .scrollama-locations .tut-minimap {
@@ -1559,4 +1598,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   letter-spacing: 0.1em;
   font-style: italic;
   opacity: 0.6;
+}
+
+.bucket-label text {
+  text-anchor: middle;
+  alignment-baseline: middle;
+  font-size: 0.8em;
 }

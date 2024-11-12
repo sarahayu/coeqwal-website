@@ -8,9 +8,21 @@ import {
   drawBucketOutline,
   transitionSway,
 } from "bucket-lib/bucket-glyph";
-import { interpolateWatercolorBlue, ticksExact } from "bucket-lib/utils";
+import {
+  collideOffsetter,
+  interpolateWatercolorBlue,
+  ticksExact,
+} from "bucket-lib/utils";
 
 const LEVELS = 10;
+
+const PERCENTILE_LABELS = [
+  "Maximum",
+  "75th Percentile",
+  "50th Percentile",
+  "25th Percentile",
+  "Minimum",
+];
 
 export default function BucketGlyph({
   levelInterp,
@@ -20,21 +32,25 @@ export default function BucketGlyph({
   resolution = LEVELS,
 }) {
   const LINE_WIDTH = 3;
-  const innerWidth = width - LINE_WIDTH * 2;
-  const innerHeight = height - LINE_WIDTH;
+  const GLYPH_MARGIN = {
+    top: 30,
+    right: LINE_WIDTH / 2,
+    bottom: 30,
+    left: 180,
+  };
 
   const svgElement = useRef();
 
   useLayoutEffect(function initialize() {
     const svgContainer = svgElement.current
-      .attr("width", width)
-      .attr("height", height)
+      .attr("width", width + GLYPH_MARGIN.left + GLYPH_MARGIN.right)
+      .attr("height", height + GLYPH_MARGIN.top + GLYPH_MARGIN.bottom)
       .append("g")
-      .attr("class", "bucket")
-      .attr("transform", `translate(${LINE_WIDTH}, ${LINE_WIDTH / 2})`);
+      .attr("class", "graph-area")
+      .attr("transform", `translate(${GLYPH_MARGIN.left},${GLYPH_MARGIN.top})`);
 
     svgContainer.call(
-      bucketShape(innerWidth, innerHeight, drawBucketMask, drawBucketOutline)
+      bucketShape(width, height, drawBucketMask, drawBucketOutline)
     );
   }, []);
 
@@ -44,12 +60,13 @@ export default function BucketGlyph({
         levelInterp(d)
       );
 
-      const glyph = bucketGlyph(innerWidth, innerHeight);
+      const glyph = bucketGlyph(width, height);
+      const data = glyph(liquidLevels);
 
       const liquids = svgElement.current
-        .select(".graph-area")
+        .select(".masked-area")
         .selectAll(".bucket-box")
-        .data(glyph(liquidLevels))
+        .data(data)
         .join("rect")
         .attr("class", "bucket-box")
         .attr("width", (d) => d.width)
@@ -58,6 +75,51 @@ export default function BucketGlyph({
         .attr("fill", (_, i) => colorInterp(i / resolution));
 
       transitionSway(liquids, 200 / height).attr("y", (d) => d.y);
+
+      // percentile labels that appear on the side
+      const reverseData = data.reverse();
+
+      const labelWidth = 170,
+        labelHeight = 30;
+
+      const xOffset = collideOffsetter(reverseData, labelHeight);
+
+      const tagElem = (s) =>
+        s.append("g").call((s) => {
+          s.append("rect");
+          s.append("text");
+        });
+
+      const labels = svgElement.current
+        .select(".graph-area")
+        .selectAll(".bucket-label")
+        .data(reverseData)
+        .join(tagElem)
+        .attr("class", "bucket-label")
+        .transition()
+        .attr(
+          "transform",
+          (d, i) =>
+            `translate(${-labelWidth / 2 - 3 + xOffset(i)}, ${
+              d.y + height / 2
+            })`
+        );
+
+      labels
+        .select("text")
+        .text((_, i) => PERCENTILE_LABELS[data.length - 1 - i])
+        .style("fill", (_, i) => (i > data.length / 2 ? "black" : "white"));
+
+      labels
+        .select("rect")
+        .attr("width", labelWidth)
+        .attr("height", labelHeight)
+        .attr("x", -labelWidth / 2)
+        .attr("y", -labelHeight / 2)
+        .attr("rx", 8)
+        .style("fill", (_, i) =>
+          colorInterp((data.length - 1 - i) / resolution)
+        );
     },
     [levelInterp]
   );

@@ -93,8 +93,8 @@ async function initObjectivesData() {
         )
       );
 
-      minmaxes[objective] = [scenariosMin, baselineMax];
-      // minmaxes[objective] = [0, baselineMax];
+      // minmaxes[objective] = [scenariosMin, baselineMax];
+      minmaxes[objective] = [0, baselineMax];
     }
 
     return minmaxes;
