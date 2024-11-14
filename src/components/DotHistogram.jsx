@@ -5,7 +5,7 @@ import { quantileBins } from "bucket-lib/quantile-bins";
 import { clamp } from "utils/math-utils";
 
 const NUM_CIRCLES = 20;
-const MARGIN = { top: 10, right: 10, bottom: 20, left: 10 };
+const MARGIN = { top: 20, right: 20, bottom: 45, left: 20 };
 
 const WATERDROP_ICON = {
   draw: function (context, size) {
@@ -57,6 +57,7 @@ export default function DotHistogram({
         d3
           .axisBottom()
           .scale(d3.scaleLinear().domain(range).range([0, width]))
+          .ticks(8)
           .tickFormat(d3.format(".2s"))
       )
       .call((s) => {
@@ -66,7 +67,7 @@ export default function DotHistogram({
       })
       .append("text")
       .attr("fill", "black")
-      .attr("transform", `translate(${width / 2}, ${30})`)
+      .attr("transform", `translate(${width / 2}, ${40})`)
       .text("Delivery (TAF)");
 
     razorElement.current.style.transform = `translateX(${d3

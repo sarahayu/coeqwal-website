@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { SETT_NUM_OPTS, deserialize } from "utils/data-utils";
 
-import { clamp, shuffle } from "utils/math-utils";
+import { shuffle } from "utils/math-utils";
 import { mapBy } from "utils/misc-utils";
 
 const SCEN_DIVISOR = 1; // debugging purposes, don't render all scenarios to speed things up

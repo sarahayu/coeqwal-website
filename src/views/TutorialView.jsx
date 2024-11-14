@@ -67,7 +67,10 @@ export default function TutorialView() {
         </DataStoryScrollama>
       </div>
       <div className="scrollama scrollama-create-buckets">
-        <CompareBucketCreationsGraphics storyVars={storyVars} />
+        <CompareBucketCreationsGraphics
+          storyVars={storyVars}
+          size={appCtx.appHeight * 0.4}
+        />
         <DataStoryScrollama>
           {getSlidesInRange("barsAppear", "overallIfWantReliable").map(
             (slide, i) => (
@@ -79,7 +82,10 @@ export default function TutorialView() {
         </DataStoryScrollama>
       </div>
       <div className="scrollama scrollama-compare-scenobjs">
-        <CompareScenariosGraphics storyVars={storyVars} />
+        <CompareScenariosGraphics
+          storyVars={storyVars}
+          size={appCtx.appHeight * 0.4}
+        />
         <CompareBigDroplets />
         <DataStoryScrollama>
           {getSlidesInRange("forNowLetsFocus", "letsBringRefuge").map(
@@ -211,17 +217,19 @@ function CompareBucketCreationsGraphics({ storyVars }) {
   );
 }
 
-function CompareScenariosGraphics({ storyVars }) {
+function CompareScenariosGraphics({ storyVars, size }) {
   return (
     <div className="tut-drop-graphics-wrapper">
       <MainWaterdropGraphics
         objectiveLabel={descriptionsData[constants.PAG_OBJECTIVE].display_name}
         dropInterper={storyVars.dropInterper}
         histData={constants.PAG_DELIVS}
+        histRange={[0, objectivesData.MIN_MAXES[constants.PAG_OBJECTIVE][1]]}
         goal={storyVars.userGoal}
         setGoal={(newGoal) => {
           storyVars.setUserGoal(newGoal);
         }}
+        size={size}
       />
       <VariationWaterdropGraphics
         variations={constants.DROP_VARIATIONS.map((variation) => ({
@@ -233,6 +241,8 @@ function CompareScenariosGraphics({ storyVars }) {
         setGoal={(newGoal) => {
           storyVars.setUserGoal(newGoal);
         }}
+        histRange={[0, objectivesData.MIN_MAXES[constants.PAG_OBJECTIVE][1]]}
+        size={size}
       />
     </div>
   );
@@ -250,16 +260,18 @@ function MainWaterdropGraphics({
   objectiveLabel,
   dropInterper,
   histData,
+  histRange,
   goal,
   setGoal,
+  size,
 }) {
   return (
     <>
       <div className="main-waterdrop">
         <DropletGlyph
           levelInterp={dropInterper}
-          width={400}
-          height={constants.BAR_CHART_HEIGHT}
+          width={size}
+          height={size}
           resolution={4}
         />
         <p className="var-scen-label">
@@ -273,9 +285,10 @@ function MainWaterdropGraphics({
       </div>
       <div className="main-histogram">
         <DotHistogram
-          width={210}
-          height={140}
+          width={size}
+          height={(size * 2) / 3}
           data={histData}
+          range={histRange}
           goal={goal}
           setGoal={setGoal}
         />
@@ -284,13 +297,19 @@ function MainWaterdropGraphics({
   );
 }
 
-function VariationWaterdropGraphics({ variations, goal, setGoal }) {
+function VariationWaterdropGraphics({
+  variations,
+  goal,
+  setGoal,
+  histRange,
+  size,
+}) {
   return variations.map(({ idx, scen, clas, desc, interper, histData }) => (
     <div className={`vardrop ${clas}`} key={idx} desc={desc}>
       <DropletGlyph
         levelInterp={interper}
-        width={400}
-        height={(constants.BAR_CHART_HEIGHT * 2) / 3}
+        width={size * 0.7}
+        height={size * 0.7}
         resolution={4}
       />
       <p className="var-scen-label">
@@ -298,9 +317,10 @@ function VariationWaterdropGraphics({ variations, goal, setGoal }) {
       </p>
       <DotHistogram
         shortForm
-        width={210}
-        height={140}
+        width={size}
+        height={(size * 2) / 3}
         data={histData}
+        range={histRange}
         goal={goal}
         setGoal={setGoal}
       />

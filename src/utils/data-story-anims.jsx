@@ -641,10 +641,7 @@ function initAllAnims() {
         .style("transform", "translate(50px, 15px) scale(0.5)");
 
       d3.select(".main-histogram").style("display", "initial");
-      d3.selectAll(".vardrop .dot-histogram-wrapper").style(
-        "display",
-        "initial"
-      );
+      d3.selectAll(".vardrop .dot-histogram-wrapper").style("display", "flex");
     }
 
     function animUndo() {

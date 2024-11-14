@@ -263,7 +263,7 @@ input::-moz-focus-inner {
   height: 100%;
   top: 0;
   position: absolute;
-  font-size: 1rem;
+  font-size: 0.8em;
   border: none;
   border-right: 3px dashed #f00;
   color: gray;
@@ -938,7 +938,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 .panel {
   cursor: move;
   background-color: white;
-  padding: 1.5rem;
+  padding: 1em 0.5em;
   position: absolute;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
     rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
@@ -947,7 +947,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   display: flex;
   gap: 1rem;
   flex-direction: column;
-  font-size: 1.2rem;
+  font-size: 1.2em;
 }
 
 .panel-main-container {
@@ -1067,7 +1067,23 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   background-color: #efefef;
   isolation: isolate;
   line-height: 1.8;
+  font-size: 0.9em;
+}
+
+.tutorial-view .vardrop,
+.tutorial-view .main-histogram,
+.tutorial-view .main-waterdrop {
   font-size: 1.4em;
+}
+
+.tutorial-view .dot-histogram-wrapper {
+  height: 25vh;
+  display: flex;
+  align-items: end;
+}
+
+.tutorial-view .dot-histogram-wrapper text {
+  font-size: 1.2em;
 }
 
 .scrollama {
@@ -1193,6 +1209,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .vardrop {
   position: absolute;
+  --block-padding: 3rem;
+  --inlind-padding: 1rem;
 }
 
 .vardrop path {
@@ -1200,34 +1218,34 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .drop1 {
-  left: 0;
-  top: 2rem;
+  left: var(--inlind-padding);
+  top: var(--block-padding);
 }
 
 .drop1.highlighted::after {
   content: "";
   position: absolute;
-  top: -1rem;
-  left: 2rem;
-  right: 2rem;
-  bottom: -1rem;
+  top: -1em;
+  left: 0em;
+  right: 0em;
+  bottom: -1em;
   border: 3px solid orange;
-  border-radius: 1rem;
+  border-radius: 1em;
 }
 
 .drop2 {
-  right: 0;
-  top: 2rem;
+  right: var(--inlind-padding);
+  top: var(--block-padding);
 }
 
 .drop3 {
-  left: 0;
-  bottom: 2rem;
+  left: var(--inlind-padding);
+  bottom: var(--block-padding);
 }
 
 .drop4 {
-  right: 0;
-  bottom: 2rem;
+  right: var(--inlind-padding);
+  bottom: var(--block-padding);
 }
 
 .tut-text-card button {
@@ -1269,6 +1287,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   font-style: italic;
   width: 40ch;
   line-height: 1.8;
+  font-size: 0.8em;
 
   --indentation: 5ch;
   text-indent: calc(-1 * var(--indentation));
@@ -1343,10 +1362,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   top: 50%;
   left: 50%;
   transform: translateX(-50%);
-}
-
-.scrollama-compare-scenobjs .dot-histogram-wrapper text {
-  font-size: 0.9rem;
 }
 
 .tut-comparer-graphics-wrapper {
