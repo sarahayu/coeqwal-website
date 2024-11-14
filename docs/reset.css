@@ -74,8 +74,7 @@ picture {
 input,
 button,
 textarea,
-select,
-g {
+select {
   font-family: inherit;
   font-size: inherit;
 }
