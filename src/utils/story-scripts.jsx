@@ -14,13 +14,6 @@ function initScripts() {
     soCal: (
       <div className="tut-text-card">...and the refuge group in the south.</div>
     ),
-    barsAppear: (
-      <div className="tut-text-card">
-        This is the average yearly amount of water each group receives,
-        specifically from the <b>Central Valley Project</b>, one of two water
-        municipalities in California.
-      </div>
-    ),
     barsExplain: (
       <div className="tut-text-card">
         Here, it is presented as bar graphs, with the bottom axis representing
@@ -45,45 +38,8 @@ function initScripts() {
         </span>
       </div>
     ),
-    comparingTheTwo: (
-      <div className="tut-text-card">
-        Comparing the two, we see that the maximum water level for the
-        agriculture group is more than the refuge group. Additionally, the
-        refuge group's water level is more consistent than that of the
-        agriculture group, with the most likely water levels hovering at around
-        1/3 maximum capacity.
-      </div>
-    ),
-    butTheAgGroup: (
-      <div className="tut-text-card">
-        But the agriculture group has some chances of reaching higher than the
-        refuge group's most likely water level, judging from the light blue
-        levels that are situated above the 1/3 mark.
-      </div>
-    ),
-    overallIfWantReliable: (
-      <div className="tut-text-card" style={{ marginBottom: "80vh" }}>
-        Overall, if we want a reliable supply we would want the refuge group's
-        deliveries, but if we want a chance at higher supplies of water albeit
-        with more inconsistent results, we would want the agriculture group's
-        deliveries.
-      </div>
-    ),
-    forNowLetsFocus: (
-      <div className="tut-text-card">
-        For now, let's focus on the agriculture group. Here it is as a drop of
-        water. We see here that the lightest color reaches approximately the
-        midpoint of the maximum capacity, meaning that there is a chance 600 TAF
-        of water will be delivered to this group.
-      </div>
-    ),
-    darkerColsIndic: (
-      <div className="tut-text-card">
-        The darker colors, however, indicate that it's more likely that slightly
-        less than 600 TAF of water will be delivered — around 500 TAF. As we'll
-        later see, this is not a lot compared to other areas of California.
-      </div>
-    ),
+    comparingTheTwo: <span></span>,
+    forNowLetsFocus: <span></span>,
     ifChangeReality: (
       <div className="tut-text-card">
         But what if we could <em>change reality</em>? What if we could increase
@@ -114,15 +70,9 @@ function initScripts() {
       </div>
     ),
     tryMoveRed: (
-      <div className="tut-text-card" style={{ marginBottom: "120vh" }}>
+      <div className="tut-text-card">
         Try moving the red line to change the minimum demand and see how well
         each of these scenarios meet those demands.
-      </div>
-    ),
-    collectAllScen: (
-      <div className="tut-text-card">
-        We'll collect all the possible scenarios and sort them by their average
-        deliveries.
       </div>
     ),
     soWhyNot: (
@@ -132,14 +82,7 @@ function initScripts() {
         <em>objectives</em>, want scenarios that best fit <em>them.</em>
       </div>
     ),
-    letsBringRefuge: (
-      <div className="tut-text-card" style={{ marginBottom: "120vh" }}>
-        Let's bring back the refuge group. The scenarios that benefit the
-        agriculture group do not always benefit the refuge group, and vice
-        versa. Hover over the waterdrops to see how the same scenarios place for
-        each objective. (Can you find a scenario that benefits both?)
-      </div>
-    ),
+    letsBringRefuge: <span></span>,
   };
 }
 

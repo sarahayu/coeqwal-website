@@ -259,11 +259,11 @@ function updateColorDrops(container, waterdropGroups, opacFn, color) {
     });
 }
 
-function getWaterdropGroups(keyArr, waterdrops, center) {
+function getWaterdropGroups(keyArr, waterdrops, center, spacing = 0.75) {
   const groups = keyArr.map((k) => waterdrops.groups.find((g) => g.key === k));
 
   const groupPositions = [];
-  const rad = groups[0].height * settings.SPREAD_1_2 * 0.75;
+  const rad = groups[0].height * settings.SPREAD_1_2 * spacing;
 
   for (let i = 0, n = groups.length; i < n; i++) {
     const angle = ((Math.PI * 2) / n) * (i - 0.5) - Math.PI / 2;

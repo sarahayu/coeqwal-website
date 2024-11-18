@@ -33,6 +33,7 @@ export function useDataStory(waterdrops, camera) {
       const showLocationAnimGroup = anims.initShowLocationAnimGroup(context);
       const chartAnimGroup = anims.initChartAnimGroup(context);
       const bucketsFillAnim = anims.initBucketsFillAnim(context);
+      const moveBucketsAnim = anims.initMoveBucketsAnim(context);
       const dropFillAnim = anims.initDropFillAnim(context);
       const changeRealityAnim = anims.initChangeRealityAnim(context);
       const fillVarDropsAnim = anims.initFillVarDropsAnim(context);
@@ -55,12 +56,8 @@ export function useDataStory(waterdrops, camera) {
           animHandler: showLocationAnimGroup.showPRF,
         },
         {
-          name: "barsAppear",
-          animHandler: chartAnimGroup.barsAppear,
-        },
-        {
           name: "barsExplain",
-          // no anims
+          animHandler: chartAnimGroup.barsAppear,
         },
         {
           name: "barsCondense",
@@ -72,23 +69,11 @@ export function useDataStory(waterdrops, camera) {
         },
         {
           name: "comparingTheTwo",
-          // no anims
-        },
-        {
-          name: "butTheAgGroup",
-          // no anims
-        },
-        {
-          name: "overallIfWantReliable",
-          // no anims
+          animHandler: moveBucketsAnim,
         },
         {
           name: "forNowLetsFocus",
           animHandler: dropFillAnim,
-        },
-        {
-          name: "darkerColsIndic",
-          // no anims
         },
         {
           name: "ifChangeReality",
@@ -111,12 +96,8 @@ export function useDataStory(waterdrops, camera) {
           animHandler: showQuantilesAnim,
         },
         {
-          name: "collectAllScen",
-          animHandler: comparerAnimGroup.showPAG,
-        },
-        {
           name: "soWhyNot",
-          // no anims
+          animHandler: comparerAnimGroup.showPAG,
         },
         {
           name: "letsBringRefuge",

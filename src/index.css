@@ -802,7 +802,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .wide-view-action-btn {
   color: #333;
-  font-size: 3rem;
+  font-size: 2rem;
   cursor: pointer;
   padding: 0.5em 1em;
   border: none;
@@ -827,7 +827,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .supplement-btn {
   color: #333;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   cursor: pointer;
   padding: 0.8em 1.2em;
   border: none;
@@ -1086,22 +1086,77 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   font-size: 1.2em;
 }
 
+#tut-point-groups {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 .scrollama {
   padding-bottom: 1px;
 }
 
-.tut-graph-wrapper {
+.create-buckets-section {
   position: sticky;
   top: 0;
   height: 100vh;
-  width: min-content;
+  width: 100%;
   margin-inline: auto;
   z-index: -1;
+  --graph-width: 1300px;
+}
+
+.create-buckets-section h2,
+.scenarios-section h2 {
+  font-size: 3em;
+  color: steelblue;
+  text-align: center;
+  padding-top: 1em;
+}
+
+.scenarios-section h2 {
+  position: sticky;
+  top: 0;
+}
+
+.create-buckets-section p {
+  font-size: 1.4em;
+  text-indent: 2ch;
+  margin-block: 0.3em;
+}
+
+.create-buckets-section > p:first-of-type {
+  margin-block: 1.3em;
+  text-align: center;
+}
+
+.explain-results {
+  position: absolute;
+  width: calc(100vw - var(--graph-width) - 10em);
+  right: var(--graph-width);
+  top: 50%;
+  transform: translate(0, -50%);
+  display: none;
+}
+
+.tut-graph-wrapper {
   display: flex;
+  position: absolute;
+  width: min-content;
+  top: 50%;
+
+  right: 50%;
+  transform: translate(50%, -50%);
+  transition: transform 0.5s;
+}
+
+.tut-graph-wrapper.moved {
+  transform: translate(calc(50vw - 3em), -50%);
 }
 
 .tut-graph {
   display: grid;
+  position: relative;
   grid-template-areas: "area";
 }
 
@@ -1118,38 +1173,57 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .tut-graph > p {
   position: absolute;
-  top: calc(50% - 260px);
+  top: -1.3em;
+}
+
+.tut-text-card-wrapper {
+  height: 100vh;
+}
+
+.tut-text-card-wrapper + .tut-text-card-wrapper {
+  margin-top: 2rem;
 }
 
 .tut-text-card {
+  --width: min(50rem, 100%);
+
   padding: 2em;
-  max-width: 40vw;
-  margin-inline: auto;
-  position: relative;
   isolation: isolate;
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: white;
   box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-  border-radius: 1em;
+
+  transform-origin: bottom; /* equivalent to 50% 100% */
+  transform: perspective(800px) rotateX(-90deg);
+  position: fixed;
+  bottom: 1rem;
+
+  margin-left: calc(50% - var(--width) / 2);
+  width: var(--width);
+}
+
+.tut-text-card {
 }
 
 .tut-text-card + .tut-text-card {
-  margin-top: 20rem;
 }
 
 .tut-text-card:last-of-type {
-  margin-bottom: 100vh;
+  /* margin-bottom: 100vh; */
 }
 
 .scrollama .tut-text-card {
-  opacity: 0.2;
+  /* opacity: 0; */
 }
 
 .scrollama .tut-text-card.hero {
   opacity: 1;
 }
 
-.tut-text-card.cte {
-  margin-bottom: 40vh;
+.cte {
+  font-size: 1.4em;
+  width: min(60ch, 100%);
+  margin-inline: auto;
+  min-height: 40vh;
 }
 
 .card1 {
@@ -1159,6 +1233,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   margin: 0 auto;
   height: 100vh;
   position: relative;
+}
+
+.cte button {
+  display: block;
+  margin: 1em auto;
+  background-color: none;
+  border: 2px solid lightgray;
+  background-color: transparent;
+  padding: 0.5em 1em;
+  border-radius: 1em;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.cte button:hover {
+  background-color: lightgray;
 }
 
 .card1 > p {
@@ -1175,13 +1265,59 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   color: gray;
   font-size: 0.7em;
   font-style: italic;
-  margin-top: 1em;
+  margin-top: -0.5em;
+}
+
+.tut-hero {
+  min-height: 100vh;
+  width: min(100%, 90rem);
+  margin-inline: auto;
+  position: relative;
+}
+
+.tut-hero .tut-map-california {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: max-content;
+  display: block;
+  z-index: -1;
+}
+
+.tut-hero h1 {
+  font-size: 10em;
+  width: max-content;
+  margin-inline: auto;
+  text-indent: -3ch;
+  padding-top: 0.3em;
+  color: steelblue;
+}
+
+.tut-hero p {
+  font-size: 1.7em;
+  width: min(calc(100% - 50vh), 60ch);
+  margin-left: auto;
+  margin-right: 2em;
+  z-index: 1;
+  margin-block: 1em;
+  color: #333;
+}
+
+#ag-group {
+  color: #008080;
+  font-weight: bold;
+}
+
+#ref-group {
+  color: #ff6347;
+  font-weight: bold;
 }
 
 .skip-btn {
   position: absolute;
   top: calc(100vh - 5rem);
-  right: calc((100% - var(--width)) / 2 - 1rem);
+  left: 50%;
+  transform: translateX(-50%);
   background-color: none;
   border: none;
   padding: 1em;
@@ -1200,10 +1336,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   top: 0;
   height: 100vh;
   margin-inline: auto;
-  display: grid;
 }
 
-.tut-drop-graphics-wrapper > :first-child {
+.waterdrop-graphics-wrapper {
+  position: relative;
+  display: grid;
+  height: 80%;
+}
+
+.waterdrop-graphics-wrapper .main-waterdrop {
   place-self: center;
 }
 
@@ -1306,6 +1447,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   font-weight: bold;
 }
 
+.waterdrop-explain-pag {
+  position: absolute;
+  font-size: 1.4em;
+  width: 30ch;
+  text-indent: 2ch;
+  right: 60%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .vardrop > .dot-histogram-wrapper {
   position: absolute;
   top: 50%;
@@ -1369,8 +1520,26 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   top: 0;
 }
 
-.tut-comparer-graphics-wrapper > * {
-  max-width: 100%;
+.tut-comparer-graphics-wrapper > svg {
+  /* transform: translateX(-30vh); */
+}
+
+.bigdrop-describe {
+  position: absolute;
+  top: 6em;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.4em;
+}
+
+.bigdrop-explain {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 65%;
+  width: 40ch;
+  font-size: 1.4em;
+  transform: translateY(-50%);
 }
 
 .scen-settings {
@@ -1575,33 +1744,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   right: 100%;
   top: 50%;
   transform: translate(50%, -50%);
-}
-
-.scrollama-locations {
-  --width: min(50rem, 100%);
-}
-
-.scrollama-locations .tut-minimap {
-  position: sticky;
-  top: 50%;
-  transform: translateY(-50%);
-  width: max-content;
-  display: block;
-  margin-left: auto;
-  margin-right: calc(50% - var(--width) / 2);
-}
-
-.scrollama-locations .tut-text-card {
-  margin-left: calc(50% - var(--width) / 2);
-  width: calc(var(--width) - 300px);
-  max-width: 100%;
-}
-
-.scrollama-locations .tut-text-card:first-of-type {
-  --map-svg-height: 500px;
-
-  margin-top: calc(-1 * var(--map-svg-height) + 50vh);
-  transform: translateY(-50%);
 }
 
 .baseline-pointer path {

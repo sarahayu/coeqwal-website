@@ -32,11 +32,11 @@ export function useCompareLargeDrops() {
     groupsRef.current = compareViewHelpers.getWaterdropGroups(
       [constants.PAG_OBJECTIVE, constants.PRF_OBJECTIVE],
       waterdrops,
-      [0, 0]
+      [0, 0],
+      0.6
     );
 
-    const farHeight =
-      waterdrops.groups[0].height * 2 * settings.SPREAD_1_2 * 0.75;
+    const farHeight = waterdrops.groups[0].height * 2 * settings.SPREAD_1_2 * 1;
     const k = camera.height / farHeight;
 
     let x = camera.width / 2;
@@ -62,7 +62,10 @@ export function useCompareLargeDrops() {
 
     const container = d3
       .select("#comparer-graphics")
-      .attr("width", window.innerWidth)
+      .attr(
+        "width",
+        window.innerWidth - 20
+      ) /* leave room for scrollbar on side */
       .attr("height", window.innerHeight)
       .append("g")
       .attr("class", "svg-group")

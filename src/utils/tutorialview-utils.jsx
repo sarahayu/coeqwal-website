@@ -19,6 +19,9 @@ function initConstants() {
   const PAG_OBJECTIVE = "DEL_CVP_PAG_N";
   const PRF_OBJECTIVE = "DEL_CVP_PRF_S";
 
+  const PAG_COLOR = "#008080";
+  const PRF_COLOR = "#ff6347";
+
   const DEFAULT_SCENARIO = "expl0000";
 
   const PAG_DELIVS =
@@ -128,6 +131,8 @@ function initConstants() {
     INTERP_COLOR,
     PAG_OBJECTIVE,
     PRF_OBJECTIVE,
+    PAG_COLOR,
+    PRF_COLOR,
     DEFAULT_SCENARIO,
     PAG_DELIVS,
     PRF_DELIVS,

@@ -535,6 +535,29 @@ function initAllAnims() {
     };
   }
 
+  function initMoveBucketsAnim({ deps }) {
+    function animDo() {
+      d3.select(".tut-graph-wrapper").classed("moved", true);
+      // .style("transform", "translate(0, -50%)")
+      // .style("right", "3em");
+
+      showElems(".explain-results");
+    }
+
+    function animUndo() {
+      d3.select(".tut-graph-wrapper").classed("moved", false);
+      // .style("transform", "translate(50%, -50%)")
+      // .style("right", "50%");
+
+      hideElems(".explain-results");
+    }
+
+    return {
+      do: animDo,
+      undo: animUndo,
+    };
+  }
+
   function initDropFillAnim({ deps }) {
     function animDo() {
       deps.setDropInterper(() => constants.PAG_INTERPER_DROP);
@@ -557,7 +580,7 @@ function initAllAnims() {
         .classed("hasarrow", true);
 
       hideElems(
-        ".main-waterdrop .objective-label, .main-waterdrop .volume-not-height"
+        ".main-waterdrop .objective-label, .main-waterdrop .volume-not-height, .waterdrop-explain-pag"
       );
     }
 
@@ -567,7 +590,7 @@ function initAllAnims() {
         .classed("hasarrow", false);
 
       showElems(
-        ".main-waterdrop .objective-label, .main-waterdrop .volume-not-height"
+        ".main-waterdrop .objective-label, .main-waterdrop .volume-not-height, .waterdrop-explain-pag"
       );
     }
 
@@ -676,13 +699,13 @@ function initAllAnims() {
 
   function initComparerAnimGroup({ deps }) {
     function showPAGAnimDo() {
-      hideElems(".scrollama-compare-scenobjs .tut-drop-graphics-wrapper");
+      hideElems(".scrollama-compare-scenobjs .waterdrop-graphics-wrapper");
       showElems(".scrollama-compare-scenobjs .tut-comparer-graphics-wrapper");
     }
 
     function showPAGAnimUndo() {
       showElems(
-        ".scrollama-compare-scenobjs .tut-drop-graphics-wrapper",
+        ".scrollama-compare-scenobjs .waterdrop-graphics-wrapper",
         d3,
         "grid"
       );
@@ -691,10 +714,20 @@ function initAllAnims() {
 
     function showPRFAnimDo() {
       deps.largeDropComparer.showOtherDrop();
+      showElems(".bigdrop-explain");
+      d3.select(".tut-comparer-graphics-wrapper #comparer-graphics").style(
+        "transform",
+        `translateX(${-window.innerHeight * 0.25}px)`
+      );
     }
 
     function showPRFAnimUndo() {
       deps.largeDropComparer.hideOtherDrop();
+      hideElems(".bigdrop-explain");
+      d3.select(".tut-comparer-graphics-wrapper #comparer-graphics").style(
+        "transform",
+        `none`
+      );
     }
 
     return {
@@ -713,6 +746,7 @@ function initAllAnims() {
     initShowLocationAnimGroup,
     initChartAnimGroup,
     initBucketsFillAnim,
+    initMoveBucketsAnim,
     initDropFillAnim,
     initChangeRealityAnim,
     initFillVarDropsAnim,

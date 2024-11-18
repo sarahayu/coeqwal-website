@@ -5,7 +5,7 @@ import { shuffle } from "utils/math-utils";
 import { mapBy } from "utils/misc-utils";
 
 async function initObjectivesData() {
-  const MAX_DELIVS = 1200;
+  const MAX_DELIVS = 800;
   const SCENARIO_KEY_STRING = "scens";
   const DELIV_KEY_STRING = "delivs";
   const BASELINE_YRLY_KEY_STRING = "baseline_yearly";
