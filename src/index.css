@@ -1261,7 +1261,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .tut-text-card {
-  --height: 7em;
+  --height: 5em;
 
   font-size: 1.4em;
   width: 100%;
@@ -1277,19 +1277,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 .tut-text-card::before {
   content: '';
   background-image: url("data:image/svg+xml,%3Csvg version='1.2' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 112' width='100%25' height='112' preserveAspectRatio='none'%3E%3Cg fill='%23D0DBD9'%3E%3Cpath d='m960 84c160 0 240-21 320-42v70h-1280v-70c80-21 160-42 320-42 320 0 320 84 640 84z'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 100% 50px;
+  background-size: 100% 100px;
   bottom: 100%;
   position: absolute;
-  height: 50px;
+  height: 100px;
   width: 100%;
   opacity: 0.7;
-  z-index: 1;
+  z-index: -1;
   transform: scale(1, 1);
 }
 
 .tut-text-card-container {
-  max-width: min(100ch, 100%);
+  max-width: min(80ch, 100%);
   place-self: center;
+  transform: translateY(-20px);
 }
 
 .scrollama .tut-text-card.hero {
@@ -1297,15 +1298,27 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .cte {
-  font-size: 1.4em;
-  width: min(60ch, 100%);
+  font-size: 1.6em;
   margin-inline: auto;
-  min-height: 40vh;
+  min-height: calc(100vh - 200px);
   display: grid;
+  position: relative;
+}
+
+.cte::before {
+  content: '';
+  background-image: url("data:image/svg+xml,%3Csvg version='1.2' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 112' width='100%25' height='112' preserveAspectRatio='none'%3E%3Cg fill='%23D0DBD9'%3E%3Cpath d='m960 84c160 0 240-21 320-42v70h-1280v-70c80-21 160-42 320-42 320 0 320 84 640 84z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100px;
+  bottom: 100%;
+  position: absolute;
+  height: 100px;
+  width: 100%;
+  transform: scale(1, 1);
 }
 
 .cte-container {
   place-self: center;
+  width: min(60ch, 100%);
 }
 
 .card1 {

@@ -65,7 +65,7 @@ export default function TutorialView() {
           {getSlidesInRange("barsExplain", "comparingTheTwo").map(
             (slide, i) => (
               <Step key={i} data={slide}>
-                <CardBBox>{slide.script}</CardBBox>
+                <CardBBox id={`card${slide.idx}`}>{slide.script}</CardBBox>
               </Step>
             )
           )}
@@ -81,7 +81,7 @@ export default function TutorialView() {
           {getSlidesInRange("forNowLetsFocus", "letsBringRefuge").map(
             (slide, i) => (
               <Step key={i} data={slide}>
-                <CardBBox>{slide.script}</CardBBox>
+                <CardBBox id={`card${slide.idx}`}>{slide.script}</CardBBox>
               </Step>
             )
           )}

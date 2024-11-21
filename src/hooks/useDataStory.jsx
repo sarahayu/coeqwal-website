@@ -105,7 +105,7 @@ export function useDataStory(waterdrops, camera) {
         },
       ];
 
-      setSlides(_slides);
+      setSlides(_slides.map((s, i) => ({ ...s, idx: i })));
     },
     [waterdrops, camera]
   );
