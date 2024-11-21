@@ -15,11 +15,11 @@ import {
   showElems,
 } from "utils/render-utils";
 import { createInterpsFromDelivs, deserialize } from "utils/data-utils";
-import { clipEnds, dist } from "utils/math-utils";
-import { radToDeg } from "three/src/math/MathUtils";
+import { clipEnds } from "utils/math-utils";
 import { helpers } from "utils/examineview-helpers";
 import { useDragPanels } from "hooks/useDragPanels";
 import DropletGlyph from "components/DropletGlyph";
+import { ConnectLine } from "components/ConnectLine";
 
 export default function ExamineView() {
   const appCtx = useContext(AppContext);
@@ -57,10 +57,8 @@ export default function ExamineView() {
 
     svgGroup
       .append("text")
-      .attr("class", "instruction-text large-gray-text fancy-font");
-    svgGroup
-      .append("text")
-      .attr("class", "large-drop-label large-gray-text fancy-font");
+      .attr("class", "instruction-text large-green-text fancy-font");
+    svgGroup.append("text").attr("class", "drop-label fancy-font");
 
     appCtx.addZoomHandler(function (transform) {
       setCamTransform(transform);
@@ -102,7 +100,7 @@ export default function ExamineView() {
           removeElems(".small-drop, .circlet", container);
           hideElems("#examine-group");
           d3.selectAll(
-            "#examine-group .instruction-text, #examine-group .large-drop-label, #examine-group .highlight-circle, #examine-group .baseline-pointer"
+            "#examine-group .instruction-text, #examine-group .drop-label, #examine-group .highlight-circle, #examine-group .baseline-pointer"
           ).attr("opacity", 0);
 
           setPanels([]);
@@ -173,7 +171,7 @@ export default function ExamineView() {
     const labelFontSize =
       (curMinidropsRef.current.height * settings.SPREAD_1_2) / 15;
 
-    d3.select("#examine-group .large-drop-label")
+    d3.select("#examine-group .drop-label")
       .attr("x", curMinidropsRef.current.x)
       .attr(
         "y",
@@ -382,23 +380,4 @@ export default function ExamineView() {
       </>
     );
   }
-}
-
-function ConnectLine({ connectLine }) {
-  return (
-    <div className="connect-line" style={getConnectStyle(...connectLine)}>
-      <div className="connect-line-container"></div>
-    </div>
-  );
-}
-
-function getConnectStyle(from, to) {
-  const width = dist(from, to);
-  const rot = radToDeg(Math.atan2(to[1] - from[1], to[0] - from[0]));
-  return {
-    left: `${from[0]}px`,
-    top: `${from[1]}px`,
-    width: `${width}px`,
-    rotate: `${rot}deg`,
-  };
 }

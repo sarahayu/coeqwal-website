@@ -19,18 +19,18 @@ function initConstants() {
   const PAG_OBJECTIVE = "DEL_CVP_PAG_N";
   const PRF_OBJECTIVE = "DEL_CVP_PRF_S";
 
-  const PAG_COLOR = "#008080";
-  const PRF_COLOR = "#ff6347";
+  const PAG_COLOR = "#808C54";
+  const PRF_COLOR = "#60A4BF";
 
   const DEFAULT_SCENARIO = "expl0000";
 
   const PAG_DELIVS =
     objectivesData.OBJECTIVES_DATA[PAG_OBJECTIVE][
-      objectivesData.SCENARIO_KEY_STRING
+    objectivesData.SCENARIO_KEY_STRING
     ][DEFAULT_SCENARIO][objectivesData.DELIV_KEY_STRING];
   const PRF_DELIVS =
     objectivesData.OBJECTIVES_DATA[PRF_OBJECTIVE][
-      objectivesData.SCENARIO_KEY_STRING
+    objectivesData.SCENARIO_KEY_STRING
     ][DEFAULT_SCENARIO][objectivesData.DELIV_KEY_STRING];
 
   const VARIATIONS = [
@@ -43,7 +43,7 @@ function initConstants() {
   const VARIATIONS_DELIVS = VARIATIONS.map(
     (vars) =>
       objectivesData.OBJECTIVES_DATA[PAG_OBJECTIVE][
-        objectivesData.SCENARIO_KEY_STRING
+      objectivesData.SCENARIO_KEY_STRING
       ][vars][objectivesData.DELIV_KEY_STRING]
   );
 

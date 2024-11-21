@@ -1,5 +1,7 @@
 :root {
-  font-family: Georgia, "Times New Roman", Times, serif;
+  font-family: 'Didact Gothic', Helvetica, Arial, Lucida, sans-serif;
+  font-weight: 400;
+  color: #3D4039;
 }
 
 h1,
@@ -7,11 +9,13 @@ h2,
 h3,
 h4,
 .fancy-font {
-  font-family: "Quattrocento", serif;
+  font-family: 'Source Sans 3', Helvetica, Arial, Lucida, sans-serif;
+  letter-spacing: 0.06em;
+  color: #125773;
 }
 
 body {
-  background-color: rgb(251, 251, 255);
+  background-color: #D0DBD9;
   margin: 0;
   padding: 0;
   line-height: 1.2;
@@ -45,7 +49,7 @@ svg {
   gap: 0.5rem;
   width: max-content;
   margin: 0.5rem auto;
-  color: gray;
+  color: #808c54;
   font-size: 0.8rem;
 }
 
@@ -107,7 +111,7 @@ svg {
   position: relative;
 }
 
-.pdf-container > * {
+.pdf-container>* {
   max-height: 100%;
   display: flex;
   position: absolute !important;
@@ -124,7 +128,7 @@ svg {
   grid-template-columns: repeat(auto-fill, 50px);
   font-size: 0.6rem;
   gap: 1rem;
-  color: gray;
+  color: #808c54;
   overflow-y: scroll;
 }
 
@@ -145,12 +149,12 @@ svg {
 
 .scen-name :first-child {
   font-size: 0.7rem;
-  color: gray;
+  color: #808c54;
 }
 
 .scen-name button {
   font-size: 0.7rem;
-  color: gray;
+  color: #808c54;
   padding: 0.5em 1em;
   margin-top: 1em;
   background-color: white;
@@ -200,10 +204,10 @@ input::-moz-focus-inner {
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  color: gray;
+  color: #808c54;
 }
 
-.bucket-and-label > span {
+.bucket-and-label>span {
   display: inline-block;
   max-width: 9ch;
   text-overflow: ellipsis;
@@ -237,7 +241,7 @@ input::-moz-focus-inner {
   margin-top: -2em;
   width: min-content;
   font-size: 0.7rem;
-  color: gray;
+  color: #808c54;
 }
 
 .bucket-razor p:last-child {
@@ -249,7 +253,7 @@ input::-moz-focus-inner {
   font-size: 1rem;
 }
 
-.bucket-razor p:last-child > span {
+.bucket-razor p:last-child>span {
   font-size: 0.8rem;
 }
 
@@ -265,12 +269,12 @@ input::-moz-focus-inner {
   position: absolute;
   font-size: 0.8em;
   border: none;
-  border-right: 3px dashed #f00;
+  border-right: 3px dashed #CC8F43;
   color: gray;
   font-family: sans-serif;
 }
 
-.pdf-razor > :first-child::after {
+.pdf-razor> :first-child::after {
   content: "";
   height: 100%;
   width: 20px;
@@ -279,7 +283,7 @@ input::-moz-focus-inner {
   cursor: col-resize;
 }
 
-.pdf-razor > * {
+.pdf-razor>* {
   position: relative;
   height: 100%;
 }
@@ -368,16 +372,16 @@ input::-moz-focus-inner {
   flex-direction: column;
 }
 
-.overlay-container-2.previewing > * {
+.overlay-container-2.previewing>* {
   filter: contrast(30%) brightness(150%);
 }
 
-.overlay-container-2 > * {
+.overlay-container-2>* {
   position: relative;
   display: flex;
   align-items: end;
   font-size: 0.7rem;
-  color: gray;
+  color: #808c54;
   font-weight: 300;
   cursor: pointer;
   height: 23px;
@@ -394,12 +398,12 @@ input::-moz-focus-inner {
   visibility: visible;
 }
 
-.overlay-container-2 > *.previewing {
+.overlay-container-2>*.previewing {
   filter: none;
   z-index: 1000;
 }
 
-.overlay-container-2 > *.current-scene {
+.overlay-container-2>*.current-scene {
   box-shadow: 0px 0px 10px 1px yellow;
 }
 
@@ -413,8 +417,7 @@ input::-moz-focus-inner {
   overflow: hidden;
 }
 
-.dot-pdf-shadowed {
-}
+.dot-pdf-shadowed {}
 
 /* cr: https://codepen.io/S-Maas/pen/NrYvdK */
 
@@ -434,21 +437,27 @@ input::-moz-focus-inner {
   color: steelblue;
   margin-bottom: 2rem;
 }
-.sort-types > input {
+
+.sort-types>input {
   display: none;
 }
-.sort-types > input:checked + label {
+
+.sort-types>input:checked+label {
   color: white;
 }
-.sort-types > input:nth-of-type(1):checked ~ label:last-of-type:before {
+
+.sort-types>input:nth-of-type(1):checked~label:last-of-type:before {
   transform: translateX(calc(0% + 0px));
 }
-.sort-types > input:nth-of-type(2):checked ~ label:last-of-type:before {
+
+.sort-types>input:nth-of-type(2):checked~label:last-of-type:before {
   transform: translateX(calc(100% + 0px));
 }
-.sort-types > input:nth-of-type(3):checked ~ label:last-of-type:before {
+
+.sort-types>input:nth-of-type(3):checked~label:last-of-type:before {
   transform: translateX(calc(200% + 0px));
 }
+
 .sort-types label {
   flex: 1;
   text-align: center;
@@ -457,6 +466,7 @@ input::-moz-focus-inner {
   text-overflow: ellipsis;
   cursor: pointer;
 }
+
 .sort-types label:last-of-type:before {
   content: "";
   display: block;
@@ -470,14 +480,17 @@ input::-moz-focus-inner {
   z-index: -1;
   transform: translateX(0);
 }
+
 .sort-types label {
   padding: 6px 3px;
   transition: color 250ms cubic-bezier(0, 0.95, 0.38, 0.98);
 }
+
 .sort-types label:before {
   background: steelblue;
   transition: all 250ms cubic-bezier(0, 0.95, 0.38, 0.98);
 }
+
 .sort-types label:not(:last-child) {
   border-right: 1px solid steelblue;
 }
@@ -539,9 +552,7 @@ main {
   --gap: 1rem;
   --cols: 3;
   --colSize: calc(var(--width) / var(--cols));
-  --cellSize: calc(
-    (var(--width) - (var(--gap) * (var(--cols) - 1))) / var(--cols)
-  );
+  --cellSize: calc((var(--width) - (var(--gap) * (var(--cols) - 1))) / var(--cols));
 
   place-self: center;
 
@@ -553,7 +564,7 @@ main {
   padding-block: 2rem;
 }
 
-.main-container > * {
+.main-container>* {
   display: block;
   width: var(--cellSize);
   height: var(--cellSize);
@@ -636,6 +647,10 @@ text {
   cursor: pointer;
 }
 
+.drop-label {
+  fill: #808c54;
+}
+
 .small-drop .outline {
   fill: none;
   stroke: lightgray;
@@ -664,6 +679,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #D0DBD9;
 }
 
 .sec-loading .one {
@@ -675,6 +691,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   position: relative;
   animation: move 0.5s linear infinite alternate-reverse;
 }
+
 .sec-loading .one::before {
   content: "";
   position: absolute;
@@ -695,6 +712,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     transform: translate(-50%, -50%) rotate(360deg);
   }
 }
+
 @keyframes move {
   to {
     transform: translateY(15px) rotate(45deg);
@@ -721,7 +739,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   align-items: center;
 }
 
-.explanation-anim-wrapper > * {
+.explanation-anim-wrapper>* {
   grid-area: animcenter;
   place-self: center;
 }
@@ -750,14 +768,36 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   transform: translateX(-50%);
   background: none;
   outline: 0;
-  border: 0;
-  font-size: 8rem;
+  font-size: 4em;
   cursor: pointer;
-  transition: 0.2s translate;
+  background-color: #6b7544;
+  color: white;
+  padding: 0 0.5em;
+  height: 0.8em;
+  display: flex;
+  align-items: end;
+  border: none;
+  border-radius: 0.5rem;
+
+  
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .go-back-btn:hover {
-  translate: -0.5em 0;
+  
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.5) 0px 1px 3px -1px;
+}
+
+
+.go-back-btn span {
+  transition: 0.2s transform;
+  display: block;
+}
+
+.go-back-btn:hover span {
+  transform: translateX(-0.3em);
 }
 
 .circlet {
@@ -770,7 +810,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   display: none;
 }
 
-.hover-capture:hover + .circlet,
+.hover-capture:hover+.circlet,
 .hover-capture:hover .circlet {
   display: initial;
 }
@@ -780,10 +820,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   animation: rotating 30s linear infinite;
 }
 
+.cloud-text {
+  fill: #3D4039;
+}
+
 @keyframes rotating {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -801,32 +846,31 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .wide-view-action-btn {
-  color: #333;
+  color: white;
   font-size: 2rem;
   cursor: pointer;
   padding: 0.5em 1em;
   border: none;
   border-radius: 0.5rem;
-  font-weight: bold;
   display: flex;
   gap: 0.3em;
   align-items: center;
   transition: all 0.3s;
   animation: enterView 0.1s;
 
-  background-color: white;
+  background-color: rgba(128, 140, 84, 1.0);
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
     rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .wide-view-action-btn:hover {
-  background-color: #edf1fa;
+  background-color: rgb(107, 117, 68, 1.0);
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
     rgba(0, 0, 0, 0.5) 0px 1px 3px -1px;
 }
 
 .supplement-btn {
-  color: #333;
+  color: white;
   font-size: 1.3rem;
   cursor: pointer;
   padding: 0.8em 1.2em;
@@ -838,7 +882,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   transition: all 0.3s;
   animation: enterView 0.1s;
 
-  background-color: white;
+  background-color: rgba(128, 140, 84, 1.0);
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
     rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
@@ -846,7 +890,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 .supplement-btn:hover {
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
     rgba(0, 0, 0, 0.5) 0px 1px 3px -1px;
-  background-color: #edf1fa;
+  background-color: rgba(107, 117, 68, 1.0);
 }
 
 @keyframes enterView {
@@ -868,11 +912,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   flex-direction: column;
   width: min-content;
   padding: 2rem;
+  display: none;
+  isolation: isolate;
 
-  background: rgba(239, 239, 239, 0.568);
+  background: rgba(239, 235, 224, 0.568);
   backdrop-filter: blur(10px);
   border-radius: 1em;
-  border: 1px solid rgba(239, 239, 239, 0.868);
+  border: 1px solid rgba(239, 235, 224, 0.868);
 }
 
 #infobox svg {
@@ -902,9 +948,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   border-radius: 1em;
   overflow-y: hidden;
   width: 100%;
+  color: gray;
+  background-color: white;
+  padding-block: 0.5em;
 }
 
 .results button {
+  color: gray;
   border: none;
   cursor: pointer;
   padding: 0.4em 1em;
@@ -921,16 +971,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .curKey {
   font-size: 0.8em;
-  color: gray;
+  color: #808c54;
   margin-block: 1em;
 }
 
-.curDesc {
-}
+.curDesc {}
 
 .no-loc-data {
   font-size: 0.8em;
-  color: gray;
+  color: #808c54;
   margin-block: 1em;
   font-style: italic;
 }
@@ -997,7 +1046,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .comp-line {
-  stroke: orange;
+  stroke: #CC8F43;
   stroke-dasharray: 3;
   opacity: 0.5;
   stroke-width: 1;
@@ -1016,20 +1065,25 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   margin: 1em;
   width: 15ch;
   line-height: 1.2;
-  color: gray;
+  color: #808c54;
   opacity: 0.5;
 }
 
-.large-gray-text {
-  fill: #bababa;
+.large-green-text {
+  fill: #808c54;
   line-height: 1.5;
+}
+
+.instruction-text {
+  opacity: 0.6;
 }
 
 #member-label {
   fill: black;
 }
+
 #member-variable {
-  fill: orange;
+  fill: #CC8F43;
   font-weight: bold;
 }
 
@@ -1045,7 +1099,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .panel-tab span {
   font-weight: bold;
-  color: orange;
+  color: #CC8F43;
   font-size: 2em;
 }
 
@@ -1064,7 +1118,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   position: absolute;
   top: 0;
   width: 100%;
-  background-color: #efefef;
   isolation: isolate;
   line-height: 1.8;
   font-size: 0.9em;
@@ -1094,6 +1147,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .scrollama {
   padding-bottom: 1px;
+  background-color: #EFEBE0;
 }
 
 .create-buckets-section {
@@ -1102,21 +1156,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   height: 100vh;
   width: 100%;
   margin-inline: auto;
-  z-index: -1;
-  --graph-width: 1300px;
+  --graph-width: 1100px;
 }
 
 .create-buckets-section h2,
 .scenarios-section h2 {
   font-size: 3em;
-  color: steelblue;
   text-align: center;
   padding-top: 1em;
-}
-
-.scenarios-section h2 {
-  position: sticky;
-  top: 0;
 }
 
 .create-buckets-section p {
@@ -1125,7 +1172,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   margin-block: 0.3em;
 }
 
-.create-buckets-section > p:first-of-type {
+.create-buckets-section>p:first-of-type {
   margin-block: 1.3em;
   text-align: center;
 }
@@ -1137,6 +1184,30 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   top: 50%;
   transform: translate(0, -50%);
   display: none;
+}
+
+.ag-annot, .ref-annot {
+  display: none;
+  max-width: 30ch;
+  top: 50%;
+  transform: translateY(-50%);
+  /* list-style-type: '- '; */
+  list-style-position: outside;
+  font-size: 1.4em;
+}
+
+.ag-annot li + li, .ref-annot li + li {
+  /* margin-top: 1em; */
+}
+
+.ag-annot {
+  position: absolute;
+  right: calc(var(--graph-width) / 2 + 50%);
+}
+
+.ref-annot {
+  position: absolute;
+  left: calc(var(--graph-width) / 2 + 50%);
 }
 
 .tut-graph-wrapper {
@@ -1160,59 +1231,65 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   grid-template-areas: "area";
 }
 
-.tut-graph > * {
+.tut-graph>* {
   place-self: center;
   grid-area: area;
 }
 
 .objective-label {
   text-align: center;
-  color: gray;
+  color: #808c54;
   font-size: 1.1em;
 }
 
-.tut-graph > p {
+.tut-graph>p {
   position: absolute;
   top: -1.3em;
 }
 
-.tut-text-card-wrapper {
-  height: 100vh;
+.scrollama {
+  scroll-snap-type: mandatory;
 }
 
-.tut-text-card-wrapper + .tut-text-card-wrapper {
+.tut-text-card-wrapper {
+  height: 100vh;
+  scroll-snap-align: start;
+}
+
+.tut-text-card-wrapper+.tut-text-card-wrapper {
   margin-top: 2rem;
 }
 
 .tut-text-card {
-  --width: min(50rem, 100%);
+  --height: 7em;
 
-  padding: 2em;
+  font-size: 1.4em;
+  width: 100%;
+  height: var(--height);
   isolation: isolate;
-  background-color: white;
-  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-
-  transform-origin: bottom; /* equivalent to 50% 100% */
-  transform: perspective(800px) rotateX(-90deg);
+  background-color: rgba(208, 219, 217, 0.7);
   position: fixed;
-  bottom: 1rem;
-
-  margin-left: calc(50% - var(--width) / 2);
-  width: var(--width);
+  bottom: 0;
+  display: grid;
+  transform: translateY(200%);
 }
 
-.tut-text-card {
+.tut-text-card::before {
+  content: '';
+  background-image: url("data:image/svg+xml,%3Csvg version='1.2' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 112' width='100%25' height='112' preserveAspectRatio='none'%3E%3Cg fill='%23D0DBD9'%3E%3Cpath d='m960 84c160 0 240-21 320-42v70h-1280v-70c80-21 160-42 320-42 320 0 320 84 640 84z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 50px;
+  bottom: 100%;
+  position: absolute;
+  height: 50px;
+  width: 100%;
+  opacity: 0.7;
+  z-index: 1;
+  transform: scale(1, 1);
 }
 
-.tut-text-card + .tut-text-card {
-}
-
-.tut-text-card:last-of-type {
-  /* margin-bottom: 100vh; */
-}
-
-.scrollama .tut-text-card {
-  /* opacity: 0; */
+.tut-text-card-container {
+  max-width: min(100ch, 100%);
+  place-self: center;
 }
 
 .scrollama .tut-text-card.hero {
@@ -1224,6 +1301,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   width: min(60ch, 100%);
   margin-inline: auto;
   min-height: 40vh;
+  display: grid;
+}
+
+.cte-container {
+  place-self: center;
 }
 
 .card1 {
@@ -1238,20 +1320,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 .cte button {
   display: block;
   margin: 1em auto;
-  background-color: none;
-  border: 2px solid lightgray;
-  background-color: transparent;
+  border: none;
+
+  color: white;
+  background-color: rgba(128, 140, 84, 1.0);
   padding: 0.5em 1em;
-  border-radius: 1em;
+  border-radius: 0.6em;
   cursor: pointer;
-  font-weight: bold;
 }
 
 .cte button:hover {
-  background-color: lightgray;
+  background-color: rgb(107, 117, 68, 1.0);
 }
 
-.card1 > p {
+.card1>p {
   position: relative;
   isolation: isolate;
   padding: 2rem;
@@ -1262,7 +1344,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 .supplement-card-info {
   display: block;
   text-align: right;
-  color: gray;
+  color: #808c54;
   font-size: 0.7em;
   font-style: italic;
   margin-top: -0.5em;
@@ -1270,9 +1352,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .tut-hero {
   min-height: 100vh;
-  width: min(100%, 90rem);
-  margin-inline: auto;
+  background-color: #D0DBD9;
+}
+
+.tut-hero-container {
   position: relative;
+  width: min(100%, 90rem);
+  isolation: isolate;
+  margin-inline: auto;
 }
 
 .tut-hero .tut-map-california {
@@ -1290,7 +1377,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   margin-inline: auto;
   text-indent: -3ch;
   padding-top: 0.3em;
-  color: steelblue;
 }
 
 .tut-hero p {
@@ -1304,12 +1390,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 #ag-group {
-  color: #008080;
+  color: #808C54;
   font-weight: bold;
 }
 
 #ref-group {
-  color: #ff6347;
+  color: #60A4BF;
   font-weight: bold;
 }
 
@@ -1318,10 +1404,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   top: calc(100vh - 5rem);
   left: 50%;
   transform: translateX(-50%);
-  background-color: none;
+  background-color: inherit;
   border: none;
   padding: 1em;
-  color: gray;
+  color: #808c54;
   font-style: italic;
   text-decoration: underline;
   cursor: pointer;
@@ -1370,7 +1456,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   left: 0em;
   right: 0em;
   bottom: -1em;
-  border: 3px solid orange;
+  border: 3px solid #CC8F43;
   border-radius: 1em;
 }
 
@@ -1424,7 +1510,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   position: absolute;
   top: 0;
   left: 100%;
-  color: gray;
+  color: #808c54;
   font-style: italic;
   width: 40ch;
   line-height: 1.8;
@@ -1443,7 +1529,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .tut-drop-graphics-wrapper .scen-number {
-  color: orange;
+  color: #CC8F43;
   font-weight: bold;
 }
 
@@ -1457,19 +1543,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   transform: translateY(-50%);
 }
 
-.vardrop > .dot-histogram-wrapper {
+.vardrop>.dot-histogram-wrapper {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
 }
 
-.drop1 > .dot-histogram-wrapper,
-.drop3 > .dot-histogram-wrapper {
+.drop1>.dot-histogram-wrapper,
+.drop3>.dot-histogram-wrapper {
   left: 60%;
 }
 
-.drop2 > .dot-histogram-wrapper,
-.drop4 > .dot-histogram-wrapper {
+.drop2>.dot-histogram-wrapper,
+.drop4>.dot-histogram-wrapper {
   right: 60%;
 }
 
@@ -1477,7 +1563,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   content: attr(desc);
   display: block;
   position: absolute;
-  color: gray;
+  color: #808c54;
   width: 30ch;
   text-align: center;
   transform-origin: center center;
@@ -1520,7 +1606,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   top: 0;
 }
 
-.tut-comparer-graphics-wrapper > svg {
+.tut-comparer-graphics-wrapper>svg {
   /* transform: translateX(-30vh); */
 }
 
@@ -1659,7 +1745,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   flex-shrink: 1;
 }
 
-.scen-settings .full-container > span {
+.scen-settings .full-container>span {
   width: 100%;
   color: gray;
   font-style: italic;
@@ -1684,7 +1770,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   background-color: var(--dot-color-medium, rgb(252, 156, 156));
 }
 
-.scen-settings .full-card > span:nth-child(2) {
+.scen-settings .full-card>span:nth-child(2) {
   font-size: 3em;
 }
 
@@ -1709,7 +1795,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .connect-line {
   height: 5px;
-  background-color: orange;
+  background-color: #CC8F43;
   position: absolute;
   transform-origin: left center;
   pointer-events: none;

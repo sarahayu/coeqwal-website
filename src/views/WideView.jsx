@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { BiCross, BiNetworkChart } from "react-icons/bi";
 import fuzzysort from "fuzzysort";
 
 import { AppContext } from "AppContext";
@@ -19,6 +18,7 @@ import { avgCoords, dropCenterCorrection } from "utils/math-utils";
 import { arrRemove, isState } from "utils/misc-utils";
 import { generateTSpan, hideElems, showElems } from "utils/render-utils";
 import { helpers } from "utils/wideview-helpers";
+import { ActionButtons } from "components/ActionButtons";
 
 export default function WideView() {
   const appCtx = useContext(AppContext);
@@ -175,7 +175,7 @@ export default function WideView() {
 
     svgGroup
       .append("text")
-      .attr("class", "instruction-text large-gray-text fancy-font")
+      .attr("class", "instruction-text large-green-text fancy-font")
       .attr("x", 0 - appCtx.waterdrops.height * 0.6);
   }
 
@@ -350,54 +350,6 @@ export default function WideView() {
           handleClickCompare={handleClickCompare}
         />
       </div>
-    </>
-  );
-}
-
-function ActionButtons({
-  appCtx,
-  handleClickExamine,
-  handleClickDeselectAll,
-  handleClickCompare,
-}) {
-  let examineBtn, compareBtn;
-
-  if (isState(appCtx.state, "WideView") && appCtx.activeWaterdrops.length) {
-    if (appCtx.activeWaterdrops.length === 1) {
-      examineBtn = (
-        <button
-          onClick={handleClickExamine}
-          className="wide-view-action-btn fancy-font"
-        >
-          <BiCross />
-          <span>examine</span>
-        </button>
-      );
-    } else {
-      compareBtn = (
-        <>
-          <button
-            onClick={handleClickCompare}
-            className="wide-view-action-btn fancy-font"
-          >
-            <BiNetworkChart />
-            <span>compare</span>
-          </button>
-          <button
-            onClick={handleClickDeselectAll}
-            className="fancy-font supplement-btn"
-          >
-            <span>deselect all</span>
-          </button>
-        </>
-      );
-    }
-  }
-
-  return (
-    <>
-      {examineBtn}
-      {compareBtn}
     </>
   );
 }

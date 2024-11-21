@@ -5,7 +5,7 @@ import { WaterdropMesh, Camera } from "utils/three-utils";
 function initThreeResources() {
   const scene = (function getScene() {
     const s = new THREE.Scene();
-    s.background = new THREE.Color(0xefefef);
+    s.background = new THREE.Color(0xEFEBE0);
     return s;
   })();
 

@@ -72,14 +72,14 @@ export default function CompareView() {
         );
 
         hideElems(
-          ".large-gray-text, .baseline-pointer, .circlet, .comp-line, .highlight-circle",
+          ".large-green-text, .baseline-pointer, .circlet, .comp-line, .highlight-circle",
           container
         );
 
         setTimeout(() => {
           setActiveMinidrop({ key: groupsRef.current.groups[0].nodes[0].key });
           showElems(
-            "#member-variable, #member-label, .large-gray-text, .baseline-pointer, .circlet, .comp-line, .highlight-circle",
+            "#member-variable, #member-label, .large-green-text, .baseline-pointer, .circlet, .comp-line, .highlight-circle",
             container
           );
           showElems(".comp-settings", d3, "flex");

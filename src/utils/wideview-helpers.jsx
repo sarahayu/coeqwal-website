@@ -104,9 +104,14 @@ function drawMinimapSVG() {
     .join("path")
     .attr("d", (d) => d3.geoPath().projection(proj)(d))
     .attr("class", (d) => "outline " + d.properties.CalLiteID)
-    .attr("stroke", (d) => (d.properties.CalLiteID ? "transparent" : "gray"))
+    .attr("stroke", "transparent")
     .attr("stroke-width", 1)
-    .attr("fill", "transparent");
+    .attr("fill", (d) => (d.properties.CalLiteID ? "transparent" : "white"))
+    .style("filter", (d) =>
+      d.properties.CalLiteID
+        ? "none"
+        : "drop-shadow(6px 6px 18px rgba(0, 0, 0, 0.1))"
+    );
 
   minimap
     .selectAll("circle")

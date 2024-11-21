@@ -4,7 +4,9 @@ import {
 } from "bucket-lib/utils";
 import * as d3 from "d3";
 import { settings } from "settings";
+import { radToDeg } from "three/src/math/MathUtils";
 import { wrap } from "utils/misc-utils";
+import { dist } from "utils/math-utils";
 
 // path generated when WATERDROP_ICON size = 2
 export const DROPLET_SHAPE = "M0,-1L0.5,-0.5A0.707,0.707,0,1,1,-0.5,-0.5L0,-1Z";
@@ -148,7 +150,7 @@ export function waterdrop(yFill, size = 2) {
 
 export function circlet(s) {
   s.attr("fill", "transparent")
-    .attr("stroke", "orange")
+    .attr("stroke", "#CC8F43")
     .attr("stroke-dasharray", 3)
     .attr("stroke-width", 3)
     .attr("vector-effect", "non-scaling-stroke");
@@ -241,5 +243,16 @@ export function generateTSpan(text, lineHeight = 1.2, len = 15) {
     lines.forEach((line) => {
       s.append("tspan").attr("x", x).attr("dy", `${lineHeight}em`).text(line);
     });
+  };
+}
+
+export function getConnectStyle(from, to) {
+  const width = dist(from, to);
+  const rot = radToDeg(Math.atan2(to[1] - from[1], to[0] - from[0]));
+  return {
+    left: `${from[0]}px`,
+    top: `${from[1]}px`,
+    width: `${width}px`,
+    rotate: `${rot}deg`,
   };
 }

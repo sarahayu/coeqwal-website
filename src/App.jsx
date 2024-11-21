@@ -26,7 +26,7 @@ export default function App() {
       <CompareView />
       {appState.goBack && (
         <button className="go-back-btn" onClick={appState.goBack}>
-          ←
+          <span>←</span>
         </button>
       )}
     </AppContext.Provider>

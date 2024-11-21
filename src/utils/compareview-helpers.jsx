@@ -30,7 +30,7 @@ function largeDropInit({ nodes, height, key }) {
 
     s.append("text")
       .style("font-size", (height * settings.SPREAD_1_2) / 15)
-      .attr("class", "drop-label fancy-font large-gray-text")
+      .attr("class", "drop-label fancy-font")
       .attr("text-anchor", "middle");
 
     s.selectAll(".small-drop")

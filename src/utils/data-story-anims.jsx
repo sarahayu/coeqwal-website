@@ -537,19 +537,11 @@ function initAllAnims() {
 
   function initMoveBucketsAnim({ deps }) {
     function animDo() {
-      d3.select(".tut-graph-wrapper").classed("moved", true);
-      // .style("transform", "translate(0, -50%)")
-      // .style("right", "3em");
-
-      showElems(".explain-results");
+      showElems(".ag-annot, .ref-annot");
     }
 
     function animUndo() {
-      d3.select(".tut-graph-wrapper").classed("moved", false);
-      // .style("transform", "translate(50%, -50%)")
-      // .style("right", "50%");
-
-      hideElems(".explain-results");
+      hideElems(".ag-annot, .ref-annot");
     }
 
     return {
@@ -673,7 +665,7 @@ function initAllAnims() {
 
       d3.selectAll(".var-scen-label").style("opacity", "1");
       d3.selectAll(".var-scen-label").style("color", "black");
-      d3.selectAll(".scen-number").style("color", "orange");
+      d3.selectAll(".scen-number").style("color", "#CC8F43");
 
       d3.select(".main-waterdrop").transition().style("transform", "none");
       // undo scaling of label due to shrinking div
@@ -714,20 +706,10 @@ function initAllAnims() {
 
     function showPRFAnimDo() {
       deps.largeDropComparer.showOtherDrop();
-      showElems(".bigdrop-explain");
-      d3.select(".tut-comparer-graphics-wrapper #comparer-graphics").style(
-        "transform",
-        `translateX(${-window.innerHeight * 0.25}px)`
-      );
     }
 
     function showPRFAnimUndo() {
       deps.largeDropComparer.hideOtherDrop();
-      hideElems(".bigdrop-explain");
-      d3.select(".tut-comparer-graphics-wrapper #comparer-graphics").style(
-        "transform",
-        `none`
-      );
     }
 
     return {
