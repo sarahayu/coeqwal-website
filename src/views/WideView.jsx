@@ -315,7 +315,23 @@ export default function WideView() {
           </div>
         )}
         {!currentHoveredDrop && (
-          <div className="searchbox">
+          <div
+            className="searchbox"
+            tabIndex={-1}
+            onBlur={(e) => {
+              // https://stackoverflow.com/a/71530515
+              const currentTarget = e.currentTarget;
+
+              // Give browser time to focus the next element
+              requestAnimationFrame(() => {
+                // Check if the new focused element is a child of the original container
+                if (!currentTarget.contains(document.activeElement)) {
+                  setSearchPrompt(null);
+                  d3.select(".results").style("display", "none");
+                }
+              });
+            }}
+          >
             <input
               type="text"
               placeholder="search"
@@ -325,16 +341,18 @@ export default function WideView() {
                 setSearchPrompt("");
                 d3.select(".results").style("display", "flex");
               }}
-              onBlur={() => {
-                setTimeout(() => {
-                  setSearchPrompt(null);
-                  d3.select(".results").style("display", "none");
-                }, 100);
-              }}
             ></input>
             <div className="results" style={{ display: "none" }}>
               {searchResults.map(({ obj: wd }) => (
-                <button key={wd.key} onClick={() => updateActiveDrops(wd)}>
+                <button
+                  key={wd.key}
+                  onClick={() => {
+                    updateActiveDrops(wd);
+
+                    setSearchPrompt(null);
+                    d3.select(".results").style("display", "none");
+                  }}
+                >
                   {wd.display_name}
                 </button>
               ))}
