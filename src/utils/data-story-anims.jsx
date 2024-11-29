@@ -3,6 +3,7 @@ import { constants } from "utils/tutorialview-utils";
 
 import { objectivesData } from "data/objectives-tutorial-data";
 import { hideElems, showElems } from "utils/render-utils";
+import { interpolateWatercolorBlue } from "bucket-lib/utils";
 
 function initAllAnims() {
   function initShowLocationAnimGroup() {
@@ -105,7 +106,7 @@ function initAllAnims() {
             placeFromLeft,
             year: placeFromLeft + 1,
           }))
-          .sort(d3.descending);
+          .sort((a, b) => b.val - a.val);
 
         const x = d3
           .scaleBand()
@@ -174,7 +175,7 @@ function initAllAnims() {
             placeFromLeft,
             year: placeFromLeft + 1,
           }))
-          .sort(d3.descending);
+          .sort((a, b) => b.val - a.val);
 
         const x = d3
           .scaleBand()
@@ -291,6 +292,12 @@ function initAllAnims() {
     }
 
     async function barsCondenseDo() {
+      const x = d3
+        .scaleBand()
+        .domain(d3.range(_pagDataDescending.length))
+        .range([0, constants.BAR_CHART_WIDTH])
+        .padding(0.4);
+
       // PAG
       {
         const newWidth = constants.BAR_CHART_WIDTH / 8;
@@ -301,16 +308,18 @@ function initAllAnims() {
         const bars = svgGroup.selectAll(".bars");
 
         bars
-          .style("mix-blend-mode", "multiply")
           .transition()
           .duration(500)
-          .attr("opacity", 0.05)
+          .attr("x", (d, i) => x(i))
+          .transition()
+          .duration(500)
+          .attr("fill", (d, i) =>
+            interpolateWatercolorBlue(i / (_pagDataDescending.length - 1))
+          )
           .transition()
           .delay(
-            (d) =>
-              100 +
-              (1 - (1 - d.placeFromLeft / _pagDataDescending.length) ** 4) *
-                1000
+            (d, i) =>
+              100 + (1 - (1 - i / _pagDataDescending.length) ** 4) * 1000
           )
           .duration(500)
           .attr("width", newWidth)
@@ -354,16 +363,18 @@ function initAllAnims() {
         const bars = svgGroup.selectAll(".bars");
 
         bars
-          .style("mix-blend-mode", "multiply")
           .transition()
           .duration(500)
-          .attr("opacity", 0.05)
+          .attr("x", (d, i) => x(i))
+          .transition()
+          .duration(500)
+          .attr("fill", (d, i) =>
+            interpolateWatercolorBlue(i / (_prfDataDescending.length - 1))
+          )
           .transition()
           .delay(
-            (d) =>
-              100 +
-              (1 - (1 - d.placeFromLeft / _prfDataDescending.length) ** 4) *
-                1000
+            (d, i) =>
+              100 + (1 - (1 - i / _prfDataDescending.length) ** 4) * 1000
           )
           .duration(500)
           .attr("width", newWidth)
@@ -399,6 +410,12 @@ function initAllAnims() {
     }
 
     function barsCondenseUndo() {
+      const x = d3
+        .scaleBand()
+        .domain(d3.range(_pagDataDescending.length))
+        .range([0, constants.BAR_CHART_WIDTH])
+        .padding(0.4);
+
       // PAG
       {
         const svgGroup = d3.select("#pag-bar-graph .svg-group");
@@ -413,10 +430,6 @@ function initAllAnims() {
           .attr("opacity", 1);
 
         svgGroup
-          .select(".anim-xaxis")
-          .call(_pagXAxis.tickFormat((d) => `year ${d}`));
-
-        svgGroup
           .transition()
           .delay(500)
           .attr(
@@ -426,13 +439,8 @@ function initAllAnims() {
 
         bars
           .transition()
-          .delay(
-            (d) =>
-              100 +
-              (1 - (d.placeFromLeft / _pagDataDescending.length) ** 4) * 1000
-          )
           .duration(500)
-          .attr("x", (d) => _prfX(d.year))
+          .attr("x", (d, i) => x(i))
           .attr("width", _pagX.bandwidth())
           .transition()
           .duration(500)
@@ -440,7 +448,24 @@ function initAllAnims() {
           .end()
           .catch(() => {})
           .then(() => {
-            bars.style("mix-blend-mode", "normal");
+            bars
+              .transition()
+              .duration(500)
+              .attr("fill", "steelblue")
+              .transition()
+              .delay(
+                (d, i) =>
+                  100 + (1 - (i / _pagDataDescending.length) ** 4) * 1000
+              )
+              .duration(500)
+              .attr("x", (d) => _prfX(d.year))
+              .end()
+              .catch(() => {})
+              .then(() => {
+                svgGroup
+                  .select(".anim-xaxis")
+                  .call(_pagXAxis.tickFormat((d) => `year ${d}`));
+              });
           });
       }
 
@@ -458,10 +483,6 @@ function initAllAnims() {
           .attr("opacity", 1);
 
         svgGroup
-          .select(".anim-xaxis")
-          .call(_prfXAxis.tickFormat((d) => `year ${d}`));
-
-        svgGroup
           .transition()
           .delay(500)
           .attr(
@@ -471,13 +492,8 @@ function initAllAnims() {
 
         bars
           .transition()
-          .delay(
-            (d) =>
-              100 +
-              (1 - (d.placeFromLeft / _prfDataDescending.length) ** 4) * 1000
-          )
           .duration(500)
-          .attr("x", (d) => _prfX(d.year))
+          .attr("x", (d, i) => x(i))
           .attr("width", _prfX.bandwidth())
           .transition()
           .duration(500)
@@ -485,7 +501,24 @@ function initAllAnims() {
           .end()
           .catch(() => {})
           .then(() => {
-            bars.style("mix-blend-mode", "normal");
+            bars
+              .transition()
+              .duration(500)
+              .attr("fill", "steelblue")
+              .transition()
+              .delay(
+                (d, i) =>
+                  100 + (1 - (i / _prfDataDescending.length) ** 4) * 1000
+              )
+              .duration(500)
+              .attr("x", (d) => _prfX(d.year))
+              .end()
+              .catch(() => {})
+              .then(() => {
+                svgGroup
+                  .select(".anim-xaxis")
+                  .call(_prfXAxis.tickFormat((d) => `year ${d}`));
+              });
           });
       }
     }
@@ -506,7 +539,7 @@ function initAllAnims() {
 
   function initBucketsFillAnim({ deps }) {
     function animDo() {
-      d3.selectAll(".tut-graph-wrapper .bucket-wrapper").style(
+      d3.selectAll(".tut-graph-wrapper .bottle-wrapper").style(
         "display",
         "initial"
       );
@@ -521,7 +554,7 @@ function initAllAnims() {
       deps.setBucketInterperPAG(() => d3.scaleLinear().range([0, 0]));
       deps.setBucketInterperPRF(() => d3.scaleLinear().range([0, 0]));
 
-      d3.selectAll(".tut-graph-wrapper .bucket-wrapper").style(
+      d3.selectAll(".tut-graph-wrapper .bottle-wrapper").style(
         "display",
         "none"
       );
@@ -648,10 +681,10 @@ function initAllAnims() {
       d3.select(".main-waterdrop .var-scen-label")
         .transition()
         .style("transform", "scale(2)");
-      d3.selectAll(".drop1 .waterdrop-wrapper, .drop3 .waterdrop-wrapper")
+      d3.selectAll(".drop1 .bottle-wrapper, .drop3 .bottle-wrapper")
         .transition()
         .style("transform", "translate(-50px, 15px) scale(0.5)");
-      d3.selectAll(".drop2 .waterdrop-wrapper, .drop4 .waterdrop-wrapper")
+      d3.selectAll(".drop2 .bottle-wrapper, .drop4 .bottle-wrapper")
         .transition()
         .style("transform", "translate(50px, 15px) scale(0.5)");
 
@@ -672,10 +705,10 @@ function initAllAnims() {
       d3.select(".main-waterdrop .var-scen-label")
         .transition()
         .style("transform", "scale(1)");
-      d3.selectAll(".drop1 .waterdrop-wrapper, .drop3 .waterdrop-wrapper")
+      d3.selectAll(".drop1 .bottle-wrapper, .drop3 .bottle-wrapper")
         .transition()
         .style("transform", "none");
-      d3.selectAll(".drop2 .waterdrop-wrapper, .drop4 .waterdrop-wrapper")
+      d3.selectAll(".drop2 .bottle-wrapper, .drop4 .bottle-wrapper")
         .transition()
         .style("transform", "none");
 

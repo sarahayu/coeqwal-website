@@ -16,7 +16,7 @@ function initScripts() {
     ),
     bucketsFill: (
       <>
-        What we get are buckets of water showing which water levels are most
+        What we get are containers of water showing which water levels are most
         likely, with the darker areas being the most likely water levels.
         <span className="supplement-card-info">
           Visuals made using{" "}

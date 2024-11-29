@@ -4,7 +4,8 @@ import { settings } from "settings";
 
 import { dropCenterCorrection } from "utils/math-utils";
 import {
-  DROPLET_SHAPE,
+  BOTTLE_SHAPE_BODY,
+  BOTTLE_SHAPE_FULL,
   circlet,
   gradientInit,
   gradientUpdate,
@@ -18,11 +19,11 @@ function smallDropInit({ levs, id }) {
 
     s.call(gradientInit(levs, idStr));
 
-    s.append("path").attr("d", DROPLET_SHAPE).attr("class", "outline");
+    s.append("path").attr("d", BOTTLE_SHAPE_FULL).attr("class", "outline");
 
     s.append("path")
       .attr("class", "fill")
-      .attr("d", DROPLET_SHAPE)
+      .attr("d", BOTTLE_SHAPE_BODY)
       .attr("fill", `url(#${idStr})`);
 
     s.append("circle")

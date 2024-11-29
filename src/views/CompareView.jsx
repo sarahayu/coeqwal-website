@@ -14,6 +14,7 @@ import { createInterpsFromDelivs, deserialize } from "utils/data-utils";
 import { helpers } from "utils/compareview-helpers";
 import { useDragPanels } from "hooks/useDragPanels";
 import DropletGlyph from "components/DropletGlyph";
+import BottleGlyph from "components/BottleGlyph";
 
 export default function CompareView() {
   const appCtx = useContext(AppContext);
@@ -216,7 +217,7 @@ export default function CompareView() {
 
         return (
           <div
-            className={"panel compare-panel" + (isLeft ? " left" : "")}
+            className={"panel compare-panel" + (isLeft ? " left" : " right")}
             key={i}
             style={getPanelStyle({ x, y, offsetX, offsetY })}
             onMouseDown={(e) => onPanelDragStart(e, { id })}
@@ -235,11 +236,7 @@ export default function CompareView() {
                   });
                 }}
               />
-              <DropletGlyph
-                levelInterp={interper}
-                height={200}
-                resolution={4}
-              />
+              <BottleGlyph levelInterp={interper} height={200} resolution={4} />
             </div>
           </div>
         );

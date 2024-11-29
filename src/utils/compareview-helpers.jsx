@@ -4,11 +4,12 @@ import { settings } from "settings";
 
 import { clipEnds, dropCenterCorrection } from "utils/math-utils";
 import {
-  DROPLET_SHAPE,
   generateTSpan,
   circlet,
   gradientInit,
   gradientUpdate,
+  BOTTLE_SHAPE_FULL,
+  BOTTLE_SHAPE_BODY,
 } from "utils/render-utils";
 
 function largeDropInit({ nodes, height, key }) {
@@ -131,13 +132,13 @@ function smallDropInit({ levs, id }) {
     s.call(gradientInit(levs, idStr));
 
     s.append("path")
-      .attr("d", DROPLET_SHAPE)
+      .attr("d", BOTTLE_SHAPE_FULL)
       .attr("class", "outline")
       .attr("transform", `scale(${settings.LOD_1_RAD_PX * 0.95})`);
 
     s.append("path")
       .attr("class", "fill")
-      .attr("d", DROPLET_SHAPE)
+      .attr("d", BOTTLE_SHAPE_BODY)
       .attr("fill", `url(#${idStr})`)
       .attr("transform", `scale(${settings.LOD_1_RAD_PX})`);
   };

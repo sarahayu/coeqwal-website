@@ -1003,11 +1003,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   position: relative;
 }
 
-.panel-main-container .waterdrop-wrapper {
+.panel .bottle-wrapper, .panel.left .bottle-wrapper {
   position: absolute;
   top: 100%;
   left: 100%;
-  transform: translate(-10%, -50%);
+  right: initial;
+  transform: translate(-30%, -50%);
+}
+
+.panel.right .bottle-wrapper {
+  position: absolute;
+  top: 100%;
+  right: 100%;
+  left: initial;
+  transform: translate(30%, -50%);
 }
 
 .panel .dot-histogram-wrapper {
@@ -1017,7 +1026,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   min-height: 0;
 }
 
-.panel .waterdrop-wrapper {
+.panel .bottle-wrapper {
   pointer-events: none;
 }
 
@@ -1267,7 +1276,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   width: 100%;
   height: var(--height);
   isolation: isolate;
-  background-color: rgba(208, 219, 217, 0.7);
+  background-color: rgb(18, 87, 115, 0.7);
+  color: white;
   position: fixed;
   bottom: 0;
   display: grid;
@@ -1276,7 +1286,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .tut-text-card::before {
   content: '';
-  background-image: url("data:image/svg+xml,%3Csvg version='1.2' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 112' width='100%25' height='112' preserveAspectRatio='none'%3E%3Cg fill='%23D0DBD9'%3E%3Cpath d='m960 84c160 0 240-21 320-42v70h-1280v-70c80-21 160-42 320-42 320 0 320 84 640 84z'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg version='1.2' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 112' width='100%25' height='112' preserveAspectRatio='none'%3E%3Cg fill='%23125773'%3E%3Cpath d='m960 84c160 0 240-21 320-42v70h-1280v-70c80-21 160-42 320-42 320 0 320 84 640 84z'/%3E%3C/g%3E%3C/svg%3E");
   background-size: 100% 100px;
   bottom: 100%;
   position: absolute;
@@ -1303,17 +1313,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   min-height: calc(100vh - 200px);
   display: grid;
   position: relative;
+  background-color: #4B7E92;
+  color: white;
+  isolation: isolate;
+  z-index: 10;
 }
 
 .cte::before {
   content: '';
-  background-image: url("data:image/svg+xml,%3Csvg version='1.2' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 112' width='100%25' height='112' preserveAspectRatio='none'%3E%3Cg fill='%23D0DBD9'%3E%3Cpath d='m960 84c160 0 240-21 320-42v70h-1280v-70c80-21 160-42 320-42 320 0 320 84 640 84z'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg version='1.2' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 112' width='100%25' height='112' preserveAspectRatio='none'%3E%3Cg fill='%234B7E92'%3E%3Cpath d='m960 84c160 0 240-21 320-42v70h-1280v-70c80-21 160-42 320-42 320 0 320 84 640 84z'/%3E%3C/g%3E%3C/svg%3E");
   background-size: 100% 100px;
   bottom: 100%;
   position: absolute;
   height: 100px;
   width: 100%;
   transform: scale(1, 1);
+  z-index: -1;
 }
 
 .cte-container {
@@ -1357,7 +1372,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 .supplement-card-info {
   display: block;
   text-align: right;
-  color: #808c54;
+  color: #D0DBD9;
   font-size: 0.7em;
   font-style: italic;
   margin-top: -0.5em;
@@ -1450,7 +1465,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 .vardrop {
   position: absolute;
   --block-padding: 3rem;
-  --inlind-padding: 1rem;
+  --inline-padding: 1rem;
 }
 
 .vardrop path {
@@ -1458,8 +1473,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .drop1 {
-  left: var(--inlind-padding);
-  top: var(--block-padding);
+  left: var(--inline-padding);
+  top: -2.5em;
 }
 
 .drop1.highlighted::after {
@@ -1474,17 +1489,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 }
 
 .drop2 {
-  right: var(--inlind-padding);
-  top: var(--block-padding);
+  right: var(--inline-padding);
+  top: -2.5em;
 }
 
 .drop3 {
-  left: var(--inlind-padding);
+  left: var(--inline-padding);
   bottom: var(--block-padding);
 }
 
 .drop4 {
-  right: var(--inlind-padding);
+  right: var(--inline-padding);
   bottom: var(--block-padding);
 }
 

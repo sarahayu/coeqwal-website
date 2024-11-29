@@ -37,10 +37,12 @@ export default function TutorialView() {
     function enterState() {
       if (isState(appCtx.state, "TutorialView")) {
         hideElems(
-          ".bucket-wrapper, .vardrop, .var-scen-label, .vardrop .dot-histogram-wrapper, .main-histogram, .tut-comparer-graphics-wrapper"
+          ".tut-graph .bottle-wrapper, .vardrop, .var-scen-label, .vardrop .dot-histogram-wrapper, .main-histogram, .tut-comparer-graphics-wrapper"
         );
 
         hookAnimations();
+
+        // blyat
 
         return function exitState() {
           appCtx.resetCamera(false);
@@ -65,7 +67,7 @@ export default function TutorialView() {
           {getSlidesInRange("barsExplain", "comparingTheTwo").map(
             (slide, i) => (
               <Step key={i} data={slide}>
-                <CardBBox id={`card${slide.idx}`}>{slide.script}</CardBBox>
+                <CardBBox id={`card-${slide.idx}`}>{slide.script}</CardBBox>
               </Step>
             )
           )}
@@ -81,7 +83,7 @@ export default function TutorialView() {
           {getSlidesInRange("forNowLetsFocus", "letsBringRefuge").map(
             (slide, i) => (
               <Step key={i} data={slide}>
-                <CardBBox id={`card${slide.idx}`}>{slide.script}</CardBBox>
+                <CardBBox id={`card-${slide.idx}`}>{slide.script}</CardBBox>
               </Step>
             )
           )}

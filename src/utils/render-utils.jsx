@@ -6,146 +6,75 @@ import * as d3 from "d3";
 import { settings } from "settings";
 import { radToDeg } from "three/src/math/MathUtils";
 import { wrap } from "utils/misc-utils";
-import { dist } from "utils/math-utils";
+import { clamp, dist } from "utils/math-utils";
 
 // path generated when WATERDROP_ICON size = 2
 export const DROPLET_SHAPE = "M0,-1L0.5,-0.5A0.707,0.707,0,1,1,-0.5,-0.5L0,-1Z";
+
+const BOTTLE_ICON = {
+  draw: function (context, size) {
+    const bottleWidth = size / 2;
+    const capWidth = (bottleWidth * 2) / 3;
+    const capHeight = capWidth / 2;
+    context.moveTo(capWidth / 2, -size / 2);
+    context.lineTo(-bottleWidth / 2, -size / 2);
+    context.lineTo(-bottleWidth / 2, size / 2);
+    context.lineTo(bottleWidth / 2, size / 2);
+    context.lineTo(bottleWidth / 2, -size / 2);
+    context.lineTo(capWidth / 2, -size / 2);
+    context.lineTo(capWidth / 2, -size / 2 - capHeight);
+    context.lineTo(-capWidth / 2, -size / 2 - capHeight);
+    context.lineTo(-capWidth / 2, -size / 2);
+  },
+};
+
+export const BOTTLE_SHAPE_FULL =
+  "M0.333,-1L-0.5,-1L-0.5,1L0.5,1L0.5,-1L0.333,-1L0.333,-1.333L-0.333,-1.333L-0.333,-1";
+
+export const BOTTLE_SHAPE_BODY =
+  "M0.333,-1L-0.5,-1L-0.5,1L0.5,1L0.5,-1L0.333,-1";
 
 export const CIRC_RAD = Math.SQRT1_2;
 export const DROP_RAD = 1;
 export const CIRC_HEIGHT = CIRC_RAD + CIRC_RAD;
 export const DROP_HEIGHT = DROP_RAD + CIRC_RAD;
-const HAT_START = (CIRC_RAD + DROP_RAD / 2) / DROP_HEIGHT;
 
-// half width at widest is 1
-function yToHalfWidth(y) {
-  if (y >= HAT_START) {
-    const hatHalfWidth = Math.SQRT1_2;
+export function bottleOutline(size = 2) {
+  const bottleWidth = size / 2;
+  const capWidth = (bottleWidth * 2) / 3;
+  const capHeight = capWidth / 2;
 
-    return (hatHalfWidth * (1 - y)) / (1 - HAT_START);
-  }
-
-  const circFrac = fracDropToCirc(y);
-  const trigX = (1 - circFrac) * 2 - 1;
-
-  const angle = Math.acos(trigX);
-  const trigY = Math.sin(angle);
-
-  return trigY;
+  return [
+    [capWidth / 2, -size / 2],
+    [-bottleWidth / 2, -size / 2],
+    [-bottleWidth / 2, -size / 2],
+    [-bottleWidth / 2, size / 2],
+    [-bottleWidth / 2, size / 2],
+    [bottleWidth / 2, size / 2],
+    [bottleWidth / 2, size / 2],
+    [bottleWidth / 2, -size / 2],
+    [bottleWidth / 2, -size / 2],
+    [capWidth / 2, -size / 2],
+    [capWidth / 2, -size / 2],
+    [capWidth / 2, -size / 2 - capHeight],
+    [capWidth / 2, -size / 2 - capHeight],
+    [-capWidth / 2, -size / 2 - capHeight],
+    [-capWidth / 2, -size / 2 - capHeight],
+    [-capWidth / 2, -size / 2],
+  ];
 }
 
-// fml, here sprite width is 2 (i.e. circ rad is 1) thus drop real height is 1 + sqrt2
-function yToSpriteY(y) {
-  return (y - CIRC_RAD / DROP_HEIGHT) * (1 + Math.SQRT2);
-}
+export function bottlePartial(yStart, yEnd, size = 2) {
+  const bottleWidth = size / 2;
+  const v1 = [-bottleWidth / 2, size / 2 - yStart * size],
+    v2 = [bottleWidth / 2, size / 2 - yStart * size],
+    v3 = [bottleWidth / 2, size / 2 - yEnd * size],
+    v4 = [-bottleWidth / 2, size / 2 - yEnd * size];
 
-function spriteYToY(sy) {
-  return sy / (1 + Math.SQRT2) + CIRC_RAD / DROP_HEIGHT;
-}
-
-function fracCircToDrop(v) {
-  return v / CIRC_HEIGHT / DROP_HEIGHT;
-}
-
-function fracDropToCirc(v) {
-  return v / (CIRC_HEIGHT / DROP_HEIGHT);
-}
-
-export function waterdropDeltaOutline(yStart, yEnd, size = 2, subdivs = 10) {
-  if (Math.abs(yStart - yEnd) < 0.01) return [];
-
-  const rad = (size / 2 / DROP_RAD) * CIRC_RAD;
-
-  const Y_DELTA = 1 / subdivs;
-
-  const rightCoords = [];
-  const leftCoords = [];
-
-  let dx1, dy1, dx2, dy2;
-
-  for (let i = 1; i <= Math.ceil(1 / Y_DELTA); i++) {
-    dx1 = yToHalfWidth(yStart + (i - 1) * Y_DELTA);
-    dy1 = yToSpriteY(yStart + (i - 1) * Y_DELTA);
-    dx2 = yToHalfWidth(yStart + i * Y_DELTA);
-    dy2 = yToSpriteY(yStart + i * Y_DELTA);
-
-    if (spriteYToY(dy2) >= yEnd) break;
-
-    // CC !
-    const v1 = [-dx1 * rad, -dy1 * rad],
-      v2 = [dx1 * rad, -dy1 * rad],
-      v3 = [dx2 * rad, -dy2 * rad],
-      v4 = [-dx2 * rad, -dy2 * rad];
-
-    rightCoords.push(v2, v3);
-    leftCoords.push(v1, v4);
-  }
-
-  dx2 = yToHalfWidth(yEnd);
-  dy2 = yToSpriteY(yEnd);
-
-  // CC !
-  const v1 = [-dx1 * rad, -dy1 * rad],
-    v2 = [dx1 * rad, -dy1 * rad],
-    v3 = [dx2 * rad, -dy2 * rad],
-    v4 = [-dx2 * rad, -dy2 * rad];
-
-  rightCoords.push(v2, v3);
-  leftCoords.push(v1, v4);
-
-  rightCoords.push(...leftCoords.reverse());
-
-  return rightCoords;
-}
-
-export function waterdropDelta(yStart, yEnd, size = 2) {
-  if (Math.abs(yStart - yEnd) < 0.01) return [];
-
-  const rad = (size / 2 / DROP_RAD) * CIRC_RAD;
-
-  const Y_DELTA = 0.1;
-
-  const coords = [];
-
-  let dx1, dy1, dx2, dy2;
-
-  for (let i = 1; i <= Math.ceil(1 / Y_DELTA); i++) {
-    dx1 = yToHalfWidth(yStart + (i - 1) * Y_DELTA);
-    dy1 = yToSpriteY(yStart + (i - 1) * Y_DELTA);
-    dx2 = yToHalfWidth(yStart + i * Y_DELTA);
-    dy2 = yToSpriteY(yStart + i * Y_DELTA);
-
-    if (spriteYToY(dy2) >= yEnd) break;
-
-    // CC !
-    const v1 = [-dx1 * rad, -dy1 * rad],
-      v2 = [dx1 * rad, -dy1 * rad],
-      v3 = [dx2 * rad, -dy2 * rad],
-      v4 = [-dx2 * rad, -dy2 * rad];
-
-    coords.push([v1, v2, v3]);
-    coords.push([v1, v3, v4]);
-  }
-
-  dx2 = yToHalfWidth(yEnd);
-  dy2 = yToSpriteY(yEnd);
-
-  // CC !
-  const v1 = [-dx1 * rad, -dy1 * rad],
-    v2 = [dx1 * rad, -dy1 * rad],
-    v3 = [dx2 * rad, -dy2 * rad],
-    v4 = [-dx2 * rad, -dy2 * rad];
-
-  coords.push([v1, v2, v3]);
-  coords.push([v1, v3, v4]);
-
-  return coords;
-}
-
-export function waterdrop(yFill, size = 2) {
-  if (yFill === 0) return [];
-
-  return waterdropDelta(0, yFill, size);
+  return [
+    [v1, v2, v3],
+    [v1, v3, v4],
+  ];
 }
 
 export function circlet(s) {
@@ -213,7 +142,7 @@ export function gradientUpdate(levs, maxLev) {
 
       d3.select(this).attr(
         "offset",
-        `${(1 - levelToDropletLevel(levs[valOffset] / maxLev)) * 100}%`
+        `${(1 - clamp(levs[valOffset] / maxLev, 0, 1)) * 100}%`
       );
     });
   };

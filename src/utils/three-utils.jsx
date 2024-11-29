@@ -8,10 +8,12 @@ import { settings } from "settings";
 import { copyCoords, sortBy } from "utils/misc-utils";
 import { rotatePoints, toRadians } from "utils/math-utils";
 import {
-  waterdropDeltaOutline,
-  waterdropDelta,
+  waterdropOutline,
+  waterdropPartial,
   worldToScreen,
   screenToWorld,
+  bottleOutline,
+  bottlePartial,
 } from "utils/render-utils";
 
 export function mouseToThree(mouseX, mouseY, width, height) {
@@ -59,11 +61,7 @@ export class WaterdropMesh {
     const dropsGeometry = new MeshGeometry(WaterdropMesh.MAX_POINTS_DROPS);
     const outlinePoints = [];
 
-    const outlineMeshCoords = waterdropDeltaOutline(
-      0,
-      1,
-      settings.LOD_1_RAD_PX * 2 * 0.975
-    );
+    const outlineMeshCoords = bottleOutline(settings.LOD_1_RAD_PX * 2 * 0.975);
 
     for (let i = 0; i < waterdrops.nodes.length; i++) {
       const {
@@ -79,7 +77,7 @@ export class WaterdropMesh {
         const l1 = k !== levs.length - 1 ? levs[k + 1] : 0;
         const l2 = levs[k];
 
-        const meshCoords = waterdropDelta(
+        const meshCoords = bottlePartial(
           levelToDropletLevel(l1 / maxLev),
           levelToDropletLevel(l2 / maxLev),
           settings.LOD_1_RAD_PX * 2

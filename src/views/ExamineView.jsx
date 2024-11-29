@@ -20,6 +20,7 @@ import { helpers } from "utils/examineview-helpers";
 import { useDragPanels } from "hooks/useDragPanels";
 import DropletGlyph from "components/DropletGlyph";
 import { ConnectLine } from "components/ConnectLine";
+import BottleGlyph from "components/BottleGlyph";
 
 export default function ExamineView() {
   const appCtx = useContext(AppContext);
@@ -360,7 +361,7 @@ export default function ExamineView() {
                       });
                     }}
                   />
-                  <DropletGlyph
+                  <BottleGlyph
                     levelInterp={interper}
                     height={200}
                     resolution={4}
