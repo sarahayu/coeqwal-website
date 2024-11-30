@@ -14,6 +14,7 @@ export function VariationWaterdropGraphics({
     <div className={`vardrop ${clas}`} key={idx} desc={desc}>
       <BottleGlyph
         levelInterp={interper}
+        maxValue={histRange[1]}
         width={size * 0.7}
         height={size * 0.7}
         resolution={4}

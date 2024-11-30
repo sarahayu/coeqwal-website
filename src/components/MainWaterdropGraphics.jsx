@@ -17,6 +17,7 @@ export function MainWaterdropGraphics({
       <div className="main-waterdrop">
         <BottleGlyph
           levelInterp={dropInterper}
+          maxValue={histRange[1]}
           width={size}
           height={size}
           resolution={4}

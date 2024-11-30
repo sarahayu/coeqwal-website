@@ -363,6 +363,7 @@ export default function ExamineView() {
                   />
                   <BottleGlyph
                     levelInterp={interper}
+                    maxValue={delivMax}
                     height={200}
                     resolution={4}
                   />

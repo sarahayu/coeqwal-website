@@ -26,11 +26,11 @@ function initConstants() {
 
   const PAG_DELIVS =
     objectivesData.OBJECTIVES_DATA[PAG_OBJECTIVE][
-    objectivesData.SCENARIO_KEY_STRING
+      objectivesData.SCENARIO_KEY_STRING
     ][DEFAULT_SCENARIO][objectivesData.DELIV_KEY_STRING];
   const PRF_DELIVS =
     objectivesData.OBJECTIVES_DATA[PRF_OBJECTIVE][
-    objectivesData.SCENARIO_KEY_STRING
+      objectivesData.SCENARIO_KEY_STRING
     ][DEFAULT_SCENARIO][objectivesData.DELIV_KEY_STRING];
 
   const VARIATIONS = [
@@ -43,7 +43,7 @@ function initConstants() {
   const VARIATIONS_DELIVS = VARIATIONS.map(
     (vars) =>
       objectivesData.OBJECTIVES_DATA[PAG_OBJECTIVE][
-      objectivesData.SCENARIO_KEY_STRING
+        objectivesData.SCENARIO_KEY_STRING
       ][vars][objectivesData.DELIV_KEY_STRING]
   );
 
@@ -125,6 +125,8 @@ function initConstants() {
     },
   ];
 
+  const MAX_DELIVS = objectivesData.MAX_DELIVS;
+
   return {
     BAR_CHART_WIDTH,
     BAR_CHART_HEIGHT,
@@ -143,6 +145,7 @@ function initConstants() {
     PAG_INTERPER_DROP,
     PRF_INTERPER,
     DROP_VARIATIONS,
+    MAX_DELIVS,
   };
 }
 

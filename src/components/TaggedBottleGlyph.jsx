@@ -8,6 +8,7 @@ import {
   transitionSway,
 } from "bucket-lib/bucket-glyph";
 import {
+  collideOffsetter,
   interpolateWatercolorBlue,
   levelToDropletLevel,
   ticksExact,
@@ -111,7 +112,15 @@ function drawBottleCap(context, width, bottleHeight) {
   context.closePath();
 }
 
-export default function BottleGlyph({
+const PERCENTILE_LABELS = [
+  "Maximum",
+  "75th Percentile",
+  "50th Percentile",
+  "25th Percentile",
+  "Minimum",
+];
+
+export default function TaggedBottleGlyph({
   levelInterp,
   maxValue = 100,
   colorInterp = interpolateWatercolorBlue,
@@ -123,8 +132,8 @@ export default function BottleGlyph({
   const GLYPH_MARGIN = {
     top: LINE_WIDTH / 2 + height / 6,
     right: LINE_WIDTH / 2,
-    bottom: LINE_WIDTH / 2,
-    left: LINE_WIDTH / 2,
+    bottom: LINE_WIDTH / 2 + 20,
+    left: 180,
   };
 
   const svgElement = useRef();
@@ -164,6 +173,7 @@ export default function BottleGlyph({
       );
 
       const glyph = bucketGlyph(width, height);
+      const data = glyph(liquidLevels);
 
       const x = d3
         .scaleLinear()
@@ -182,7 +192,7 @@ export default function BottleGlyph({
       const liquids = svgElement.current
         .select(".masked-area")
         .selectAll(".bucket-box")
-        .data(glyph(liquidLevels))
+        .data(data)
         .join("rect")
         .attr("class", "bucket-box")
         .attr("width", (d) => d.width)
@@ -191,6 +201,51 @@ export default function BottleGlyph({
         .attr("fill", (_, i) => colorInterp(i / resolution));
 
       transitionSway(liquids, 200 / height).attr("y", (d) => d.y);
+
+      // percentile labels that appear on the side
+      const reverseData = data.reverse();
+
+      const labelWidth = 170,
+        labelHeight = 30;
+
+      const xOffset = collideOffsetter(reverseData, labelHeight);
+
+      const tagElem = (s) =>
+        s.append("g").call((s) => {
+          s.append("rect");
+          s.append("text");
+        });
+
+      const labels = svgElement.current
+        .select(".bucket")
+        .selectAll(".bucket-label")
+        .data(reverseData)
+        .join(tagElem)
+        .attr("class", "bucket-label")
+        .transition()
+        .attr(
+          "transform",
+          (d, i) =>
+            `translate(${-labelWidth / 2 - 3 + xOffset(i)}, ${
+              d.y + height / 2
+            })`
+        );
+
+      labels
+        .select("text")
+        .text((_, i) => PERCENTILE_LABELS[data.length - 1 - i])
+        .style("fill", (_, i) => (i > data.length / 2 ? "black" : "white"));
+
+      labels
+        .select("rect")
+        .attr("width", labelWidth)
+        .attr("height", labelHeight)
+        .attr("x", -labelWidth / 2)
+        .attr("y", -labelHeight / 2)
+        .attr("rx", 8)
+        .style("fill", (_, i) =>
+          colorInterp((data.length - 1 - i) / resolution)
+        );
     },
     [levelInterp]
   );

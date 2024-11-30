@@ -1,15 +1,13 @@
-import React from "react";
-import BucketGlyph from "components/BucketGlyph";
 import { constants } from "utils/tutorialview-utils";
-import DropletGlyph from "./DropletGlyph";
-import BottleGlyph from "./BottleGlyph";
+import TaggedBottleGlyph from "./TaggedBottleGlyph";
 
 export function BucketCreationGraphics({ id, bucketInterper, label }) {
   return (
     <div className="tut-graph">
       <svg id={id}></svg>
-      <BottleGlyph
+      <TaggedBottleGlyph
         levelInterp={bucketInterper}
+        maxValue={constants.MAX_DELIVS}
         width={300}
         height={constants.BAR_CHART_HEIGHT}
         resolution={4}

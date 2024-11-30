@@ -236,7 +236,12 @@ export default function CompareView() {
                   });
                 }}
               />
-              <BottleGlyph levelInterp={interper} height={200} resolution={4} />
+              <BottleGlyph
+                maxValue={delivMax}
+                levelInterp={interper}
+                height={200}
+                resolution={4}
+              />
             </div>
           </div>
         );

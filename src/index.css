@@ -1253,7 +1253,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 .tut-graph>p {
   position: absolute;
-  top: -1.3em;
+  top: -1.8em;
 }
 
 .scrollama {
@@ -1468,7 +1468,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   --inline-padding: 1rem;
 }
 
-.vardrop path {
+.vardrop .bucket-outline {
   stroke-dasharray: 10 10;
 }
 

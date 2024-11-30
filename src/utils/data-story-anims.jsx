@@ -627,12 +627,18 @@ function initAllAnims() {
 
   function initFillVarDropsAnim({ deps }) {
     function animDo() {
-      d3.selectAll(".vardrop path").style("stroke-dasharray", "none");
+      d3.selectAll(".vardrop .bucket-outline").style(
+        "stroke-dasharray",
+        "none"
+      );
       deps.setVariationInterpers(constants.VARIATIONS_INTERPERS);
     }
 
     function animUndo() {
-      d3.selectAll(".vardrop path").style("stroke-dasharray", "10 10");
+      d3.selectAll(".vardrop .bucket-outline").style(
+        "stroke-dasharray",
+        "10 10"
+      );
       deps.setVariationInterpers(
         constants.VARIATIONS.map(() => d3.scaleLinear().range([0, 0]))
       );

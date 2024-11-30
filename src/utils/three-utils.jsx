@@ -24,8 +24,8 @@ export function mouseToThree(mouseX, mouseY, width, height) {
 }
 
 export class WaterdropMesh {
-  static MAX_POINTS_DROPS = 60 * 130000; // approx num verts per droplet * approx num droplets on screen
-  static MAX_POINTS_OUTLINE = 40 * 130000; // approx num verts per droplet * approx num droplets on screen
+  static MAX_POINTS_DROPS = 30 * 6600; // approx num verts per droplet * approx num droplets on screen
+  static MAX_POINTS_OUTLINE = 16 * 6600; // approx num verts per droplet * approx num droplets on screen
 
   dropsMesh;
   outlineMesh;
