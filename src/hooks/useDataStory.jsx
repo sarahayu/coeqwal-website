@@ -16,6 +16,7 @@ export function useDataStory(waterdrops, camera) {
     ]
      */
   const [slides, setSlides] = useState([]);
+  const [index, setIndex] = useState(0);
 
   const storyVars = useDataStoryVars();
   const largeDropComparer = useCompareLargeDrops();
@@ -43,18 +44,6 @@ export function useDataStory(waterdrops, camera) {
       const comparerAnimGroup = anims.initComparerAnimGroup(context);
 
       const _slides = [
-        {
-          name: "howMuchIntro",
-          // no anims
-        },
-        {
-          name: "norCal",
-          animHandler: showLocationAnimGroup.showPAG,
-        },
-        {
-          name: "soCal",
-          animHandler: showLocationAnimGroup.showPRF,
-        },
         {
           name: "barsExplain",
           animHandler: chartAnimGroup.barsAppear,
@@ -131,6 +120,8 @@ export function useDataStory(waterdrops, camera) {
     hookAnimations,
     getSlidesInRange: getFromTo,
     storyVars,
+    index,
+    setIndex,
   };
 }
 

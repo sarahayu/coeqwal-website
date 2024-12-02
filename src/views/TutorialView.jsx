@@ -28,10 +28,8 @@ const tutorialWaterdrops = initWaterdrops(
 export default function TutorialView() {
   const appCtx = useContext(AppContext);
 
-  const { hookAnimations, getSlidesInRange, storyVars } = useDataStory(
-    tutorialWaterdrops,
-    appCtx.camera
-  );
+  const { hookAnimations, getSlidesInRange, storyVars, index, setIndex } =
+    useDataStory(tutorialWaterdrops, appCtx.camera);
 
   useLayoutEffect(
     function enterState() {
@@ -42,7 +40,7 @@ export default function TutorialView() {
 
         hookAnimations();
 
-        // blyat
+        setIndex(-1);
 
         return function exitState() {
           appCtx.resetCamera(false);
@@ -57,13 +55,25 @@ export default function TutorialView() {
 
   return (
     <div className="tutorial-view">
+      <button
+        className="scrollama-next"
+        onClick={() => {
+          let elem = document.getElementById(`card-${index + 1}`);
+
+          if (!elem) elem = document.getElementById("cte");
+
+          elem.scrollIntoView({ behavior: "smooth" });
+        }}
+      >
+        Click Here or Scroll to Continue
+      </button>
       <TutHero appCtx={appCtx} />
       <div className="scrollama scrollama-create-buckets">
         <CompareBucketCreationsBackground
           appCtx={appCtx}
           storyVars={storyVars}
         />
-        <DataStoryScrollama>
+        <DataStoryScrollama setCurrentIndex={setIndex}>
           {getSlidesInRange("barsExplain", "comparingTheTwo").map(
             (slide, i) => (
               <Step key={i} data={slide}>
@@ -79,7 +89,7 @@ export default function TutorialView() {
           size={appCtx.appHeight * 0.4}
         />
         <CompareBigDroplets />
-        <DataStoryScrollama>
+        <DataStoryScrollama setCurrentIndex={setIndex}>
           {getSlidesInRange("forNowLetsFocus", "letsBringRefuge").map(
             (slide, i) => (
               <Step key={i} data={slide}>
