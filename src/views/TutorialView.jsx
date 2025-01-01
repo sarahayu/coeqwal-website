@@ -19,11 +19,7 @@ import { descriptionsData } from "data/descriptions-tutorial-data";
 import { objectivesData } from "data/objectives-tutorial-data";
 import { initWaterdrops } from "utils/waterdrop-utils";
 
-const tutorialWaterdrops = initWaterdrops(
-  objectivesData,
-  descriptionsData,
-  "objective"
-);
+const tutorialWaterdrops = initWaterdrops(objectivesData, descriptionsData);
 
 export default function TutorialView() {
   const appCtx = useContext(AppContext);

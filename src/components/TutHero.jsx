@@ -21,7 +21,7 @@ export function TutHero({ appCtx }) {
           <span id="ref-group">refuge group in the south.</span>
         </p>
         <p>
-          Click on the green circle on the bottom-right, or scroll through this
+          Click on the green button on the bottom-right, or scroll through this
           page, to explore!
         </p>
         <SkipBtn onClick={() => appCtx.setState({ state: "WideView" })} />

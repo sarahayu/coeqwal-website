@@ -62,7 +62,7 @@ function largeDropUpdate(
 
     s.call(textUpdate(display_name, height))
       .selectAll(".small-drop")
-      .data(nodes)
+      .data(nodes, (d) => d.id)
       .attr("display", "initial")
       .attr("transform", getStartDropLoc)
       .each(function (node) {
@@ -72,6 +72,19 @@ function largeDropUpdate(
       .delay(transitionDelay)
       .duration(1000)
       .attr("transform", getEndDropLoc);
+
+    if (baselinePos.x === undefined) {
+      s.selectAll(".highlight-circle, .baseline-pointer").style(
+        "visibility",
+        "hidden"
+      );
+      return;
+    }
+
+    s.selectAll(".highlight-circle, .baseline-pointer").style(
+      "visibility",
+      "visible"
+    );
 
     s.select(".highlight-circle")
       .attr("cx", baselinePos.x)

@@ -10,15 +10,11 @@ import { initWaterdrops } from "utils/waterdrop-utils";
 
 const appWidth = window.innerWidth,
   appHeight = window.innerHeight;
-const waterdrops = initWaterdrops(
-  objectivesData,
-  descriptionsData,
-  "objective"
-);
 
 export default function useAppState() {
   const [state, setState] = useState({});
   const [activeWaterdrops, setActiveWaterdrops] = useState([]);
+  const [waterdrops, setWaterdrops] = useState({});
   const [goBack, setGoBack] = useState(null);
   const [goals, setGoals] = useState(objectivesData.OBJECTIVE_GOALS_MAP);
 
@@ -26,6 +22,8 @@ export default function useAppState() {
   const disableCamAdjustmentsRef = useRef(false);
 
   useEffect(function initialize() {
+    const waterdrops = initWaterdrops(objectivesData, descriptionsData);
+
     threeResources.renderer.setSize(appWidth, appHeight);
 
     console.time("drops mesh creating");
@@ -72,8 +70,45 @@ export default function useAppState() {
 
     // resetCamera();
 
+    setWaterdrops(waterdrops);
     setState({ state: "TutorialView" });
   }, []);
+
+  const updateWaterdrops = useCallback(function (settings) {
+    const waterdrops = initWaterdrops(
+      objectivesData,
+      descriptionsData,
+      settings
+    );
+
+    threeResources.dropsMesh.updateMeshes(waterdrops);
+
+    setWaterdrops(waterdrops);
+  }, []);
+
+  const realignCamera = useCallback(
+    function () {
+      const outlineOpacity = d3
+        .scaleLinear()
+        .domain([
+          appHeight / waterdrops.height,
+          appHeight / waterdrops.groups[0].height,
+        ])
+        .range([0.1, 1])
+        .clamp(true);
+
+      threeResources.camera.setZoomFn((transform) => {
+        if (!disableCamAdjustmentsRef.current) {
+          threeResources.dropsMesh.updateOutlineVisibility(
+            outlineOpacity(transform.k)
+          );
+        }
+
+        for (const cb of zoomCallbacksRef.current) cb(transform);
+      });
+    },
+    [waterdrops]
+  );
 
   const getOutlineOpacity = useCallback(
     (val) =>
@@ -85,35 +120,38 @@ export default function useAppState() {
         ])
         .range([0.1, 1])
         .clamp(true)(val),
-    []
+    [waterdrops]
   );
 
-  const resetCamera = useCallback(function (animated = true, callback) {
-    const farHeight = waterdrops.height * 1.2;
-    const pos = [
-      0,
-      -waterdrops.height * 0.08,
-      threeResources.camera.getZFromFarHeight(farHeight),
-    ];
+  const resetCamera = useCallback(
+    function (animated = true, callback) {
+      const farHeight = waterdrops.height * 1.2;
+      const pos = [
+        0,
+        -waterdrops.height * 0.08,
+        threeResources.camera.getZFromFarHeight(farHeight),
+      ];
 
-    let transitionDuration = 0;
+      let transitionDuration = 0;
 
-    if (animated) {
-      const [start, dur] = zoomTo(pos, callback);
-      transitionDuration = dur;
+      if (animated) {
+        const [start, dur] = zoomTo(pos, callback);
+        transitionDuration = dur;
 
-      start();
-    } else {
-      threeResources.camera.callZoomFromWorldViewport({
-        worldX: pos[0],
-        worldY: -pos[1],
-        farHeight,
-      });
-      callback && callback();
-    }
+        start();
+      } else {
+        threeResources.camera.callZoomFromWorldViewport({
+          worldX: pos[0],
+          worldY: -pos[1],
+          farHeight,
+        });
+        callback && callback();
+      }
 
-    return transitionDuration;
-  }, []);
+      return transitionDuration;
+    },
+    [waterdrops]
+  );
 
   const zoomTo = useCallback(function (worldPos, callback) {
     const i = threeResources.camera.interpolateZoomCamera(worldPos);
@@ -160,6 +198,8 @@ export default function useAppState() {
     addZoomHandler,
     goals,
     setGoals,
+    updateWaterdrops,
+    realignCamera,
     ...threeResources,
   };
 }

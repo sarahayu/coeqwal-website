@@ -14,11 +14,12 @@ import { descriptionsData } from "data/descriptions-data";
 import { spatialData } from "data/spatial-data";
 import { settings } from "settings";
 
-import { avgCoords, dropCenterCorrection } from "utils/math-utils";
+import { avgCoords } from "utils/math-utils";
 import { arrRemove, isState } from "utils/misc-utils";
 import { generateTSpan, hideElems, showElems } from "utils/render-utils";
 import { helpers } from "utils/wideview-helpers";
 import { ActionButtons } from "components/ActionButtons";
+import { BiCheck } from "react-icons/bi";
 
 export default function WideView() {
   const appCtx = useContext(AppContext);
@@ -29,11 +30,16 @@ export default function WideView() {
     mouseY: 0,
   });
 
+  const firstStateEnterRef = useRef(true);
   const [currentHoveredDrop, setCurrentHoveredDrop] = useState(null);
   const [searchPrompt, setSearchPrompt] = useState(null);
+  const [filterIsVisible, setFilterIsVisible] = useState(false);
+  const [egoObjective, setEgoObjective] = useState(null);
+  const [minDelivery, setMinDelivery] = useState(0);
+  const [menuEgoObjective, setMenuEgoObjective] = useState(null);
+  const [menuMinDelivery, setMenuMinDelivery] = useState(0);
 
   const enableZoomRef = useRef(false);
-  const activeDropsRef = useRef([]);
 
   useEffect(function initialize() {
     initSVGGraphics();
@@ -46,9 +52,17 @@ export default function WideView() {
   }, []);
 
   useEffect(
+    function initializeEgoObjective() {
+      if (appCtx.waterdrops.groups && !egoObjective) {
+        setEgoObjective(appCtx.waterdrops.groups[0].key);
+      }
+    },
+    [appCtx.waterdrops, egoObjective]
+  );
+
+  useEffect(
     function enterState() {
       if (isState(appCtx.state, "WideView")) {
-        const { transitionDuration = 0 } = appCtx.state;
         d3.select("body").style("overflow", "hidden");
 
         enableZoomRef.current = true;
@@ -61,6 +75,8 @@ export default function WideView() {
         drawSVGGraphics();
 
         showElems("#infobox, #mosaic-webgl, #mosaic-svg, #wide-group");
+
+        firstStateEnterRef.current = false;
 
         return function exitState() {
           hideElems("#infobox, #wide-group");
@@ -89,78 +105,139 @@ export default function WideView() {
     [curScreenTransform]
   );
 
-  const handleClickExamine = useCallback(function () {
-    appCtx.setDisableCamAdjustments(true);
+  useEffect(
+    function updateVisibleScenarios() {
+      if (!egoObjective || firstStateEnterRef.current) return;
 
-    const { x, y, height } = activeDropsRef.current[0];
+      appCtx.updateWaterdrops({
+        egoObjective: egoObjective,
+        minDelivery: minDelivery,
+      });
+    },
+    [egoObjective, minDelivery]
+  );
 
-    const newCamPos = [
-      x,
-      y,
-      appCtx.camera.getZFromFarHeight(height * settings.SPREAD_1_2 * 1.5),
-    ];
+  useEffect(
+    function resetCam() {
+      if (firstStateEnterRef.current) return;
 
-    const [startZoom, transitionDuration] = appCtx.zoomTo(
-      newCamPos,
-      function onFinish() {
-        appCtx.setDisableCamAdjustments(false);
-      }
-    );
+      const transitionDuration = appCtx.resetCamera();
 
-    startZoom();
+      appCtx.setState({ state: "WideView", transitionDuration });
+    },
+    [appCtx.waterdrops]
+  );
 
-    appCtx.setState({ state: "ExamineView", transitionDuration });
+  const handleClickFilter = useCallback(
+    function () {
+      setMenuEgoObjective(egoObjective);
+      setMenuMinDelivery(minDelivery);
+      setFilterIsVisible(true);
+    },
+    [appCtx.waterdrops, egoObjective, minDelivery]
+  );
 
-    const startOpacity = appCtx.getOutlineOpacity(appCtx.camera.curTransform.k);
-    helpers.fadeOutDrops(
-      appCtx.dropsMesh,
-      appCtx.scene,
-      startOpacity,
-      transitionDuration / 2
-    );
-  }, []);
+  const handleClickDone = useCallback(
+    function () {
+      setFilterIsVisible(false);
+      setEgoObjective(menuEgoObjective);
+      setMinDelivery(menuMinDelivery);
+    },
+    [menuEgoObjective, menuMinDelivery]
+  );
 
-  const handleClickCompare = useCallback(function () {
-    appCtx.setDisableCamAdjustments(true);
+  const handleClickExamine = useCallback(
+    function () {
+      appCtx.setDisableCamAdjustments(true);
 
-    const dropsMidpoint = avgCoords(
-      activeDropsRef.current.map((w) => [w.x, w.y])
-    );
+      const { x, y, height } =
+        appCtx.waterdrops.groups[
+          appCtx.waterdrops.groupKeyToIdx[appCtx.activeWaterdrops[0]]
+        ];
 
-    const newCamPos = [
-      ...dropsMidpoint,
-      appCtx.camera.getZFromFarHeight(
-        appCtx.waterdrops.groups[0].height * 2 * settings.SPREAD_1_2 * 0.75 * 2
-      ),
-    ];
+      const newCamPos = [
+        x,
+        y,
+        appCtx.camera.getZFromFarHeight(height * settings.SPREAD_1_2 * 1.5),
+      ];
 
-    const [startZoom, transitionDuration] = appCtx.zoomTo(
-      newCamPos,
-      function onFinish() {
-        appCtx.setDisableCamAdjustments(false);
-      }
-    );
+      const [startZoom, transitionDuration] = appCtx.zoomTo(
+        newCamPos,
+        function onFinish() {
+          appCtx.setDisableCamAdjustments(false);
+        }
+      );
 
-    startZoom();
+      startZoom();
 
-    appCtx.setState({
-      state: "CompareView",
-      transitionDuration,
-      viewCenter: dropsMidpoint,
-    });
+      appCtx.setState({ state: "ExamineView", transitionDuration });
 
-    const startOpacity = appCtx.getOutlineOpacity(appCtx.camera.curTransform.k);
-    helpers.fadeOutDrops(
-      appCtx.dropsMesh,
-      appCtx.scene,
-      startOpacity,
-      transitionDuration / 5
-    );
-  }, []);
+      const startOpacity = appCtx.getOutlineOpacity(
+        appCtx.camera.curTransform.k
+      );
+      helpers.fadeOutDrops(
+        appCtx.dropsMesh,
+        appCtx.scene,
+        startOpacity,
+        transitionDuration / 2
+      );
+    },
+    [appCtx.getOutlineOpacity, appCtx.activeWaterdrops]
+  );
+
+  const handleClickCompare = useCallback(
+    function () {
+      appCtx.setDisableCamAdjustments(true);
+
+      const dropsMidpoint = avgCoords(
+        appCtx.activeWaterdrops.map((wkey) => {
+          let wd =
+            appCtx.waterdrops.groups[appCtx.waterdrops.groupKeyToIdx[wkey]];
+          return [wd.x, wd.y];
+        })
+      );
+
+      const newCamPos = [
+        ...dropsMidpoint,
+        appCtx.camera.getZFromFarHeight(
+          appCtx.waterdrops.groups[0].height *
+            2 *
+            settings.SPREAD_1_2 *
+            0.75 *
+            2
+        ),
+      ];
+
+      const [startZoom, transitionDuration] = appCtx.zoomTo(
+        newCamPos,
+        function onFinish() {
+          appCtx.setDisableCamAdjustments(false);
+        }
+      );
+
+      startZoom();
+
+      appCtx.setState({
+        state: "CompareView",
+        transitionDuration,
+        viewCenter: dropsMidpoint,
+      });
+
+      const startOpacity = appCtx.getOutlineOpacity(
+        appCtx.camera.curTransform.k
+      );
+      helpers.fadeOutDrops(
+        appCtx.dropsMesh,
+        appCtx.scene,
+        startOpacity,
+        transitionDuration / 5
+      );
+    },
+    [appCtx.getOutlineOpacity, appCtx.activeWaterdrops]
+  );
 
   const handleClickDeselectAll = useCallback(function () {
     appCtx.setActiveWaterdrops([]);
-    activeDropsRef.current = [];
     d3.selectAll("#wide-group .circlet").classed("active", false);
   }, []);
 
@@ -175,8 +252,7 @@ export default function WideView() {
 
     svgGroup
       .append("text")
-      .attr("class", "instruction-text large-green-text fancy-font")
-      .attr("x", 0 - appCtx.waterdrops.height * 0.6);
+      .attr("class", "instruction-text large-green-text fancy-font");
   }
 
   function registerEventListeners() {
@@ -223,8 +299,8 @@ export default function WideView() {
       onUnhover: unhoverDrop,
     });
 
-    for (const wd of activeDropsRef.current) {
-      container.select(`.circlet#b${wd.key}`).classed("active", true);
+    for (const wd of appCtx.activeWaterdrops) {
+      container.select(`.circlet#b${wd}`).classed("active", true);
     }
 
     const fontSize =
@@ -232,6 +308,7 @@ export default function WideView() {
       appCtx.camera.height;
     container
       .select(".instruction-text")
+      .attr("x", 0 - appCtx.waterdrops.height * 0.6)
       .attr("y", -fontSize * 5)
       .attr("text-anchor", "end")
       .attr("font-size", fontSize)
@@ -253,12 +330,10 @@ export default function WideView() {
     appCtx.setActiveWaterdrops((aw) => {
       if (aw.includes(d.key)) {
         aw = arrRemove(aw, d.key);
-        activeDropsRef.current = arrRemove(activeDropsRef.current, d);
 
         container.select(`.circlet#b${d.key}`).classed("active", false);
       } else {
         aw.push(d.key);
-        activeDropsRef.current.push(d);
 
         container.select(`.circlet#b${d.key}`).classed("active", true);
       }
@@ -364,10 +439,45 @@ export default function WideView() {
         <ActionButtons
           appCtx={appCtx}
           handleClickExamine={handleClickExamine}
+          handleClickFilter={handleClickFilter}
           handleClickDeselectAll={handleClickDeselectAll}
           handleClickCompare={handleClickCompare}
         />
       </div>
+      {filterIsVisible && (
+        <div id="filterbox">
+          I'm only interested in scenarios where{" "}
+          <select
+            name="ego-obj"
+            id="ego-obj"
+            value={menuEgoObjective}
+            onChange={(e) => void setMenuEgoObjective(e.target.value)}
+          >
+            {appCtx.waterdrops.groups.map((obj) => (
+              <option
+                key={descriptionsData[obj.key].id}
+                value={descriptionsData[obj.key].id}
+              >
+                {descriptionsData[obj.key].display_name ||
+                  descriptionsData[obj.key].id}
+              </option>
+            ))}
+          </select>{" "}
+          gets at least{" "}
+          <input
+            type="number"
+            name="min-deliv"
+            id="min-deliv"
+            value={menuMinDelivery}
+            onChange={(e) => void setMenuMinDelivery(e.target.value)}
+          />{" "}
+          TAF in deliveries.
+          <button onClick={handleClickDone} className="fancy-font">
+            <BiCheck />
+            <span>Done</span>
+          </button>
+        </div>
+      )}
     </>
   );
 }

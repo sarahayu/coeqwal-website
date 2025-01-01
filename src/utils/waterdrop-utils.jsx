@@ -1,33 +1,35 @@
 import { ticksExact } from "bucket-lib/utils";
-import { settings } from "settings";
+import { settings as appSettings } from "settings";
 
 import { calcDomLev, createInterpsFromDelivs } from "utils/data-utils";
 import { placeDropsUsingPhysics, rotatePoint } from "utils/math-utils";
 import { mapBy } from "utils/misc-utils";
+import * as d3 from "d3";
 
 // TODO optimize!!
-function initWaterdrops(objectivesData, descriptionsData, grouping) {
+function initWaterdrops(objectivesData, descriptionsData, settings) {
   console.time("init waterdrops");
-  const groupKeys =
-    grouping === "objective"
-      ? objectivesData.OBJECTIVE_IDS
-      : objectivesData.SCENARIO_IDS;
-  const memberKeys =
-    grouping === "objective"
-      ? objectivesData.SCENARIO_IDS
-      : objectivesData.OBJECTIVE_IDS;
+
+  const groupKeys = objectivesData.OBJECTIVE_IDS;
+  const memberKeys = settings
+    ? objectivesData.SCENARIO_IDS.filter(
+        (scenario) =>
+          objectivesData.MIN_MAXES[settings.egoObjective][scenario][0] >=
+          settings.minDelivery
+      )
+    : objectivesData.SCENARIO_IDS;
 
   const amtGroups = groupKeys.length;
   const amtPerGroup = memberKeys.length;
 
   const largeDropRad =
     Math.sqrt(amtPerGroup / Math.PI) *
-    settings.LOD_1_RAD_PX *
+    appSettings.LOD_1_RAD_PX *
     2 *
-    settings.LOD_1_SMALL_DROP_PAD_FACTOR *
-    settings.LOD_1_LARGE_DROP_PAD_FACTOR;
+    appSettings.LOD_1_SMALL_DROP_PAD_FACTOR *
+    appSettings.LOD_1_LARGE_DROP_PAD_FACTOR;
   const smallDropRad =
-    settings.LOD_1_RAD_PX * settings.LOD_1_SMALL_DROP_PAD_FACTOR;
+    appSettings.LOD_1_RAD_PX * appSettings.LOD_1_SMALL_DROP_PAD_FACTOR;
 
   const largeNodesPhys = placeDropsUsingPhysics(
     0,
@@ -57,31 +59,59 @@ function initWaterdrops(objectivesData, descriptionsData, grouping) {
   const smallNodesPos = mapBy(smallNodesPhys, ({ id }) => id);
 
   const nodes = [];
+  const nodeKeyToIdx = [];
   const groupNodes = [];
 
   const groupToNodes = {};
+  const groupKeyToIdx = {};
+
+  const rankCache = {};
 
   let idx = 0;
 
   for (const nodeData of objectivesData.FLATTENED_DATA) {
     const { id, objective, scenario, deliveries } = nodeData;
 
+    if (!memberKeys.includes(scenario)) continue;
+
     const [delivMin, delivMax] = objectivesData.MIN_MAXES[objective];
 
     const i = createInterpsFromDelivs(deliveries, delivMin, delivMax);
-    const wds = ticksExact(0, 1, settings.LOD_1_LEVELS + 1).map((d) => i(d));
+    const wds = ticksExact(0, 1, appSettings.LOD_1_LEVELS + 1).map((d) => i(d));
 
     const levs = wds.map(
       (w, i) =>
-        Math.max(w, i == 0 ? settings.LOD_1_MIN_LEV_VAL : 0) *
-        settings.LOD_1_RAD_PX
+        Math.max(w, i == 0 ? appSettings.LOD_1_MIN_LEV_VAL : 0) *
+        appSettings.LOD_1_RAD_PX
     );
 
-    const groupID = grouping === "objective" ? objective : scenario;
-    const memberID = grouping === "objective" ? scenario : objective;
+    const groupID = objective;
+    const memberID = scenario;
 
-    const groupRank = objectivesData.DATA_GROUPINGS[grouping][groupID].rank;
-    const memberRank = objectivesData.DATA_GROUPINGS[grouping][groupID][id];
+    if (rankCache[groupID] === undefined) {
+      let arrRanks = [];
+      for (let mkey of memberKeys) {
+        arrRanks.push(
+          objectivesData.DATA_GROUPINGS["objective"][groupID][mkey]
+        );
+      }
+
+      let rankMap = {};
+
+      arrRanks.sort(d3.ascending);
+
+      for (let i = 0; i < arrRanks.length; i++) {
+        rankMap[arrRanks[i]] = i;
+      }
+
+      rankCache[groupID] = rankMap;
+    }
+
+    const groupRank = objectivesData.DATA_GROUPINGS["objective"][groupID].rank;
+    const memberRank =
+      rankCache[groupID][
+        objectivesData.DATA_GROUPINGS["objective"][groupID][memberID]
+      ];
 
     const localTilt = Math.random() * 50 - 25;
     const parentTilt = largeNodesPos[groupRank].tilt;
@@ -92,7 +122,7 @@ function initWaterdrops(objectivesData, descriptionsData, grouping) {
     const node = {
       id,
       levs,
-      maxLev: settings.LOD_1_RAD_PX,
+      maxLev: appSettings.LOD_1_RAD_PX,
       domLev: calcDomLev(levs),
       tilt: localTilt,
       dur: Math.random() * 100 + 400,
@@ -110,11 +140,14 @@ function initWaterdrops(objectivesData, descriptionsData, grouping) {
     if (!groupToNodes[groupID]) groupToNodes[groupID] = [];
 
     groupToNodes[groupID].push(node);
+    nodeKeyToIdx[id] = idx++;
   }
+
+  idx = 0;
 
   for (const groupKey of groupKeys) {
     const { x, y, tilt } =
-      largeNodesPos[objectivesData.DATA_GROUPINGS[grouping][groupKey].rank];
+      largeNodesPos[objectivesData.DATA_GROUPINGS["objective"][groupKey].rank];
     groupNodes.push({
       x,
       y,
@@ -124,6 +157,8 @@ function initWaterdrops(objectivesData, descriptionsData, grouping) {
       nodes: groupToNodes[groupKey],
       display_name: descriptionsData[groupKey].display_name || groupKey,
     });
+
+    groupKeyToIdx[groupKey] = idx++;
   }
 
   console.timeEnd("init waterdrops");
@@ -132,6 +167,8 @@ function initWaterdrops(objectivesData, descriptionsData, grouping) {
     nodes: nodes,
     groups: groupNodes,
     height: largeNodesPhys.height,
+    groupKeyToIdx,
+    nodeKeyToIdx,
   };
 }
 

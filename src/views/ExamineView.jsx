@@ -100,6 +100,7 @@ export default function ExamineView() {
         return function exitState() {
           removeElems(".small-drop, .circlet", container);
           hideElems("#examine-group");
+
           d3.selectAll(
             "#examine-group .instruction-text, #examine-group .drop-label, #examine-group .highlight-circle, #examine-group .baseline-pointer"
           ).attr("opacity", 0);
@@ -196,7 +197,8 @@ export default function ExamineView() {
 
   function addDetailPanel(dropId, preview = false, forceReplace = false) {
     const { x: groupX, y: groupY } = curMinidropsRef.current;
-    const { x, y, id, key } = appCtx.waterdrops.nodes[dropId];
+    const { x, y, id, key } =
+      appCtx.waterdrops.nodes[appCtx.waterdrops.nodeKeyToIdx[dropId]];
     setPanels((p) => {
       if (p.findIndex(({ id: pid }) => id === pid) !== -1) {
         if (!forceReplace) return p;

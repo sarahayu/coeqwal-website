@@ -28,7 +28,9 @@ export class WaterdropMesh {
   static MAX_POINTS_OUTLINE = 16 * 6600; // approx num verts per droplet * approx num droplets on screen
 
   dropsMesh;
+  dropsGeom;
   outlineMesh;
+  outlineGeom;
 
   added = false;
 
@@ -114,14 +116,21 @@ export class WaterdropMesh {
       })
     );
 
+    let outlineGeometry = new THREE.BufferGeometry().setFromPoints(
+      outlinePoints
+    );
+
     this.outlineMesh = new THREE.LineSegments(
-      new THREE.BufferGeometry().setFromPoints(outlinePoints),
+      outlineGeometry,
       new THREE.LineBasicMaterial({
         color: 13421772,
         transparent: true,
         opacity: 0,
       })
     );
+
+    this.dropsGeom = dropsGeometry;
+    this.outlineGeom = outlineGeometry;
   }
 
   updateOutlineVisibility(opac) {
@@ -139,7 +148,57 @@ export class WaterdropMesh {
   }
 
   updateMeshes(waterdrops) {
-    // TODO fix
+    this.dropsGeom.clearMesh();
+    const outlinePoints = [];
+
+    const outlineMeshCoords = bottleOutline(settings.LOD_1_RAD_PX * 2 * 0.975);
+
+    for (let i = 0; i < waterdrops.nodes.length; i++) {
+      const {
+        id,
+        globalX: x,
+        globalY: y,
+        levs,
+        maxLev,
+        globalTilt: tilt,
+      } = waterdrops.nodes[i];
+
+      for (let k = levs.length - 1; k >= 0; k--) {
+        const l1 = k !== levs.length - 1 ? levs[k + 1] : 0;
+        const l2 = levs[k];
+
+        const meshCoords = bottlePartial(
+          levelToDropletLevel(l1 / maxLev),
+          levelToDropletLevel(l2 / maxLev),
+          settings.LOD_1_RAD_PX * 2
+        );
+        const color = new THREE.Color(
+          interpolateWatercolorBlue(k / settings.LOD_1_LEVELS)
+        );
+
+        this.dropsGeom.addMeshCoords(
+          meshCoords,
+          { x: x, y: -y, rotate: tilt },
+          color,
+          (i % 5) / 50 + 0.02
+        );
+      }
+
+      const rotOutline = rotatePoints(copyCoords(outlineMeshCoords), tilt);
+
+      outlinePoints.push(
+        ...rotOutline.map(([dx, dy]) => {
+          return new THREE.Vector3(x + dx, -y - dy, (i % 5) / 50 + 0.01);
+        })
+      );
+    }
+
+    this.dropsGeom.finish();
+    this.outlineGeom
+      .setFromPoints(outlinePoints)
+      .setDrawRange(0, outlinePoints.length);
+    this.outlineMesh.geometry.attributes.position.needsUpdate = true;
+    this.dropsMesh.geometry.attributes.position.needsUpdate = true;
   }
 }
 
@@ -280,19 +339,44 @@ export class Camera {
     this.width = width;
     this.height = height;
 
+    this.camera = new THREE.PerspectiveCamera(
+      this.fov,
+      this.width / this.height,
+      this.near,
+      this.far + 1
+    );
+
+    this.camera.position.set(0, 0, this.far);
+
     this.webglView = d3.select(webglElement);
     this.svgView = d3.select(svgElement);
 
-    this.zoom = d3.zoom().on("zoom", (e) => {
-      this.curTransform = e.transform;
+    this.setZoomFn(zoomFn);
 
-      this.#THREEHandleZoom(e.transform);
-      this.svgView.attr("transform", e.transform);
+    this.webglView.call(this.zoom);
+    this.zoom.transform(
+      this.webglView,
+      d3.zoomIdentity
+        .translate(this.width / 2, this.height / 2)
+        .scale(this.getScaleFromZ(this.far))
+    );
+  }
 
-      zoomFn && zoomFn(e.transform);
-    });
+  setZoomFn(zoomFn) {
+    this.zoom = d3
+      .zoom()
+      .on("zoom", (e) => {
+        this.curTransform = e.transform;
 
-    this.#finishCreate();
+        this.#THREEHandleZoom(e.transform);
+        this.svgView.attr("transform", e.transform);
+
+        zoomFn && zoomFn(e.transform);
+      })
+      .scaleExtent([
+        this.getScaleFromZ(this.far),
+        this.getScaleFromZ(this.near),
+      ]);
   }
 
   callZoom(transform) {
@@ -385,30 +469,6 @@ export class Camera {
     return screenToWorld(x, y, this.curTransform);
   }
 
-  #finishCreate() {
-    this.zoom = this.zoom.scaleExtent([
-      this.getScaleFromZ(this.far),
-      this.getScaleFromZ(this.near),
-    ]);
-
-    this.camera = new THREE.PerspectiveCamera(
-      this.fov,
-      this.width / this.height,
-      this.near,
-      this.far + 1
-    );
-
-    this.camera.position.set(0, 0, this.far);
-
-    this.webglView.call(this.zoom);
-    this.zoom.transform(
-      this.webglView,
-      d3.zoomIdentity
-        .translate(this.width / 2, this.height / 2)
-        .scale(this.getScaleFromZ(this.far))
-    );
-  }
-
   #THREEHandleZoom(transform) {
     const scale = transform.k;
     const x = -(transform.x - this.width / 2) / scale;
@@ -438,6 +498,10 @@ class MeshGeometry {
 
     this.positionAttribute = this.threeGeom.getAttribute("position");
     this.colorAttribute = this.threeGeom.getAttribute("color");
+  }
+
+  clearMesh() {
+    this.triangleIdx = 0;
   }
 
   addMeshCoords(meshCoords, transform, color, z = 0) {

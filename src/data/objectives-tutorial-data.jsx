@@ -97,7 +97,6 @@ async function initObjectivesData() {
     const flattenedData = [];
     const dataGroupings = {
       objective: {},
-      scenario: {},
     };
 
     // for ordering later
@@ -109,11 +108,7 @@ async function initObjectivesData() {
         if (!dataGroupings["objective"][obj])
           dataGroupings["objective"][obj] = [];
 
-        if (!dataGroupings["scenario"][scen])
-          dataGroupings["scenario"][scen] = [];
-
         dataGroupings["objective"][obj].push(idx);
-        dataGroupings["scenario"][scen].push(idx);
 
         const deliveries =
           OBJECTIVES_DATA[obj][SCENARIO_KEY_STRING][scen][DELIV_KEY_STRING];
@@ -141,7 +136,15 @@ async function initObjectivesData() {
         objScens.push({
           key,
           sorted: sortedObjScens,
-          mean: d3.mean(ids.map((id) => flattenedData[id].deliveries).flat()),
+          mean: d3.mean(
+            ids
+              .map((id) => {
+                const deliveries = flattenedData[id].deliveries;
+                const maxVal = MIN_MAXES[flattenedData[id].objective][1];
+                return deliveries.map((delivery) => delivery / maxVal);
+              })
+              .flat()
+          ),
         });
       }
 
@@ -151,12 +154,12 @@ async function initObjectivesData() {
 
       for (let i = 0; i < sortedObjScens.length; i++) {
         const { key, sorted } = sortedObjScens[i];
-        const IDtoRank = {};
+        const keyToRank = {};
 
         for (let j = 0; j < sorted.length; j++) {
-          IDtoRank[sorted[j]] = j;
+          keyToRank[flattenedData[sorted[j]].scenario] = j;
         }
-        orderedDataGroupings[criteria][key] = IDtoRank;
+        orderedDataGroupings[criteria][key] = keyToRank;
         orderedDataGroupings[criteria][key].rank = i;
       }
     }

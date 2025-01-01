@@ -79,7 +79,7 @@ function updateSmallDropSVG(
 
   const drops = container
     .selectAll(".small-drop")
-    .data(waterdropGroup.nodes)
+    .data(waterdropGroup.nodes, (d) => d.id)
     .join((enter) => {
       return enter.append("g").each(function (node) {
         d3.select(this).call(smallDropInit(node));
@@ -113,6 +113,17 @@ function updateSmallDropSVG(
     .delay(transitionDelay)
     .duration(1000)
     .attr("transform", getEndLoc);
+
+  if (baselinePos.x === undefined) {
+    container
+      .selectAll(".highlight-circle, .baseline-pointer")
+      .attr("display", "none");
+    return;
+  }
+
+  container
+    .selectAll(".highlight-circle, .baseline-pointer")
+    .attr("display", "initial");
 
   const circlePosX = waterdropGroup.x + baselinePos.x * settings.SPREAD_1_2,
     circlePosY =
