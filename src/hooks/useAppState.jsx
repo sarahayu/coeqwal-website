@@ -158,6 +158,12 @@ export default function useAppState() {
 
     const duration = i.duration / 2;
 
+    if (duration === 0) {
+      callback && callback();
+
+      return [() => {}, 0];
+    }
+
     const start = () => {
       const t = d3.timer((elapsed) => {
         const et = Math.min(elapsed / duration, 1);

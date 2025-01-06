@@ -426,6 +426,8 @@ export class Camera {
 
     interper.duration = i.duration;
 
+    if (interper.duration < 0.01) return { duration: 0 };
+
     return interper;
   }
 

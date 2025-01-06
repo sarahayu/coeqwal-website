@@ -20,6 +20,7 @@ import { generateTSpan, hideElems, showElems } from "utils/render-utils";
 import { helpers } from "utils/wideview-helpers";
 import { ActionButtons } from "components/ActionButtons";
 import { BiCheck } from "react-icons/bi";
+import { objectivesData } from "data/objectives-data";
 
 export default function WideView() {
   const appCtx = useContext(AppContext);
@@ -54,7 +55,9 @@ export default function WideView() {
   useEffect(
     function initializeEgoObjective() {
       if (appCtx.waterdrops.groups && !egoObjective) {
-        setEgoObjective(appCtx.waterdrops.groups[0].key);
+        const obj = appCtx.waterdrops.groups[0].key;
+        setEgoObjective(obj);
+        setMinDelivery(objectivesData.RANGE_OF_MINS[obj][0]);
       }
     },
     [appCtx.waterdrops, egoObjective]
@@ -115,6 +118,14 @@ export default function WideView() {
       });
     },
     [egoObjective, minDelivery]
+  );
+
+  useEffect(
+    function updateMenuMinDelivery() {
+      if (menuEgoObjective)
+        setMenuMinDelivery(objectivesData.RANGE_OF_MINS[menuEgoObjective][0]);
+    },
+    [menuEgoObjective]
   );
 
   useEffect(
@@ -464,13 +475,18 @@ export default function WideView() {
             ))}
           </select>{" "}
           gets at least{" "}
-          <input
-            type="number"
-            name="min-deliv"
-            id="min-deliv"
-            value={menuMinDelivery}
-            onChange={(e) => void setMenuMinDelivery(e.target.value)}
-          />{" "}
+          <span className="menu-min-deliv">
+            {menuMinDelivery}
+            <input
+              type="range"
+              name="min-deliv"
+              id="min-deliv"
+              value={menuMinDelivery}
+              onChange={(e) => void setMenuMinDelivery(e.target.value)}
+              min={objectivesData.RANGE_OF_MINS[menuEgoObjective][0]}
+              max={objectivesData.RANGE_OF_MINS[menuEgoObjective][1]}
+            />
+          </span>{" "}
           TAF in deliveries.
           <button onClick={handleClickDone} className="fancy-font">
             <BiCheck />
