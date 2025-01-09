@@ -1,4 +1,4 @@
-import { useContext, useLayoutEffect } from "react";
+import { useContext, useLayoutEffect, useState } from "react";
 import { Step } from "react-scrollama";
 
 import { AppContext } from "AppContext";
@@ -18,6 +18,7 @@ import { TutHero } from "components/TutHero";
 import { descriptionsData } from "data/descriptions-tutorial-data";
 import { objectivesData } from "data/objectives-tutorial-data";
 import { initWaterdrops } from "utils/waterdrop-utils";
+import { BiSkipPrevious } from "react-icons/bi";
 
 const tutorialWaterdrops = initWaterdrops(objectivesData, descriptionsData);
 
@@ -47,29 +48,69 @@ export default function TutorialView() {
     [appCtx.state]
   );
 
+  const [hasEnteredCTE, setHasEnteredCTE] = useState(false);
+
   if (!isState(appCtx.state, "TutorialView")) return;
 
   return (
     <div className="tutorial-view">
-      <button
-        className="scrollama-next"
-        onClick={() => {
-          let elem = document.getElementById(`card-${index + 1}`);
+      <div className="tutorial-btns">
+        {index !== -1 && (
+          <button
+            className="scrollama-prev"
+            title="go to previous slide"
+            onClick={() => {
+              if (hasEnteredCTE) {
+                document
+                  .getElementById(`card-${index}`)
+                  .scrollIntoView({ behavior: "smooth" });
+              } else {
+                let elem = document.getElementById(`card-${index - 1}`);
 
-          if (!elem) elem = document.getElementById("cte");
+                if (!elem) {
+                  elem = document.getElementById("tut-hero");
+                }
 
-          elem.scrollIntoView({ behavior: "smooth" });
-        }}
-      >
-        Click Here or Scroll to Continue
-      </button>
+                elem.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+          >
+            <BiSkipPrevious />
+          </button>
+        )}
+        {!hasEnteredCTE && (
+          <button
+            className="scrollama-next"
+            onClick={() => {
+              let elem = document.getElementById(`card-${index + 1}`);
+
+              if (!elem) {
+                elem = document.getElementById("cte");
+              }
+
+              elem.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            Click Here or Scroll to Continue
+          </button>
+        )}
+      </div>
       <TutHero appCtx={appCtx} />
       <div className="scrollama scrollama-create-buckets">
         <CompareBucketCreationsBackground
           appCtx={appCtx}
           storyVars={storyVars}
         />
-        <DataStoryScrollama setCurrentIndex={setIndex}>
+        <DataStoryScrollama
+          onSlideEnter={({ data }) => {
+            setIndex(data.idx);
+          }}
+          onSlideExit={({ data, direction }) => {
+            if (direction === "up") setIndex(data.idx - 1);
+            else if (!document.getElementById(`card-${index + 1}`))
+              setHasEnteredCTE(true);
+          }}
+        >
           {getSlidesInRange("barsExplain", "comparingTheTwo").map(
             (slide, i) => (
               <Step key={i} data={slide}>
@@ -84,8 +125,17 @@ export default function TutorialView() {
           storyVars={storyVars}
           size={appCtx.appHeight * 0.4}
         />
-        <CompareBigDroplets />
-        <DataStoryScrollama setCurrentIndex={setIndex}>
+        <DataStoryScrollama
+          onSlideEnter={({ data }) => {
+            setHasEnteredCTE(false);
+            setIndex(data.idx);
+          }}
+          onSlideExit={({ data, direction }) => {
+            if (direction === "up") setIndex(data.idx - 1);
+            else if (!document.getElementById(`card-${index + 1}`))
+              setHasEnteredCTE(true);
+          }}
+        >
           {getSlidesInRange("forNowLetsFocus", "letsBringRefuge").map(
             (slide, i) => (
               <Step key={i} data={slide}>

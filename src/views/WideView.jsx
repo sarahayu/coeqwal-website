@@ -324,10 +324,7 @@ export default function WideView() {
       .attr("text-anchor", "end")
       .attr("font-size", fontSize)
       .call(
-        generateTSpan(
-          ["click to interact.", "scroll to zoom.", "drag to pan."],
-          2
-        )
+        generateTSpan(["click to interact", "scroll to zoom", "drag to pan"], 2)
       )
       .selectAll("tspan")
       .each(function (_, i) {

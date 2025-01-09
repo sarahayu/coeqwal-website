@@ -248,7 +248,7 @@ function updateColorDrops(container, waterdropGroups, opacFn, color) {
 
   container
     .selectAll(".color-drop-group")
-    .data(waterdropGroups.groups)
+    .data(waterdropGroups.groups, (g) => g.key + "-" + g.nodes.length)
     .join((enter) => {
       return enter.append("g").each(function ({ nodes }) {
         d3.select(this).call((s) => {

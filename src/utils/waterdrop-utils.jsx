@@ -155,7 +155,7 @@ function initWaterdrops(objectivesData, descriptionsData, settings) {
       key: groupKey,
       height: smallNodesPhys.height,
       nodes: groupToNodes[groupKey],
-      display_name: descriptionsData[groupKey].display_name || groupKey,
+      display_name: descriptionsData[groupKey]?.display_name || groupKey,
     });
 
     groupKeyToIdx[groupKey] = idx++;

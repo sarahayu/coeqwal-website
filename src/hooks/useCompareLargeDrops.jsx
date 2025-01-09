@@ -36,7 +36,7 @@ export function useCompareLargeDrops() {
       0.6
     );
 
-    const farHeight = waterdrops.groups[0].height * 2 * settings.SPREAD_1_2 * 1;
+    const farHeight = waterdrops.groups[0].height * settings.SPREAD_1_2 * 1.5;
     const k = camera.height / farHeight;
 
     let x = camera.width / 2;

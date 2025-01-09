@@ -3,7 +3,7 @@ import React from "react";
 export function CompareBucketCreationsText() {
   return (
     <>
-      <h2>From Bar Graphs to Buckets</h2>
+      <h2>From Bar Graphs to Bottles</h2>
       <p>
         This is the average yearly amount of water each group receives,
         specifically from the <b>Central Valley Project</b>, one of two water

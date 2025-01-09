@@ -4,7 +4,7 @@ import { MapCalifornia } from "components/MapCalifornia";
 
 export function TutHero({ appCtx }) {
   return (
-    <div className="tut-hero">
+    <div className="tut-hero" id="tut-hero">
       <div className="tut-hero-container">
         <h1>
           Watering <br /> the Future

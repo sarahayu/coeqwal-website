@@ -72,6 +72,13 @@ export default function useAppState() {
 
     setWaterdrops(waterdrops);
     setState({ state: "TutorialView" });
+
+    window.addEventListener("resize", () => {
+      document.querySelector("dialog").showModal();
+      d3.select(document.body)
+        .style("height", "100%")
+        .style("overflow", "hidden");
+    });
   }, []);
 
   const updateWaterdrops = useCallback(function (settings) {

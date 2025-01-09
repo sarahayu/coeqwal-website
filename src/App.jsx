@@ -20,6 +20,7 @@ export default function App() {
           <g className="svg-trans"></g>
         </svg>
       </div>
+      <dialog>Page was resized, please reload the page!</dialog>
       <TutorialView />
       <WideView />
       <ExamineView />

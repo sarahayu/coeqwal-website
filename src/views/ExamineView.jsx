@@ -15,7 +15,7 @@ import {
   showElems,
 } from "utils/render-utils";
 import { createInterpsFromDelivs, deserialize } from "utils/data-utils";
-import { clipEnds } from "utils/math-utils";
+import { clipEnds, dropCenterCorrection } from "utils/math-utils";
 import { helpers } from "utils/examineview-helpers";
 import { useDragPanels } from "hooks/useDragPanels";
 import DropletGlyph from "components/DropletGlyph";
@@ -32,6 +32,7 @@ export default function ExamineView() {
   const [camTransform, setCamTransform] = useState(d3.zoomIdentity);
   const { panels, panelsRef, setPanels, onPanelDragStart, getPanelStyle } =
     useDragPanels(camTransform);
+  const panelCountRef = useRef(0);
   const [hoveredCard, setHoveredCard] = useState(null);
   const removePreviewRef = useRef(null);
 
@@ -97,6 +98,8 @@ export default function ExamineView() {
         setCamTransform(appCtx.camera.curTransform);
         showElems("#examine-group");
 
+        panelCountRef.current = 0;
+
         return function exitState() {
           removeElems(".small-drop, .circlet", container);
           hideElems("#examine-group");
@@ -157,10 +160,7 @@ export default function ExamineView() {
       .attr("text-anchor", "end")
       .attr("font-size", instrFontSize)
       .call(
-        generateTSpan(
-          ["click to keep panels open.", "you can drag panels."],
-          1.6
-        )
+        generateTSpan(["click to keep panels open", "you can drag panels"], 1.6)
       )
       .call((s) => {
         s.transition().attr("opacity", 1);
@@ -196,7 +196,11 @@ export default function ExamineView() {
   }
 
   function addDetailPanel(dropId, preview = false, forceReplace = false) {
-    const { x: groupX, y: groupY } = curMinidropsRef.current;
+    const {
+      x: groupX,
+      y: groupY,
+      height: groupHeight,
+    } = curMinidropsRef.current;
     const { x, y, id, key } =
       appCtx.waterdrops.nodes[appCtx.waterdrops.nodeKeyToIdx[dropId]];
     setPanels((p) => {
@@ -205,12 +209,29 @@ export default function ExamineView() {
 
         arrRemove(p, (_p) => _p.id === id);
       }
+
+      let offsetCount = preview
+        ? panelCountRef.current + 1
+        : ++panelCountRef.current;
+
+      const offset =
+        (dropCenterCorrection({ height: groupHeight }) * settings.SPREAD_1_2) /
+        4;
+
       const newPanel = {
         text: key.slice(4),
-        x: groupX + x * settings.SPREAD_1_2,
-        y: groupY + y * settings.SPREAD_1_2,
-        offsetX: 20,
-        offsetY: 40,
+        x:
+          groupX +
+          (groupHeight * settings.SPREAD_1_2) / 2 +
+          offset * offsetCount,
+        y:
+          groupY -
+          dropCenterCorrection({ height: groupHeight }) * settings.SPREAD_1_2 +
+          offset * offsetCount,
+        offsetX: 0,
+        offsetY: 0,
+        circleX: groupX + x * settings.SPREAD_1_2,
+        circleY: groupY + y * settings.SPREAD_1_2,
         id,
         preview,
         panelKey: preview ? -1 : dropId,
@@ -280,16 +301,16 @@ export default function ExamineView() {
   function drawLineConnect(id) {
     if (panelsRef.current.findIndex(({ id: pid }) => id === pid) === -1) return;
 
-    const { x: circleX, y: circleY } = panelsRef.current.find(
-      (p) => p.id === id
-    );
+    const { circleX, circleY } = panelsRef.current.find((p) => p.id === id);
 
     const [cx, cy] = appCtx.camera.worldToScreen(circleX, circleY);
 
-    const panelBox = d3
-      .select(`.examine-panel#p${id}`)
-      .node()
-      .getBoundingClientRect();
+    const panelNode = d3.select(`.examine-panel#p${id}`).node();
+
+    // panel might not have been created
+    if (!panelNode) return;
+
+    const panelBox = panelNode.getBoundingClientRect();
     const [px, py] = [
       panelBox.left + panelBox.width / 2,
       panelBox.top + panelBox.height / 2,
@@ -349,6 +370,14 @@ export default function ExamineView() {
                 <div className="panel-tab">
                   scenario <span>{text}</span>
                 </div>
+                {!preview && hoveredCard == id && (
+                  <button
+                    className="exit-btn"
+                    onClick={() => updateActiveMinidrops({ id })}
+                  >
+                    ✕
+                  </button>
+                )}
                 <div className="panel-main-container">
                   <DotHistogram
                     width={480}

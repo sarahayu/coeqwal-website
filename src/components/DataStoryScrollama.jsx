@@ -2,16 +2,17 @@ import * as d3 from "d3";
 import React from "react";
 import { Scrollama } from "react-scrollama";
 
-export function DataStoryScrollama({ setCurrentIndex, children }) {
-  const onStepEnter = async ({ data, direction, element }) => {
-    setCurrentIndex(data.idx);
-    if (direction === "up") return;
-    data.animHandler?.do();
+export function DataStoryScrollama({ onSlideEnter, onSlideExit, children }) {
+  const onStepEnter = async (args) => {
+    onSlideEnter(args);
+    if (args.direction === "up") return;
+    args.data.animHandler?.do();
   };
 
-  const onStepExit = async ({ data, direction, element }) => {
-    if (direction === "down") return;
-    data.animHandler?.undo();
+  const onStepExit = async (args) => {
+    onSlideExit(args);
+    if (args.direction === "down") return;
+    args.data.animHandler?.undo();
   };
 
   const onStepProgress = async ({ data, direction, element, progress }) => {
